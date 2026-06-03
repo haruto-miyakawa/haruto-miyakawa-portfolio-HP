@@ -35,7 +35,7 @@ const badgeIcons: Record<PaperBadge, ReactNode> = {
   ),
 };
 
-export function ResearchGrid({ detailSlug }: { detailSlug: string }) {
+export function ResearchGrid() {
   const router = useRouter();
   const [activeCat, setActiveCat] = useState("all");
 
@@ -61,7 +61,7 @@ export function ResearchGrid({ detailSlug }: { detailSlug: string }) {
               key={pub.slug}
               className={`rcard${hide ? " hide" : ""}`}
               onClick={(e) => {
-                if (!(e.target as HTMLElement).closest("a")) router.push(`/research/${detailSlug}`);
+                if (!(e.target as HTMLElement).closest("a")) router.push(`/research/${pub.slug}`);
               }}
             >
               <div className="rthumb">

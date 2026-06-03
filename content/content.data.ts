@@ -374,17 +374,18 @@ export const researchHero = {
   statusLabel: "Available for research",
   title: "Research",
   lead: "探究心を原動力に、実世界の課題解決を目指した研究を行っています。",
-  sub: "国際会議や学会での発表・採択実績を積み重ねています。",
+  sub: "査読付き国際会議での発表に加え、進行中の研究にも取り組んでいます。",
   interestsLabel: "Research Interests",
+  /** 実在3件の研究領域から抽出した関心トピック（icon は icons レジストリのキー） */
   interests: [
-    "Generative AI",
-    "3D Vision",
-    "Point Cloud",
-    "Traffic AI",
-    "LLM",
-    "Human-AI Interaction",
-    "Creative Tools",
-  ],
+    { label: "Explainable AI", icon: "shield" },
+    { label: "Content Moderation", icon: "people" },
+    { label: "NLP", icon: "book" },
+    { label: "LLM", icon: "layers" },
+    { label: "Multi-Agent", icon: "network" },
+    { label: "Generative AI", icon: "sun" },
+    { label: "Pixel Art", icon: "grid" },
+  ] as { label: string; icon: string }[],
 };
 
 export type PaperThumb = "cubes" | "traffic" | "collage" | "galaxy" | "wave" | "cloud" | "terrain";
@@ -406,107 +407,66 @@ export interface Publication {
 }
 
 export const featuredResearch = {
-  slug: "generative-terrain-modeling",
-  badgeLabel: "ICCV 2024 Accepted",
-  title: "Generative Terrain Modeling\nUsing Diffusion Models",
-  description: "拡散モデルを用いた高解像度地形生成手法を提案。地形の自然さと制御性を両立。",
-  tags: ["Generative AI", "Diffusion Model", "3D Generation"],
-  venue: "ICCV 2024",
-  where: "Oct 2024 · Paris, France",
-  thumb: "terrain" as PaperThumb,
+  slug: "firestorm-detection",
+  badgeLabel: "査読付き国際会議（IIAI AAI 2025・IEEE）",
+  title: "Persona-Conditioned Online\nFirestorm Risk Detection",
+  description:
+    "コミュニティごとに異なる「炎上」基準を、事例データベースへの類似度マージンで判定。データベースを差し替えるだけでペルソナを切り替えられ、再学習を要しない。",
+  tags: ["Explainable AI", "Content Moderation", "NLP"],
+  venue: "IIAI AAI 2025",
+  where: "IEEE Xplore · Peer-reviewed",
+  thumb: "traffic" as PaperThumb,
+  paperUrl: "https://ieeexplore.ieee.org/document/11418320",
 };
 
 export const publications: Publication[] = [
   {
-    slug: "efficient-3d-object-detection",
+    slug: "firestorm-detection",
     badge: "intl",
-    badgeLabel: "国際会議",
-    status: "Accepted",
-    title: "Efficient 3D Object Detection\nwith Point Transformer",
-    description: "Point Transformerを用いた軽量かつ高精度な3D物体検出手法を提案。",
-    tags: ["3D Vision", "Point Cloud", "Transformer"],
-    venue: "CVPR 2024",
-    thumb: "cubes",
-    cats: ["intl", "presented"],
-    linkLabel: "Read Paper",
-    hasDetail: true,
-  },
-  {
-    slug: "traffic-flow-prediction",
-    badge: "domestic",
-    badgeLabel: "国内学会",
-    title: "時系列データに基づく\n交通流予測のための深層学習手法",
-    description: "グラフニューラルネットワークを用いた都市部の交通流予測モデルを提案。",
-    tags: ["GNN", "Time Series", "Traffic Forecasting"],
-    venue: "第28回 交通工学論文集",
+    badgeLabel: "国際会議（IEEE）",
+    status: "査読付き",
+    title: "Persona-Conditioned Online\nFirestorm Risk Detection",
+    description: "OUT/SAFE事例DBへの類似度マージンで炎上リスクを判定。DB差し替えだけでペルソナを切り替え（再学習不要）。",
+    tags: ["Explainable AI", "Content Moderation", "NLP"],
+    venue: "IIAI AAI 2025 (IEEE)",
     thumb: "traffic",
-    cats: ["domestic", "presented"],
+    cats: ["intl"],
     linkLabel: "Read Paper",
     hasDetail: true,
   },
   {
-    slug: "llm-learning-support",
-    badge: "reviewed",
-    badgeLabel: "査読論文",
-    title: "LLMを活用した対話型学習支援\nシステムの設計",
-    description: "大規模言語モデルを活用した個別最適化型の学習支援システムを設計・評価。",
-    tags: ["LLM", "EdTech", "Conversational AI"],
-    venue: "情報処理学会論文誌",
-    thumb: "collage",
-    cats: ["reviewed", "presented"],
-    linkLabel: "Read Paper",
-    hasDetail: true,
-  },
-  {
-    slug: "text-to-image-semantic-control",
-    badge: "intl",
-    badgeLabel: "国際会議",
-    status: "Presented",
-    title: "Text-to-Image Generation\nwith Semantic Control",
-    description: "セマンティックマップによる制御可能な画像生成手法を提案。",
-    tags: ["GAN", "ControlNet", "Semantic Segmentation"],
-    venue: "ECCV 2023",
-    thumb: "galaxy",
-    cats: ["intl", "presented"],
-    linkLabel: "Read Paper",
-    hasDetail: true,
-  },
-  {
-    slug: "multimodal-action-recognition",
+    slug: "rumor-distortion-npc",
     badge: "ongoing",
     badgeLabel: "進行中",
-    title: "マルチモーダル情報を用いた\n行動認識モデルの構築",
-    description: "RGB・深度・音声を統合したマルチモーダル行動認識モデルを研究中。",
-    tags: ["Multi-modal", "Action Recognition", "Deep Learning"],
-    venue: "—",
-    thumb: "wave",
-    cats: ["ongoing"],
+    title: "Forgetting to Remember:\nRumor Distortion in Multi-Agent NPCs",
+    description: "人間社会の「噂の変質」をLLMマルチエージェントで意図的にモデル化するNPC対話フレームワーク（執筆中）。",
+    tags: ["LLM", "Multi-Agent", "Game AI"],
+    venue: "IIAI AAI 2026 投稿予定・執筆中",
+    thumb: "cubes",
+    cats: ["progress"],
     linkLabel: "Research Note",
     hasDetail: true,
   },
   {
-    slug: "lidar-self-supervised",
-    badge: "domestic",
-    badgeLabel: "国内学会",
-    title: "LiDAR点群の自己教師あり表現学習",
-    description: "点群データの自己教師あり学習による3D表現獲得手法を提案。",
-    tags: ["Point Cloud", "Self-Supervised", "3D Representation"],
-    venue: "第42回 日本ロボット学会学術講演会",
-    thumb: "cloud",
-    cats: ["domestic", "presented"],
+    slug: "pixelart-wfc",
+    badge: "ongoing",
+    badgeLabel: "進行中",
+    title: "Spatio-Temporal Wave Function\nCollapse for Pixel Art Animation",
+    description: "ピクセルアート・アニメのフレーム間不整合を制約充足問題として解く事後補正フレームワーク（個人研究・進行中）。",
+    tags: ["Pixel Art", "Neuro-Symbolic", "Generative AI"],
+    venue: "個人研究",
+    thumb: "collage",
+    cats: ["progress"],
     linkLabel: "Research Note",
     hasDetail: true,
   },
 ];
 
-/** Research タブ（件数は確定版デザインの表記をそのまま使用） */
+/** Research タブ（実数・ステータスベース） */
 export const researchTabs: { key: string; label: string; count: number }[] = [
-  { key: "all", label: "すべて", count: 9 },
-  { key: "intl", label: "国際会議", count: 5 },
-  { key: "domestic", label: "国内学会", count: 3 },
-  { key: "reviewed", label: "査読論文", count: 2 },
-  { key: "presented", label: "発表済み", count: 6 },
-  { key: "ongoing", label: "進行中", count: 3 },
+  { key: "all", label: "すべて", count: 3 },
+  { key: "intl", label: "国際会議", count: 1 },
+  { key: "progress", label: "進行中", count: 2 },
 ];
 
 export const researchAreas = [
@@ -523,141 +483,219 @@ export const researchHighlights = [
 ];
 
 /* ============ Research 詳細（論文） ============ */
+/** 3枚目のCSOカード。① は結果(stats)あり、②③ は検証予定でstatsなし */
+export interface PaperResults {
+  label: string;
+  en: string;
+  body: string;
+  stats?: { num: string; unit: string; label: string; sub: string }[];
+}
 export interface PaperDetail {
   slug: string;
   statusBadge: string;
   title: string;
   lead: string;
-  body: string;
-  meta: { label: string; value: string; sub?: string }[];
+  body?: string;
+  /** メタ帯。icon は icons レジストリのキー。6件なら pd-meta6(6列)、5件なら meta-strip(5列) */
+  meta: { label: string; value: string; sub?: string; icon: string; status?: boolean }[];
   tldr: string;
   tldrTags: string[];
   problem: { body: string; points: string[] };
   approach: { body: string; points: string[] };
-  results: { body: string; stats: { num: string; unit: string; label: string; sub: string }[] };
-  overview: { label: string; value: string; links?: { label: string; external?: boolean }[] }[];
+  results: PaperResults;
+  overview: { label: string; value: string; icon: string; link?: boolean; href?: string; status?: boolean }[];
   highlights: string[];
-  stack: string[];
-  relatedLinks: string[];
-  quantitative: { metric: string; ours: string; pgm: string; stylegan: string }[];
-  ablation: {
-    setting: string;
-    multiScale: boolean;
-    terrain: boolean;
-    fid: string;
-    rmse: string;
-    diversity: string;
-    best: boolean;
-  }[];
-  contributions: string[];
-  publication: {
+  /** 技術スタック（実装がある場合のみ。無ければレール非表示） */
+  stack?: string[];
+  relatedLinks: { label: string; href: string }[];
+  /** 貢献（発表済み=①のみ。未発表は非表示） */
+  contributions?: string[];
+  /** 出版情報（発表済み=①のみ。未発表は非表示） */
+  publication?: {
     statusBadge: string;
     title: string;
     authors: string;
+    authorHighlight?: string;
     affiliation: string;
     tags: string[];
+    links: { label: string; href: string }[];
   };
-  presentation: { statusBadge: string; date: string; duration: string; slideTitle: string; slideAuthors: string };
-  relatedWork: { title: string; desc: string; icon: string }[];
+  /** ヒーローCTA（先頭が btn-pub）。無ければボタン非表示 */
+  links: { label: string; href: string }[];
+  /** 連絡先CTAの GitHub 先（無ければボタン非表示） */
+  github?: string;
 }
 
 export const paperDetails: Record<string, PaperDetail> = {
-  "generative-terrain-modeling": {
-    slug: "generative-terrain-modeling",
-    statusBadge: "ICCV 2024 Accepted",
-    title: "Generative Terrain\nModeling Using\nDiffusion Models",
-    lead: "拡散モデルを用いた高解像度地形生成手法の提案",
-    body:
-      "本研究では、拡散モデルを3Dノイズ場に適用することで、地形の自然さと地形多様性を両立する高解像度地形生成手法を提案します。従来の手法と比較して、地形の連続性と細かな地形特徴において定量・定性的に優れた結果を示しました。",
+  /* ① 炎上検知（査読付き国際会議・IEEE収録／発表済み） */
+  "firestorm-detection": {
+    slug: "firestorm-detection",
+    statusBadge: "査読付き国際会議（IIAI AAI 2025・IEEE）",
+    title: "Persona-Conditioned Online\nFirestorm Risk Detection",
+    lead: "ペルソナ条件づけによる、事例ベースの炎上リスク検知フレームワーク",
+    body: "A Similarity-Based Approach with Switchable OUT/SAFE Exemplars",
     meta: [
-      { label: "Conference", value: "ICCV 2024", sub: "Oral Presentation" },
-      { label: "Acceptance Rate", value: "23.6%" },
-      { label: "Authors", value: "Haruto Miyakawa", sub: "et al." },
-      { label: "Affiliation", value: "Tokyo University", sub: "情報工学研究科" },
-      { label: "Period", value: "2024.01 – 2024.07" },
-      { label: "Role", value: "First Author", sub: "Lead Researcher" },
+      { label: "会場", value: "IIAI AAI 2025", sub: "IEEE", icon: "globe" },
+      { label: "査読", value: "査読付き", sub: "Peer-reviewed", icon: "shield" },
+      { label: "収録", value: "IEEE Xplore", icon: "book" },
+      { label: "Role", value: "Co-author", sub: "4th author", icon: "user" },
+      { label: "著者", value: "7 名（共著）", icon: "people" },
+      { label: "所属", value: "東京工科大学", sub: "コンピュータサイエンス学部", icon: "building" },
     ],
     tldr:
-      "拡散モデルを3Dノイズ場に適用する新しい地形生成手法を提案します。マルチスケールの条件付き地形制約を組み合わせることで、自然で多様性のある高解像な地形を効率的に生成できます。",
-    tldrTags: ["Generative AI", "Diffusion Model", "3D Generation", "Terrain", "Procedural Generation"],
+      "SNSでの「炎上」リスクを検知するフレームワーク。毒性の基準はコミュニティや組織ごとに異なるという問題に対し、「炎上事例(OUT)」と「安全事例(SAFE)」の事例データベースへの類似度マージンでリスクを判定する。データベースを差し替えるだけで「誰の基準で見るか（ペルソナ）」を切り替えられ、再学習を必要としない。",
+    tldrTags: ["Explainable AI", "Content Moderation", "NLP", "RoBERTa"],
     problem: {
-      body: "従来の地形生成手法には以下の課題がありました。",
-      points: ["高解像度での生成における計算コストの増大", "地形の自然さと多様性のトレードオフ", "細かな地形特徴の再現が困難"],
+      body: "既存の毒性分類器は、万人に共通する「毒性」を前提とします。しかし実際の炎上基準は、コミュニティや組織ごとに大きく異なります。",
+      points: [
+        "毒性・炎上の基準はコミュニティ/組織ごとに異なる",
+        "共通基準の分類器では各コミュニティの炎上を捉えにくい",
+        "基準を変えるたびにモデルの再学習が必要になりがち",
+      ],
     },
     approach: {
-      body: "拡散モデルをベースとした新しい枠組みを提案。",
-      points: ["3Dノイズ場における拡散過程の設計", "マルチスケール条件付けによる制御", "地形制約を組み込んだサンプリング"],
+      body: "「炎上事例(OUT)」と「安全事例(SAFE)」の2つの事例データベースを持ち、入力文の埋め込みベクトルがどちらに近いか（類似度マージン）でリスクを判定します。データベースを差し替えるだけでペルソナを切り替えられ、再学習は不要です。",
+      points: [
+        "OUT/SAFE 2つの事例DBへの類似度マージンでリスク判定",
+        "DBの差し替えだけでペルソナを切り替え（再学習不要）",
+        "近傍事例で「なぜ危険か」を示す説明可能性と書き換え提案",
+      ],
     },
     results: {
-      body: "既存手法と比較して、定量・定性的に優れた性能を達成しました。",
+      label: "結果",
+      en: "Results",
+      body: "Jigsaw データセットで評価し、SAFEクラスで以下の性能を達成しました。",
       stats: [
-        { num: "22.3", unit: "%", label: "FID", sub: "↓ Lower is better" },
-        { num: "18.7", unit: "%", label: "RMSE", sub: "↓ Lower is better" },
-        { num: "31.2", unit: "%", label: "多様性スコア", sub: "↑ Higher is better" },
+        { num: "79.0", unit: "%", label: "F値 (F1)", sub: "SAFE class" },
+        { num: "76.3", unit: "%", label: "Precision", sub: "SAFE class" },
+        { num: "82.0", unit: "%", label: "Recall", sub: "SAFE class" },
       ],
     },
     overview: [
-      { label: "期間", value: "2024.01 – 2024.07" },
-      { label: "分野", value: "Computer Vision /\nGenerative AI" },
-      { label: "タイプ", value: "研究・論文" },
-      { label: "ステータス", value: "ICCV 2024 採択" },
-      {
-        label: "リンク",
-        value: "",
-        links: [
-          { label: "arXiv: 2405.12345v1" },
-          { label: "Project Page", external: true },
-        ],
-      },
+      { label: "会場", value: "IIAI AAI 2025（IEEE）", icon: "globe" },
+      { label: "形式", value: "査読付き国際会議", icon: "shield" },
+      { label: "ステータス", value: "発表済み", icon: "checkCircle", status: true },
+      { label: "論文", value: "IEEE Xplore", icon: "link", link: true, href: "https://ieeexplore.ieee.org/document/11418320" },
     ],
     highlights: [
-      "高解像度地形の高品質生成を実現",
-      "自然さと多様性をバランスよく両立",
-      "計算効率の高い生成プロセス",
-      "様々な地形タイプに対応可能",
-      "ゲーム・CG・シミュレーションへの応用が期待",
+      "ペルソナ条件づけで炎上基準を切り替え可能",
+      "再学習を必要としない事例ベース判定",
+      "近傍事例による説明可能性と書き換え提案",
     ],
-    stack: ["Python", "PyTorch", "JAX", "Diffusers", "NumPy", "Scipy", "Trimesh", "NVIDIA CUDA"],
-    relatedLinks: ["GitHub リポジトリ", "発表スライド（予定）"],
-    quantitative: [
-      { metric: "FID (↓)", ours: "22.3", pgm: "28.7", stylegan: "32.1" },
-      { metric: "RMSE (↓)", ours: "18.7", pgm: "23.4", stylegan: "27.9" },
-      { metric: "多様性スコア (↑)", ours: "31.2", pgm: "22.1", stylegan: "19.3" },
-      { metric: "地形連続性 (↑)", ours: "0.882", pgm: "0.756", stylegan: "0.701" },
-      { metric: "細部再現性 (↑)", ours: "0.873", pgm: "0.692", stylegan: "0.634" },
-    ],
-    ablation: [
-      { setting: "Full Model (Ours)", multiScale: true, terrain: true, fid: "22.3", rmse: "18.7", diversity: "31.2", best: true },
-      { setting: "w/o Multi-scale", multiScale: false, terrain: true, fid: "27.9", rmse: "22.4", diversity: "24.1", best: false },
-      { setting: "w/o Terrain Constraint", multiScale: true, terrain: false, fid: "30.1", rmse: "24.8", diversity: "21.3", best: false },
-      { setting: "w/o Both", multiScale: false, terrain: false, fid: "34.6", rmse: "28.7", diversity: "17.6", best: false },
-    ],
+    stack: ["Python 3.12", "Hugging Face Transformers", "RoBERTa-base", "コサイン類似度", "Jigsaw Dataset"],
+    relatedLinks: [{ label: "IEEE Xplore（論文）", href: "https://ieeexplore.ieee.org/document/11418320" }],
     contributions: [
-      "3Dノイズ場における拡散モデルの新しい適用方法を提案",
-      "マルチスケール条件付けによる多様な地形制御を実現",
-      "地形制約を組み込んだ効率的なサンプリング手法を設計",
-      "既存手法を上回る高品質・高多様性の地形生成を達成",
+      "ペルソナ条件づけによる炎上基準の切り替えを実現",
+      "再学習を必要としない事例ベースのリスク判定",
+      "近傍事例による説明可能性（なぜ危険かの提示）",
     ],
     publication: {
-      statusBadge: "ICCV 2024 (Accepted)",
-      title: "Generative Terrain Modeling Using Diffusion Models",
-      authors: "Haruto Miyakawa*, Taro Yamada, Hanako Suzuki",
-      affiliation: "Tokyo University",
-      tags: ["Diffusion Models", "3D Generation", "Terrain", "Procedural Generation"],
+      statusBadge: "IIAI AAI 2025（IEEE・査読付き）",
+      title:
+        "Persona-Conditioned Online Firestorm Risk Detection: A Similarity-Based Approach with Switchable OUT/SAFE Exemplars",
+      authors:
+        "Ren Yamauchi, Yuki Fujimatsu, Jinyu Toida, Haruto Miyakawa, Haruto Ichikawa, Rei Oshima, Takafumi Nakanishi",
+      authorHighlight: "Haruto Miyakawa",
+      affiliation: "東京工科大学 コンピュータサイエンス学部",
+      tags: ["Explainable AI", "Content Moderation", "NLP", "RoBERTa"],
+      links: [{ label: "IEEE Xplore", href: "https://ieeexplore.ieee.org/document/11418320" }],
     },
-    presentation: {
-      statusBadge: "ICCV 2024 Oral Presentation",
-      date: "発表予定日: 2024年10月",
-      duration: "Duration: 12 min + 3 min Q&A",
-      slideTitle: "Generative Terrain Modeling Using Diffusion Models",
-      slideAuthors: "Haruto Miyakawa et al.",
-    },
-    relatedWork: [
-      { title: "Terrain Generation", desc: "Houdini, Unity Terrain などの従来のプロシージャル手法", icon: "terrain" },
-      { title: "Generative Models", desc: "GANやVAEを用いた地形生成手法", icon: "sun" },
-      { title: "Diffusion Models", desc: "画像生成分野での拡散モデルの成功例", icon: "noise" },
-      { title: "3D Generation", desc: "3Dオブジェクト生成や3Dシーン生成の研究", icon: "cube" },
+    links: [{ label: "Read Paper", href: "https://ieeexplore.ieee.org/document/11418320" }],
+  },
+
+  /* ② 噂の変質・マルチエージェントNPC（執筆中・筆頭著者） */
+  "rumor-distortion-npc": {
+    slug: "rumor-distortion-npc",
+    statusBadge: "進行中（執筆中・IIAI AAI 2026 投稿予定）",
+    title: "Forgetting to Remember:\nRumor Distortion via Hierarchical\nMemory in Multi-Agent NPCs",
+    lead: "LLMマルチエージェントで「噂の変質」を意図的にモデル化するNPC対話フレームワーク",
+    meta: [
+      { label: "ステータス", value: "執筆中", sub: "In Progress", icon: "checkCircle", status: true },
+      { label: "投稿予定", value: "IIAI AAI 2026", icon: "globe" },
+      { label: "Role", value: "First Author", sub: "筆頭著者", icon: "user" },
+      { label: "分野", value: "LLM / Multi-Agent", icon: "network" },
+      { label: "応用", value: "Game AI", icon: "monitor" },
     ],
+    tldr:
+      "LLMで複数のゲームNPCを同時に動かすと、応答の単調化（モード崩壊）と個性の収束が起きる。人間社会の「噂の変質」（情報が人を経由する過程で意味が変わる現象）に着想し、それをLLMマルチエージェント環境で意図的にモデル化するNPC対話フレームワークを提案する。",
+    tldrTags: ["LLM", "Multi-Agent", "Game AI"],
+    problem: {
+      body: "LLMで複数のNPCを同時に動かすと、出力が画一化しやすいという課題があります。",
+      points: ["応答が単調になる（モード崩壊）", "NPCの個性が互いに収束してしまう", "長時間運用で会話の多様性が失われる"],
+    },
+    approach: {
+      body: "人間社会の「噂の変質」に着想し、3つの機構を統合したNPC対話フレームワークを提案します。",
+      points: [
+        "ランダムイベント注入による話題刺激",
+        "エビングハウスの忘却曲線に着想を得た階層型記憶減衰",
+        "キャラクター性格パラメータに基づく確率的話題選択",
+      ],
+    },
+    results: {
+      label: "検証予定",
+      en: "Planned Evaluation",
+      body: "複数NPCを同一世界で長時間運用するシミュレーションを通じて、情報がNPC間で伝播する際の意味的変質を、埋め込み距離・伝播ホップ数・キャラクター一貫性などの指標で定量評価し、ベースライン手法と比較する予定です。",
+    },
+    overview: [
+      { label: "ステータス", value: "執筆中（In Progress）", icon: "checkCircle", status: true },
+      { label: "投稿予定", value: "IIAI AAI 2026", icon: "globe" },
+      { label: "役割", value: "First Author（筆頭著者）", icon: "user" },
+      { label: "分野", value: "LLM / Multi-Agent / Game AI", icon: "network" },
+    ],
+    highlights: [
+      "ランダムイベント注入による話題刺激",
+      "忘却曲線に着想を得た階層型記憶減衰",
+      "性格パラメータに基づく確率的話題選択",
+    ],
+    relatedLinks: [],
+    links: [],
+  },
+
+  /* ③ ピクセルアート・アニメーションの時間的一貫性（個人研究・進行中） */
+  "pixelart-wfc": {
+    slug: "pixelart-wfc",
+    statusBadge: "進行中（個人研究 / Solo）",
+    title: "Spatio-Temporal Wave Function\nCollapse for Topology-Preserving\nPixel Art Animation Refinement",
+    lead: "ピクセルアート・アニメの時間的一貫性を、制約充足で事後補正する",
+    meta: [
+      { label: "ステータス", value: "進行中", sub: "In Progress", icon: "checkCircle", status: true },
+      { label: "体制", value: "単独 (Solo)", icon: "people" },
+      { label: "Role", value: "個人研究", icon: "user" },
+      { label: "分野", value: "Pixel Art / Neuro-Symbolic", icon: "grid" },
+      { label: "手法", value: "Wave Function Collapse", icon: "codeStack" },
+    ],
+    tldr:
+      "生成AIが作るピクセルアート・アニメは、フレーム間でピクセルが明滅し、輪郭がドリフトし、キャラクター部位の接続（トポロジー）が破綻するなど時間的非一貫性に悩まされ、そのままでは制作現場で使えない。ピクセルアートの離散構造を活かし、フレーム間の不整合を制約充足問題として解く事後補正フレームワークを提案する。",
+    tldrTags: ["Pixel Art", "Neuro-Symbolic", "Generative AI"],
+    problem: {
+      body: "生成AIが作るピクセルアート・アニメは、時間的な非一貫性のために制作現場でそのまま使えません。",
+      points: ["フレーム間でピクセルが明滅する", "輪郭がフレームごとにドリフトする", "キャラクター部位の接続（トポロジー）が破綻する"],
+    },
+    approach: {
+      body: "ピクセルアートの離散構造を活かし、フレーム間の不整合を制約充足問題として解く事後補正フレームワークを提案します。",
+      points: [
+        "アニメをX×Y×Tの三次元離散格子として再定式化",
+        "Wave Function Collapse をベースに「時空隣接制約」を導入",
+        "追加学習なし・汎用ハードウェア上で数秒オーダーの事後補正",
+      ],
+    },
+    results: {
+      label: "検証予定",
+      en: "Planned Evaluation",
+      body: "歩行アニメーションのスプライトを対象に、光学フロー系・拡散ベース手法をベースラインとして、Warp Error・LPIPS・ピクセルアート実務者による主観評価で比較検証する予定です。",
+    },
+    overview: [
+      { label: "ステータス", value: "進行中（In Progress）", icon: "checkCircle", status: true },
+      { label: "体制", value: "単独（個人研究）", icon: "people" },
+      { label: "分野", value: "Pixel Art / Neuro-Symbolic / Generative AI", icon: "grid" },
+    ],
+    highlights: [
+      "アニメをX×Y×Tの離散格子として再定式化",
+      "WFCベースの時空隣接制約",
+      "追加学習なしで数秒オーダーの事後補正",
+    ],
+    relatedLinks: [],
+    links: [],
   },
 };
 
@@ -687,59 +725,60 @@ export const processSteps: { title: string; desc: string }[] = [
 
 /* ============ About ページ ============ */
 export const about = {
-  catch: "妥協なき創作を、誠実に。",
+  catch: "妥協なき創作のために、技術を磨く。",
   intro: [
-    "私は、技術そのものよりも、その先にある体験に興味があります。",
+    "情報システムを専攻する大学生です。Next.js / TypeScript でのWeb開発を軸に、Claude や Gemini などのAIを実プロダクトへ組み込むことに取り組んでいます。",
     "新しい技術を試すことは好きです。でも本当に大切なのは、\nそれが誰かの課題を解決できるか、使う人にとって心地よいものになるかだと考えています。",
-    "だから設計も、実装も、改善もできるだけ自分の手で向き合います。\n細かな余白や色温度まで、コードの保守性まで気にするのは、\nその積み重ねが最終的な体験の質を決めると信じているからです。",
-    "派手な成果を重ねるわけではありません。\nそれでも、一つひとつのプロダクトに責任を持ち、最後までやり切ること。\nそれが私のものづくりの姿勢です。",
+    "AIに任せきりにはしません。\n構造的な制約をかけて出力を検証できる形にする——そんな『信頼できるAI活用』を、設計の中心に据えています。",
+    "派手な成果を重ねるわけではありません。\nそれでも企画から実装まで一人で作りきり、一つひとつのプロダクトに責任を持つこと。\nそれが私のものづくりの姿勢です。",
   ],
   profileRows: [
     { label: "名前", value: "宮川 陽翔（みやかわ はると）", icon: "user" },
-    { label: "所属", value: "東京の大学に在学中（情報系）", icon: "building" },
-    { label: "学年", value: "学部3年生", icon: "cap" },
-    { label: "専攻", value: "情報工学", icon: "atom" },
-    { label: "拠点", value: "Tokyo, Japan", icon: "pin" },
+    { label: "所属", value: "東京工科大学 コンピュータサイエンス学部（在学中）", icon: "building" },
+    { label: "学年", value: "2年生", icon: "cap" },
+    { label: "専攻", value: "コンピュータサイエンス / 情報システム", icon: "atom" },
+    { label: "拠点", value: "埼玉, Japan", icon: "pin" },
     { label: "言語", value: "日本語 / English", icon: "globe" },
-    { label: "興味", value: "Web開発 / AI活用 /\n体験設計 / 旅行 / ゲーム制作", icon: "heart" },
+    { label: "興味", value: "Web開発 / AI活用 /\nゲーム制作 / 研究", icon: "heart" },
   ],
   profileNote: "ユーザーに価値を届けるプロダクトを、誠実に、やり切ることを大切にしています。",
   values: [
     { title: "ユーザーに寄り添う設計", desc: "使う人の課題に向き合い、直感的で心地よい体験を届けます。", icon: "user" },
     { title: "技術で本質を解決する", desc: "流行にむやみに惑わされず、課題の本質を見極めて技術を選びます。", icon: "gem" },
     { title: "誠実に、やり切る", desc: "小さな改善も妥協せず、最後まで責任を持ってやり切ります。", icon: "shield" },
-    { title: "学び続け、還元する", desc: "学びを発信し、チームやコミュニティに価値を還元します。", icon: "book" },
+    { title: "学び続け、発信する", desc: "学びや実装の知見を技術記事として発信し、研究にも取り組みます。", icon: "book" },
   ],
   whatIDo: [
     {
       title: "Webアプリケーション開発",
-      desc: "Next.js / React / TypeScriptを中心に、パフォーマンスとアクセシビリティを意識したWebアプリを開発します。",
+      desc: "Next.js / TypeScript / React を中心に、Webアプリケーションを設計・開発します。",
       icon: "monitor",
     },
     {
       title: "AIプロダクト開発・活用",
-      desc: "LLMや各種APIを活用し、AIを組み込んだプロダクトの設計・実装・改善を行います。",
+      desc: "Claude API / Gemini API を実装に組み込み、制約付きで検証可能な『信頼できるAI活用』を実現します。",
       icon: "sparkle",
     },
     {
       title: "体験設計・UI/UX実装",
-      desc: "情報設計からUI実装まで一貫して担当し、ユーザー体験の最大化を追求します。",
+      desc: "情報設計からUI実装まで一貫して担当し、ユーザー体験を追求します。",
       icon: "pen",
     },
     {
-      title: "技術調査・改善・運用",
-      desc: "技術調査、パフォーマンス改善、継続的な運用・改善でプロダクトを成長させます。",
-      icon: "chart",
+      title: "技術記事の執筆・研究",
+      desc: "学びや実装の知見を技術記事として発信し、研究にも取り組みます。",
+      icon: "book",
     },
   ],
   tech: [
-    { name: "Next.js", use: "フルスタック開発 / SSR / API Routesで高速なWeb体験を実現", emblem: "N" },
-    { name: "OpenAI API", use: "自然言語処理を活用したAI機能の実装", emblem: "openai" },
-    { name: "TypeScript", use: "型安全な設計で、保守性の高いコードを書きます", emblem: "TS" },
-    { name: "PostgreSQL", use: "リレーショナルデータの設計・最適化", emblem: "postgres" },
-    { name: "React", use: "再利用性の高いUIコンポーネント設計と状態管理", emblem: "react" },
-    { name: "Prisma", use: "型安全なORMで開発体験と生産性を向上", emblem: "prisma" },
+    { name: "Next.js", use: "フルスタックなWeb開発（App Router / SSR）", emblem: "N" },
+    { name: "TypeScript", use: "型安全な設計で保守性の高いコードを書く", emblem: "TS" },
+    { name: "React", use: "再利用性の高いUIコンポーネント設計", emblem: "react" },
     { name: "Tailwind CSS", use: "ユーティリティファーストで高速なUI実装", emblem: "tailwind" },
-    { name: "Vercel / GitHub", use: "デプロイ / CI/CD / コード管理", emblem: "github" },
+    { name: "Claude API", use: "AIを組み込んだプロダクト開発（つむぐ 等）", emblem: "C" },
+    { name: "Gemini API", use: "制約付きAI活用（家電ガイド 等）", emblem: "G" },
+    { name: "Python", use: "研究・データ処理（Whisper / sentence-transformers 等）", emblem: "Py" },
+    { name: "Supabase / PostgreSQL", use: "データの設計・管理", emblem: "postgres" },
+    { name: "Vercel / GitHub", use: "デプロイ / コード管理", emblem: "github" },
   ],
 };

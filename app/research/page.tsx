@@ -8,18 +8,8 @@ import { researchHero, featuredResearch, researchAreas, researchHighlights } fro
 
 export const metadata: Metadata = {
   title: "Research — Haruto Miyakawa",
-  description: "探究心を原動力に、実世界の課題解決を目指した研究を行っています。国際会議や学会での発表・採択実績。",
+  description: "探究心を原動力に、実世界の課題解決を目指した研究を行っています。査読付き国際会議での発表と進行中の研究。",
 };
-
-const interestIcons = [
-  <svg key="0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1" /><circle cx="12" cy="12" r="3" /></svg>,
-  <svg key="1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3 4 7.5v9L12 21l8-4.5v-9L12 3Z" /><path d="m4 7.5 8 4.5 8-4.5M12 12v9" /></svg>,
-  <svg key="2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M7 18a4 4 0 0 1 0-8 5 5 0 0 1 9.6-1.3A3.5 3.5 0 0 1 17 18Z" /><circle cx="9" cy="14" r=".6" fill="currentColor" /><circle cx="13" cy="13" r=".6" fill="currentColor" /></svg>,
-  <svg key="3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M5 20l4-16M19 20l-4-16M3 9h18M3 15h18" /></svg>,
-  <svg key="4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M8 10h8M8 14h5" /><path d="M4 5h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H9l-4 3v-3H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Z" /></svg>,
-  <svg key="5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><circle cx="8" cy="9" r="3" /><path d="M3 19c0-2.8 2.2-5 5-5M14 8h6M14 12h6M14 16h4" /></svg>,
-  <svg key="6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 5.5a3 3 0 0 0-4 4L4 16v3h3l6.5-6.5a3 3 0 0 0 4-4l-2 2-2-2 2-2Z" /></svg>,
-];
 
 const featBadgeIcon = (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3l4 5-4 13-4-13 4-5Z" /></svg>
@@ -49,10 +39,10 @@ export default function ResearchPage() {
           <div className="ri-block">
             <div className="ri-label">{researchHero.interestsLabel}</div>
             <div className="ri-tags">
-              {researchHero.interests.map((interest, i) => (
-                <span key={interest} className="ri-tag">
-                  {interestIcons[i]}
-                  {interest}
+              {researchHero.interests.map((interest) => (
+                <span key={interest.label} className="ri-tag">
+                  {icons[interest.icon]}
+                  {interest.label}
                 </span>
               ))}
             </div>
@@ -73,7 +63,7 @@ export default function ResearchPage() {
           {/* FEATURED CARD */}
           <CardLink href={`/research/${detailSlug}`} className="feat-paper">
             <div className="fp-img">
-              <ResearchThumb type="terrain" />
+              <ResearchThumb type={featuredResearch.thumb} />
               <span className="fp-badge">
                 {featBadgeIcon}
                 {featuredResearch.badgeLabel}
@@ -99,14 +89,14 @@ export default function ResearchPage() {
                   <span className="fp-venue">{featuredResearch.venue}</span>
                   <span className="fp-where">{featuredResearch.where}</span>
                 </div>
-                <a className="rc-link" href="#">
+                <a className="rc-link" href={featuredResearch.paperUrl} target="_blank" rel="noopener noreferrer">
                   Read Paper <ArrowRight />
                 </a>
               </div>
             </div>
           </CardLink>
 
-          <ResearchGrid detailSlug={detailSlug} />
+          <ResearchGrid />
 
           <a className="see-all" href="#">
             すべての研究を見る <ArrowRight />

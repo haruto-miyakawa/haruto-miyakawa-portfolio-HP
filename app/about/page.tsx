@@ -123,10 +123,10 @@ export default function AboutPage() {
           <div className="tech-grid">
             {about.tech.map((t) => (
               <div key={t.name} className="tech-cell">
-                {t.emblem === "N" || t.emblem === "TS" ? (
-                  <span className="tech-emblem tech-mark">{t.emblem}</span>
-                ) : (
+                {icons[t.emblem] ? (
                   <span className="tech-emblem">{icons[t.emblem]}</span>
+                ) : (
+                  <span className="tech-emblem tech-mark">{t.emblem}</span>
                 )}
                 <div className="tech-tx">
                   <div className="tech-name">{t.name}</div>
