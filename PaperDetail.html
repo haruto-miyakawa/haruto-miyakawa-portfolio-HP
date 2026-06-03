@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Generative Terrain Modeling Using Diffusion Models — Research | Haruto Miyakawa</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ============ TOKENS ============ */
+:root{
+  --bg:           #110b09;
+  --bg-grad-top:  #1a110d;
+  --bg-grad-bot:  #0d0907;
+  --sidebar:      #0d0807;
+  --sidebar-line: rgba(232,148,86,0.12);
+  --surface:      #1a1411;
+  --surface-2:    #211915;
+  --card:         #181210;
+  --border:       rgba(255,240,230,0.07);
+  --border-2:     rgba(255,240,230,0.10);
+  --text:         #ece3da;
+  --text-2:       #b9ada2;
+  --text-3:       #8a7d72;
+  --text-faint:   #6f635a;
+  --accent:       #e8924f;
+  --accent-2:     #f0a766;
+  --accent-soft:  rgba(232,146,79,0.14);
+  --accent-line:  rgba(232,146,79,0.30);
+  --radius:       12px;
+
+  --f-head: 'Space Grotesk', sans-serif;
+  --f-jp:   'Zen Kaku Gothic New', sans-serif;
+  --f-mono: 'JetBrains Mono', monospace;
+}
+
+*{ box-sizing:border-box; margin:0; padding:0; }
+html{ scroll-behavior:smooth; }
+body{
+  font-family: var(--f-jp);
+  background: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+::selection{ background: var(--accent-soft); color:#fff; }
+a{ color:inherit; text-decoration:none; }
+
+/* ============ SHELL ============ */
+.shell{
+  display:grid;
+  grid-template-columns: 232px 1fr;
+  min-height:100vh;
+  background:
+    radial-gradient(1200px 600px at 78% -8%, rgba(232,120,60,0.10), transparent 60%),
+    linear-gradient(180deg, var(--bg-grad-top), var(--bg) 30%, var(--bg-grad-bot));
+}
+
+/* ============ SIDEBAR ============ */
+.sidebar{
+  position:sticky; top:0; align-self:start;
+  height:100vh;
+  background: linear-gradient(180deg, #0e0a08, #0b0706);
+  border-right:1px solid var(--sidebar-line);
+  padding:30px 22px 24px;
+  display:flex; flex-direction:column;
+  gap:22px;
+  overflow:hidden;
+}
+.id-block{ display:flex; flex-direction:column; gap:14px; align-items:flex-start; }
+.avatar-frame{ position:relative; width:178px; height:183px; flex:none; align-self:center; }
+.av-photo{
+  position:absolute; inset:18px;
+  width:calc(100% - 36px); height:calc(100% - 36px);
+  object-fit:cover; object-position:center 26%;
+  border-radius:6px; display:block;
+}
+.av-frame{
+  position:absolute; inset:0;
+  width:100%; height:100%; display:block;
+  pointer-events:none;
+  filter:drop-shadow(0 6px 18px rgba(0,0,0,0.45));
+}
+.id-name{
+  font-family:var(--f-head);
+  font-size:26px; font-weight:600; letter-spacing:-0.01em;
+  color:var(--text); line-height:1.06;
+}
+.id-role{
+  font-family:var(--f-mono);
+  font-size:13px; font-weight:500;
+  color:var(--accent);
+  line-height:1.45;
+  margin-top:5px;
+}
+
+/* nav */
+.nav{ display:flex; flex-direction:column; gap:3px; margin-top:2px; }
+.nav-item{
+  display:flex; align-items:center; gap:13px;
+  padding:11px 13px;
+  border-radius:10px;
+  font-size:15px; color:var(--text-2);
+  border:1px solid transparent;
+  transition:.18s ease;
+}
+.nav-item svg{ width:19px; height:19px; flex:none; color:var(--text-3); transition:.18s ease; }
+.nav-item:hover{ background:rgba(255,255,255,0.03); color:var(--text); }
+.nav-item:hover svg{ color:var(--accent); }
+.nav-item.active{
+  background: linear-gradient(180deg, rgba(232,146,79,0.13), rgba(232,146,79,0.06));
+  border-color: rgba(232,146,79,0.22);
+  color:#fff; font-weight:500;
+}
+.nav-item.active svg{ color:var(--accent); }
+
+/* contact */
+.side-label{
+  font-family:var(--f-mono);
+  font-size:12px; font-weight:600; letter-spacing:0.08em;
+  color:var(--accent);
+  text-transform:none;
+}
+.contact{ display:flex; flex-direction:column; gap:11px; margin-top:11px; }
+.contact a{
+  display:flex; align-items:center; gap:12px;
+  font-size:14px; color:var(--text-2);
+  transition:.18s ease;
+}
+.contact a svg{ width:18px; height:18px; flex:none; }
+.contact a .ic-img{ width:18px; height:18px; flex:none; object-fit:contain; display:block; }
+.contact a:hover{ color:var(--accent); transform:translateX(2px); }
+
+/* lantern */
+.lantern-wrap{
+  margin-top:auto;
+  position:relative;
+  display:flex; justify-content:center;
+  padding:6px 0 14px;
+}
+.lantern-wrap::after{
+  content:""; position:absolute; left:50%; top:46%;
+  width:140px; height:140px; transform:translate(-50%,-50%);
+  background: radial-gradient(circle, rgba(255,170,70,0.35), transparent 65%);
+  filter:blur(6px);
+  animation:flicker 4s ease-in-out infinite;
+  pointer-events:none;
+}
+@keyframes flicker{
+  0%,100%{ opacity:.7; }
+  45%{ opacity:1; }
+  60%{ opacity:.78; }
+  75%{ opacity:.95; }
+}
+.lantern-wrap img{ width:150px; height:auto; position:relative; z-index:1; filter:drop-shadow(0 6px 18px rgba(0,0,0,0.5)); }
+
+/* available */
+.available{ display:flex; flex-direction:column; gap:7px; }
+.avail-title{
+  display:flex; align-items:center; gap:9px;
+  font-size:14px; font-weight:700; color:var(--accent);
+}
+.avail-dot{
+  width:9px; height:9px; border-radius:50%;
+  background:#5fd07a;
+  box-shadow:0 0 0 3px rgba(95,208,122,0.18);
+  animation:pulse 2.4s ease-in-out infinite;
+}
+@keyframes pulse{ 0%,100%{ box-shadow:0 0 0 3px rgba(95,208,122,0.18);} 50%{ box-shadow:0 0 0 6px rgba(95,208,122,0.05);} }
+.avail-sub{ font-size:13px; color:var(--text-3); line-height:1.5; }
+.avail-mail{ font-family:var(--f-mono); font-size:13px; color:var(--text-2); margin-top:2px; }
+.avail-mail:hover{ color:var(--accent); }
+
+/* ============ MAIN ============ */
+.main{ padding:30px 44px 60px; position:relative; min-width:0; }
+
+/* ---- HERO ---- */
+.hero{ position:relative; margin-top:2px; }
+.hero-img{
+  position:absolute; top:-72px; right:-44px;
+  width:60%; height:478px;
+  border-radius:0;
+  overflow:hidden;
+  z-index:0;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.25) 22%, rgba(0,0,0,0.7) 42%, #000 62%);
+          mask-image: linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.25) 22%, rgba(0,0,0,0.7) 42%, #000 62%);
+}
+.hero-img img{ width:100%; height:100%; object-fit:cover; object-position:center 38%; display:block; }
+.hero-img::after{
+  content:""; position:absolute; inset:0;
+  background:
+    linear-gradient(0deg, var(--bg) 1%, transparent 28%),
+    linear-gradient(180deg, var(--bg) 0%, transparent 16%);
+}
+.hero-content{ position:relative; z-index:2; padding-top:14px; max-width:780px; }
+.hero-hello{
+  font-family:var(--f-mono);
+  font-size:15px; color:var(--accent); font-weight:500;
+  margin-bottom:18px;
+}
+.hero-h1{
+  font-family:var(--f-head);
+  font-weight:600;
+  font-size:72px; line-height:1.02; letter-spacing:-0.025em;
+  color:#f3ece4;
+  text-shadow:0 2px 24px rgba(0,0,0,0.4);
+}
+.hero-jp{
+  font-family:var(--f-jp); font-weight:700;
+  font-size:24px; color:var(--accent-2);
+  margin-top:26px; letter-spacing:0.01em;
+}
+.hero-body{
+  font-size:16px; color:var(--text-2); line-height:1.85;
+  margin-top:16px; max-width:560px;
+}
+.hero-cta{ display:flex; gap:14px; margin-top:30px; }
+.btn{
+  display:inline-flex; align-items:center; gap:10px;
+  padding:14px 22px; border-radius:11px;
+  font-size:15px; font-weight:500; cursor:pointer;
+  font-family:var(--f-jp);
+  transition:.2s ease; border:1px solid transparent;
+}
+.btn svg{ width:17px; height:17px; }
+.btn-primary{
+  background: linear-gradient(170deg, #f0a05a, #e3823c);
+  color:#26150a; font-weight:700;
+  box-shadow:0 8px 24px rgba(227,130,60,0.28);
+}
+.btn-primary:hover{ transform:translateY(-2px); box-shadow:0 12px 30px rgba(227,130,60,0.4); }
+.btn-ghost{
+  background:rgba(255,255,255,0.02);
+  border-color:var(--border-2); color:var(--text);
+}
+.btn-ghost:hover{ border-color:var(--accent-line); background:var(--accent-soft); }
+
+.taglist{ display:flex; flex-wrap:wrap; gap:9px; margin-top:26px; }
+.tag{
+  font-family:var(--f-mono); font-size:13px;
+  color:var(--text-2);
+  background:rgba(255,255,255,0.025);
+  border:1px solid var(--border);
+  border-radius:8px; padding:7px 13px;
+  transition:.18s ease;
+}
+.tag:hover{ border-color:var(--accent-line); color:var(--accent); }
+.tag.more{ color:var(--text-faint); letter-spacing:0.1em; }
+
+/* ---- LOWER GRID ---- */
+.lower{
+  display:grid;
+  grid-template-columns: minmax(0,1fr) 296px;
+  gap:46px;
+  margin-top:54px;
+  align-items:start;
+}
+.col-left{ display:flex; flex-direction:column; gap:54px; min-width:0; }
+
+/* section heading */
+.sec-head{ display:flex; align-items:center; gap:14px; margin-bottom:24px; }
+.sec-title{
+  font-family:var(--f-head); font-size:22px; font-weight:600;
+  color:var(--text); letter-spacing:-0.01em;
+  display:flex; align-items:center; gap:11px; white-space:nowrap;
+}
+.sec-title .star{ color:var(--accent); }
+.sec-rule{ height:1px; flex:1; background:linear-gradient(90deg, var(--accent-line), transparent); }
+.sec-link{
+  font-family:var(--f-mono); font-size:13px; color:var(--accent);
+  display:flex; align-items:center; gap:7px; white-space:nowrap;
+  transition:.18s ease;
+}
+.sec-link svg{ width:15px; height:15px; }
+.sec-link:hover{ gap:11px; }
+
+/* ---- WORK CARDS ---- */
+.works{ display:grid; grid-template-columns:repeat(3,1fr); gap:18px; }
+.work{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:14px;
+  transition:.22s ease;
+}
+.work:hover{ border-color:var(--accent-line); transform:translateY(-3px); box-shadow:0 18px 40px rgba(0,0,0,0.35); }
+.thumb{
+  position:relative;
+  height:118px; border-radius:9px; overflow:hidden;
+  background:#0f1115;
+  border:1px solid rgba(255,255,255,0.05);
+}
+.thumb-badge{
+  position:absolute; top:9px; left:9px; z-index:3;
+  font-family:var(--f-mono); font-size:11px; font-weight:600;
+  background:rgba(10,10,12,0.8); color:#e9e2da;
+  border:1px solid rgba(255,255,255,0.12);
+  padding:3px 9px; border-radius:7px;
+  backdrop-filter:blur(4px);
+}
+.work-title{ font-family:var(--f-jp); font-weight:700; font-size:16px; color:var(--text); margin-top:14px; }
+.work-desc{ font-size:13px; color:var(--text-3); line-height:1.65; margin-top:7px; }
+.chips{ display:flex; flex-wrap:wrap; gap:6px; margin-top:13px; }
+.chip{
+  font-family:var(--f-mono); font-size:11px; color:var(--text-2);
+  background:rgba(255,255,255,0.03); border:1px solid var(--border);
+  border-radius:6px; padding:4px 9px;
+}
+
+/* mini mockups inside thumbs */
+.mk{ position:absolute; inset:0; }
+/* dashboard mock */
+.mk-dash{ background:linear-gradient(135deg,#f4f5f8,#e9ebf1); display:flex; }
+.mk-dash .mk-side{ width:26%; background:#eef0f5; border-right:1px solid #dfe2ea; padding:8px 6px; display:flex; flex-direction:column; gap:5px; }
+.mk-dash .mk-body{ flex:1; padding:9px; display:flex; flex-direction:column; gap:6px; }
+.mk-row{ height:6px; border-radius:3px; background:#d6dae3; }
+.mk-row.w70{ width:70%; } .mk-row.w50{ width:50%; } .mk-row.w90{ width:90%; } .mk-row.w40{ width:40%; }
+.mk-card{ background:#fff; border:1px solid #e4e7ef; border-radius:5px; padding:7px; display:flex; flex-direction:column; gap:5px; }
+.mk-bars{ display:flex; align-items:flex-end; gap:5px; height:34px; margin-top:auto; }
+.mk-bars span{ flex:1; border-radius:2px 2px 0 0; background:linear-gradient(180deg,#9b6fe0,#6f4fd0); }
+.mk-pill{ height:7px; border-radius:4px; background:#cdd2dc; }
+.mk-dot{ width:7px;height:7px;border-radius:50%;background:#c4cad6; }
+/* travel mock */
+.mk-travel{ background:#f3f4f7; display:flex; flex-direction:column; }
+.mk-photo{ height:48%; background:linear-gradient(180deg,#f3b87a 0%,#e98f6e 30%,#7d6fae 70%,#4a4f86 100%); position:relative; }
+.mk-photo::after{ content:""; position:absolute; inset:0; background:linear-gradient(180deg,transparent 50%,rgba(40,30,60,0.35)); }
+.mk-tcards{ display:flex; gap:5px; padding:8px; }
+.mk-tcard{ flex:1; height:34px; background:#fff; border:1px solid #e4e7ef; border-radius:5px; padding:5px; display:flex; flex-direction:column; gap:4px; }
+.mk-tcard .tt{ height:14px; border-radius:3px; background:linear-gradient(135deg,#e8a06a,#d98f9a); }
+/* chat mock */
+.mk-chat{ background:linear-gradient(135deg,#f5f6f9,#eceef3); display:flex; }
+.mk-chat .mk-list{ width:30%; background:#fff; border-right:1px solid #e4e7ef; padding:7px 5px; display:flex; flex-direction:column; gap:6px; }
+.mk-chat .mk-conv{ flex:1; padding:9px; display:flex; flex-direction:column; gap:7px; }
+.bubble{ max-width:78%; border-radius:8px; padding:6px; display:flex; flex-direction:column; gap:3px; }
+.bubble.in{ background:#fff; border:1px solid #e4e7ef; align-self:flex-start; }
+.bubble.out{ background:#fbe6cf; border:1px solid #f1d2ab; align-self:flex-end; }
+.bubble .ln{ height:4px; border-radius:2px; background:#d6dae3; }
+.bubble.out .ln{ background:#e7b886; }
+.mk-li{ display:flex; align-items:center; gap:5px; }
+
+/* ---- MY PROCESS ---- */
+.process{ display:flex; align-items:flex-start; gap:6px; }
+.pstep{ flex:1; display:flex; flex-direction:column; gap:12px; }
+.picon{
+  width:54px; height:54px; border-radius:50%;
+  border:1.5px solid var(--accent-line);
+  display:flex; align-items:center; justify-content:center;
+  color:var(--accent);
+  background:radial-gradient(circle at 50% 40%, rgba(232,146,79,0.10), transparent 70%);
+}
+.picon svg{ width:24px; height:24px; }
+.pstep h4{ font-family:var(--f-jp); font-size:15px; font-weight:700; color:var(--text); }
+.pstep p{ font-size:12.5px; color:var(--text-3); line-height:1.6; }
+.parrow{ color:var(--text-faint); margin-top:18px; flex:none; }
+.parrow svg{ width:20px; height:20px; }
+
+/* ---- CTA BANNER (available for work) ---- */
+.cta-banner{
+  position:relative; overflow:hidden;
+  border:1px solid rgba(232,146,79,0.26);
+  border-radius:16px;
+  background:
+    linear-gradient(120deg, rgba(232,146,79,0.10), rgba(232,146,79,0.02) 52%, rgba(120,80,200,0.06)),
+    var(--surface);
+  padding:26px 30px;
+}
+.cta-glow{
+  position:absolute; right:-60px; top:-80px;
+  width:280px; height:280px; border-radius:50%;
+  background:radial-gradient(circle, rgba(232,146,79,0.22), transparent 65%);
+  filter:blur(8px); pointer-events:none;
+  animation:flicker 5s ease-in-out infinite;
+}
+.cta-inner{
+  position:relative; z-index:1;
+  display:flex; align-items:center; justify-content:space-between;
+  gap:30px; flex-wrap:wrap;
+}
+.cta-copy{ min-width:240px; }
+.cta-status{
+  display:inline-flex; align-items:center; gap:9px;
+  font-family:var(--f-mono); font-size:12px; font-weight:600; letter-spacing:0.04em;
+  color:var(--accent);
+  padding:5px 12px 5px 11px; border-radius:999px;
+  background:rgba(232,146,79,0.10); border:1px solid rgba(232,146,79,0.22);
+}
+.cta-dot{
+  width:8px; height:8px; border-radius:50%; background:#5fd07a;
+  box-shadow:0 0 0 3px rgba(95,208,122,0.18);
+  animation:pulse 2.4s ease-in-out infinite;
+}
+.cta-head{
+  font-family:var(--f-head); font-weight:600; font-size:27px; line-height:1.18;
+  letter-spacing:-0.015em; color:#f3ece4; margin-top:15px;
+}
+.cta-sub{ font-size:13.5px; color:var(--text-2); line-height:1.7; margin-top:11px; max-width:430px; }
+.cta-actions{ display:flex; flex-direction:column; align-items:flex-end; gap:13px; }
+.cta-mail{ font-family:var(--f-mono); font-size:13px; color:var(--text-3); transition:.18s; }
+.cta-mail:hover{ color:var(--accent); }
+@media (max-width:760px){
+  .cta-inner{ flex-direction:column; align-items:flex-start; }
+  .cta-actions{ align-items:flex-start; }
+}
+
+/* ---- ABOUT / TECH (right col) ---- */
+.col-right{ display:flex; flex-direction:column; gap:42px; }
+.about-name{ font-family:var(--f-jp); font-weight:700; font-size:17px; color:var(--text); margin-bottom:11px; }
+.about-bio{ font-size:13.5px; color:var(--text-2); line-height:1.75; }
+.about-list{ list-style:none; display:flex; flex-direction:column; gap:9px; margin-top:16px; }
+.about-list li{ display:flex; align-items:flex-start; gap:10px; font-size:13.5px; color:var(--text-2); line-height:1.5; }
+.about-list li::before{ content:""; width:6px;height:6px;border-radius:50%; background:var(--accent); margin-top:7px; flex:none; }
+.about-more{ font-family:var(--f-mono); font-size:13px; color:var(--accent); display:inline-flex; align-items:center; gap:7px; margin-top:18px; transition:.18s; }
+.about-more:hover{ gap:11px; }
+.about-more svg{ width:14px; height:14px; }
+
+.tech{ display:flex; flex-direction:column; gap:17px; }
+.tech-item{ display:flex; gap:13px; align-items:flex-start; }
+.tech-emblem{
+  width:30px; height:30px; border-radius:50%; flex:none;
+  border:1.5px solid var(--accent-line);
+  display:flex; align-items:center; justify-content:center; color:var(--accent);
+  background:rgba(232,146,79,0.06);
+}
+.tech-emblem svg{ width:16px; height:16px; }
+.tech-name{ font-family:var(--f-head); font-size:14.5px; font-weight:600; color:var(--text); }
+.tech-desc{ font-size:12.5px; color:var(--text-3); line-height:1.5; margin-top:2px; }
+.tech-foot{ display:flex; justify-content:flex-end; margin-top:8px; }
+
+/* responsive guard */
+@media (max-width:1180px){
+  .lower{ grid-template-columns:1fr; }
+  .hero-img{ width:54%; }
+}
+@media (max-width:920px){
+  .shell{ grid-template-columns:1fr; }
+  .sidebar{ position:static; height:auto; }
+  .hero-img{ position:static; width:100%; height:240px; margin-bottom:20px; }
+  .hero-h1{ font-size:48px; }
+  .works{ grid-template-columns:1fr; }
+  .process{ flex-direction:column; }
+  .parrow{ display:none; }
+}
+
+/* ===== WORKS PAGE ===== */
+.avail-copy{ font-family:var(--f-mono); font-size:11px; color:var(--text-faint); margin-top:11px; }
+
+.whead{ position:relative; margin-top:2px; padding-bottom:4px; }
+.whead .hero-img{ top:-30px; height:300px; width:62%; }
+.whead-content{ position:relative; z-index:2; padding-top:4px; }
+.whead .cta-status{ margin-bottom:20px; }
+.whead-title{ font-family:var(--f-head); font-weight:600; font-size:64px; line-height:1; letter-spacing:-0.025em; color:#f3ece4; text-shadow:0 2px 24px rgba(0,0,0,0.4); }
+.whead-lead{ font-family:var(--f-jp); font-weight:700; font-size:19px; color:var(--accent-2); margin-top:22px; }
+.whead-sub{ font-size:15px; color:var(--text-2); margin-top:10px; line-height:1.7; }
+.tabs{ display:flex; flex-wrap:wrap; gap:10px; margin-top:28px; }
+.tab{ display:inline-flex; align-items:center; gap:9px; font-family:var(--f-jp); font-size:14px; color:var(--text-2); background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:10px; padding:9px 16px; cursor:pointer; transition:.18s ease; }
+.tab .tab-n{ font-family:var(--f-mono); font-size:12px; color:var(--text-faint); }
+.tab:hover{ border-color:var(--accent-line); color:var(--text); }
+.tab.active{ background:linear-gradient(170deg,#f0a05a,#e3823c); color:#26150a; font-weight:700; border-color:transparent; box-shadow:0 6px 18px rgba(227,130,60,0.25); }
+.tab.active .tab-n{ color:rgba(38,21,10,0.62); }
+
+.works-body{ display:grid; grid-template-columns: minmax(0,1fr) 264px; gap:30px; margin-top:36px; align-items:start; }
+.works-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:20px; }
+.wcard{ background:var(--card); border:1px solid var(--border); border-radius:14px; padding:14px; display:flex; flex-direction:column; transition:.22s ease; cursor:pointer; }
+.wcard.hide{ display:none; }
+.wcard:hover{ border-color:var(--accent-line); transform:translateY(-3px); box-shadow:0 18px 40px rgba(0,0,0,0.35); }
+.wthumb{ position:relative; height:150px; border-radius:9px; overflow:hidden; background:#0f1115; border:1px solid rgba(255,255,255,0.05); }
+.wbadge{ position:absolute; top:10px; left:10px; z-index:3; display:inline-flex; align-items:center; gap:7px; font-family:var(--f-mono); font-size:11px; font-weight:600; background:rgba(10,10,12,0.82); color:#e9e2da; border:1px solid rgba(255,255,255,0.12); padding:4px 11px; border-radius:8px; backdrop-filter:blur(4px); }
+.bdot{ width:6px; height:6px; border-radius:50%; background:var(--accent); box-shadow:0 0 6px rgba(232,146,79,0.6); }
+.wtitle{ font-family:var(--f-jp); font-weight:700; font-size:17px; color:var(--text); margin-top:15px; }
+.wdesc{ font-size:13px; color:var(--text-3); line-height:1.7; margin-top:8px; }
+.wcard .chips{ margin-top:14px; }
+.wfoot{ display:flex; align-items:center; justify-content:space-between; margin-top:auto; padding-top:15px; }
+.wcard .chips + .wfoot{ margin-top:16px; }
+.wfoot-a{ display:inline-flex; align-items:center; gap:7px; font-size:13px; color:var(--text-2); }
+.wfoot-a svg{ width:15px; height:15px; color:var(--text-3); }
+.wfoot-a:hover{ color:var(--accent); }
+.wfoot-a:hover svg{ color:var(--accent); }
+.wfoot-b{ display:inline-flex; align-items:center; gap:7px; font-family:var(--f-mono); font-size:13px; color:var(--accent); transition:.18s ease; }
+.wfoot-b svg{ width:15px; height:15px; }
+.wfoot-b:hover{ gap:11px; }
+
+.filter{ background:none; border:none; border-radius:0; padding:0; position:sticky; top:24px; }
+.filter-sec{ display:flex; align-items:center; gap:12px; margin-bottom:6px; }
+.filter-sectitle{ font-family:var(--f-head); font-size:16px; font-weight:600; color:var(--text); white-space:nowrap; }
+.filter-sec .sec-rule{ height:1px; flex:1; background:linear-gradient(90deg, var(--accent-line), transparent); }
+.filter-sec .tag-clear{ flex:none; }
+.filter-list{ display:flex; flex-direction:column; }
+.filter-row{ display:flex; align-items:center; gap:12px; padding:11px 6px; cursor:pointer; border-radius:8px; transition:.16s ease; }
+.filter-row:hover{ background:rgba(255,255,255,0.025); }
+.filter-row .radio{ width:16px; height:16px; border-radius:50%; border:1.6px solid var(--text-faint); flex:none; position:relative; transition:.16s ease; }
+.filter-row.active .radio{ border-color:var(--accent); }
+.filter-row.active .radio::after{ content:""; position:absolute; inset:3px; border-radius:50%; background:var(--accent); }
+.filter-label{ flex:1; font-size:14px; color:var(--text-2); }
+.filter-row.active .filter-label{ color:var(--text); font-weight:500; }
+.filter-n{ font-family:var(--f-mono); font-size:13px; color:var(--text-faint); }
+.filter-row.active .filter-n{ color:var(--accent); }
+.filter-sub{ font-family:var(--f-mono); font-size:11px; font-weight:600; letter-spacing:0.06em; color:var(--text-faint); text-transform:uppercase; margin:2px 0 8px; }
+.filter-divider{ height:1px; background:var(--border); margin:14px 0; }
+.filter-subrow{ display:flex; align-items:center; justify-content:space-between; margin:2px 0 11px; }
+.filter-subrow .filter-sub{ margin:0; }
+.tag-clear{ font-family:var(--f-mono); font-size:11px; color:var(--accent); background:none; border:none; cursor:pointer; padding:0; }
+.tag-clear:hover{ text-decoration:underline; }
+.tagfilter{ display:flex; flex-wrap:wrap; gap:7px; padding-bottom:4px; }
+.tagchip{ display:inline-flex; align-items:center; gap:6px; font-family:var(--f-mono); font-size:11.5px; color:var(--text-2); background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:7px; padding:5px 9px; cursor:pointer; transition:.15s ease; }
+.tagchip .tc-n{ font-size:10px; color:var(--text-faint); }
+.tagchip:hover{ border-color:var(--accent-line); color:var(--text); }
+.tagchip.active{ background:var(--accent-soft); border-color:var(--accent-line); color:var(--accent); }
+.tagchip.active .tc-n{ color:var(--accent); }
+.works-empty{ grid-column:1/-1; padding:48px 0; text-align:center; color:var(--text-3); font-size:14px; }
+
+/* works mockups */
+.mk-code{ background:#14161c; display:flex; }
+.mk-code .mk-gutter{ width:24px; background:#1b1e26; padding:9px 0; display:flex; flex-direction:column; gap:6px; align-items:center; }
+.mk-code .mk-gutter span{ font-family:var(--f-mono); font-size:8px; color:#454c5e; line-height:1; }
+.mk-codebody{ flex:1; padding:9px 11px; display:flex; flex-direction:column; gap:7px; }
+.cline{ display:flex; gap:6px; align-items:center; }
+.cseg{ height:6px; border-radius:2px; display:inline-block; }
+.t-kw{ background:#b48ef0; } .t-fn{ background:#e8a06a; } .t-str{ background:#7fc99a; } .t-var{ background:#6fa8e0; } .t-pl{ background:#3c4253; }
+
+.mk-analytics{ background:linear-gradient(135deg,#f5f6f9,#eceef3); display:flex; flex-direction:column; padding:9px; gap:7px; }
+.mk-stats{ display:flex; gap:6px; }
+.mk-stat{ flex:1; height:26px; background:#fff; border:1px solid #e4e7ef; border-radius:5px; }
+.mk-charts{ display:flex; gap:6px; flex:1; }
+.mk-chart{ flex:1; background:#fff; border:1px solid #e4e7ef; border-radius:5px; padding:6px; display:flex; align-items:flex-end; gap:4px; }
+.mk-chart span{ flex:1; border-radius:1px; background:linear-gradient(180deg,#e0915f,#cf6f8f); }
+
+.mk-portfolio{ background:#eceef3; display:flex; align-items:center; gap:11px; padding:14px; }
+.mk-pf-left{ flex:1; display:flex; flex-direction:column; gap:7px; }
+.mk-tagp{ width:28px; height:9px; border-radius:3px; background:#d4d8e0; }
+.mk-device{ width:44%; aspect-ratio:4/3; background:#fff; border:2px solid #d4d8e0; border-radius:7px; padding:4px; box-shadow:0 8px 16px rgba(40,40,60,0.14); }
+.mk-device-screen{ width:100%; height:100%; border-radius:3px; background:linear-gradient(180deg,#caa6e0 0%,#e89a86 45%,#5b5f9a 100%); }
+
+@media (max-width:1160px){
+  .works-body{ grid-template-columns:1fr; }
+  .filter{ position:static; }
+  .whead .hero-img{ width:54%; }
+}
+@media (max-width:820px){
+  .works-grid{ grid-template-columns:1fr; }
+  .whead-title{ font-size:46px; }
+  .whead .hero-img{ position:static; width:100%; height:200px; margin-bottom:18px; }
+}
+
+
+
+/* ===================== PAPER DETAIL ===================== */
+.status-badge{ display:inline-flex; align-items:center; gap:7px; font-family:var(--f-mono); font-size:12px; font-weight:600; color:#c9b8ff; background:rgba(40,32,64,0.5); border:1px solid rgba(155,123,255,0.4); border-radius:8px; padding:5px 12px; }
+.status-badge svg{ width:13px; height:13px; }
+.status-badge.sb-sm{ font-size:11px; padding:4px 10px; }
+.btn-pub{ background:linear-gradient(170deg,#9b7bff,#7b5ce0); color:#fff; font-weight:600; box-shadow:0 8px 24px rgba(123,92,224,0.32); }
+.btn-pub:hover{ transform:translateY(-2px); box-shadow:0 12px 30px rgba(123,92,224,0.42); }
+
+.pd-keyvis{ height:360px; border-radius:9px; overflow:hidden; }
+.cs-hero-shot .pd-keyvis .tcell{ height:100%; }
+
+.pd-meta6{ grid-template-columns:repeat(6,1fr); }
+
+.pd-tldr{ flex-direction:row; align-items:center; gap:26px; }
+.pd-tldr p{ flex:1; }
+.pd-tldr-tags{ display:flex; flex-wrap:wrap; gap:8px; max-width:320px; }
+
+/* results stat blocks in cso */
+.cso-res{ background:linear-gradient(180deg, rgba(232,146,79,0.06), var(--card)); }
+.res-stats{ display:flex; gap:10px; margin-top:16px; }
+.res-stat{ flex:1; text-align:center; }
+.res-num{ font-family:var(--f-head); font-size:26px; font-weight:600; color:var(--accent); line-height:1; }
+.res-num span{ font-size:15px; }
+.res-lab{ font-size:11.5px; color:var(--text-2); margin-top:6px; }
+.res-sub{ font-family:var(--f-mono); font-size:9px; color:var(--text-faint); margin-top:3px; }
+
+/* method overview */
+.md-flow{ display:flex; align-items:stretch; gap:6px; }
+.md-step{ flex:1; background:var(--card); border:1px solid var(--border); border-radius:12px; padding:14px 12px; display:flex; flex-direction:column; gap:10px; min-width:0; }
+.md-step.md-wide{ flex:1.6; }
+.md-label{ font-family:var(--f-jp); font-weight:700; font-size:12.5px; color:var(--text); line-height:1.3; }
+.md-en{ display:block; font-family:var(--f-mono); font-size:9.5px; color:var(--text-faint); font-weight:400; margin-top:2px; }
+.md-viz{ flex:1; min-height:56px; border-radius:8px; background:#11161f; display:flex; align-items:center; justify-content:center; color:#6f86b5; border:1px solid rgba(255,255,255,0.04); }
+.md-viz svg{ width:40px; height:40px; }
+.md-noise{ color:#8aa0c8; }
+.md-mtn .tcell{ width:100%; height:56px; }
+.md-cap{ font-size:10.5px; color:var(--text-3); line-height:1.5; }
+.md-arrow{ align-self:center; color:var(--accent); flex:none; } .md-arrow svg{ width:18px; height:18px; }
+.md-diffuse{ flex:1; display:flex; align-items:center; justify-content:center; gap:5px; color:#5a6f9e; padding:6px 0; }
+.md-diffuse svg{ width:13px; height:13px; flex:none; }
+.dcube{ width:34px; height:34px; border-radius:5px; flex:none; border:1px solid rgba(120,150,210,0.4); }
+.dcube.n0{ background:repeating-conic-gradient(#2a3344 0% 25%, #1a2030 0% 50%) 50%/6px 6px; }
+.dcube.n1{ background:repeating-conic-gradient(#2e3850 0% 25%, #1c2236 0% 50%) 50%/8px 8px; opacity:.9; }
+.dcube.n2{ background:linear-gradient(135deg,#3a4a6a,#222a3e); }
+.dcube.n3{ background:linear-gradient(135deg,#5a7bb5,#33405c); }
+.md-T{ display:flex; align-items:center; justify-content:space-between; font-family:var(--f-mono); font-size:10px; color:var(--text-faint); padding:0 4px; }
+.md-dots{ flex:1; margin:0 8px; height:1px; background:repeating-linear-gradient(90deg, var(--text-faint) 0 3px, transparent 3px 7px); opacity:.5; }
+
+/* terrain cells */
+.tcell{ position:relative; width:100%; aspect-ratio:4/3; border-radius:6px; overflow:hidden; background:#0e1420; }
+.tcell .t-sky{ position:absolute; inset:0; }
+.tcell .t-mtn{ position:absolute; left:0; right:0; bottom:0; height:62%; }
+.t-mtn .t-sky{ background:linear-gradient(180deg,#3a4a6b,#1a2236); }
+.t-mtn .t-mtn{ background:linear-gradient(180deg,#aab4c8 0%,#5b6680 55%,#2e3548 100%); clip-path:polygon(0 100%,18% 42%,32% 64%,50% 22%,66% 56%,82% 38%,100% 70%,100% 100%); }
+.t-mtn{ background:linear-gradient(180deg,#46587e 0%,#2a3550 45%,#161d2e 100%); }
+.t-mtn .t-sky{ background:linear-gradient(180deg,#52638a,#2c3650); }
+.t-mtn .t-mtn{ background:linear-gradient(180deg,#b8c2d6,#54607c); clip-path:polygon(0 100%,16% 40%,30% 62%,48% 20%,64% 54%,80% 36%,100% 66%,100% 100%); }
+.t-valley{ background:linear-gradient(180deg,#4a6a52 0%,#2c4030 50%,#16241a 100%); }
+.t-valley .t-sky{ background:linear-gradient(180deg,#6a8a6e,#3a5240); }
+.t-valley .t-mtn{ background:linear-gradient(180deg,#9fc09a,#4c6b50); clip-path:polygon(0 100%,20% 50%,40% 70%,52% 44%,70% 64%,86% 48%,100% 72%,100% 100%); }
+.t-plain{ background:linear-gradient(180deg,#caa86a 0%,#9a7c48 50%,#5c4828 100%); }
+.t-plain .t-sky{ background:linear-gradient(180deg,#d8b87a,#a98a52); }
+.t-plain .t-mtn{ background:linear-gradient(180deg,#e8cf9a,#a98a52); clip-path:polygon(0 100%,30% 74%,55% 82%,75% 72%,100% 80%,100% 100%); }
+.t-hero{ aspect-ratio:auto; height:100%; }
+.t-hero .t-sky{ background:linear-gradient(180deg,#3a2c4e 0%,#7a4a52 38%,#c87a4a 60%,#e89a5a 72%,#2a2436 100%); }
+.t-hero .t-sky{ background:linear-gradient(180deg,#33294a 0%,#6e4258 40%,#c2704a 62%,#e6985a 74%,#241d30 100%); }
+.t-hero .t-mtn{ height:56%; background:linear-gradient(180deg,#5a5168,#2a2438); clip-path:polygon(0 100%,14% 46%,28% 66%,46% 28%,62% 58%,80% 40%,100% 64%,100% 100%); }
+
+/* qualitative grid */
+.pd-results{ display:grid; grid-template-columns: minmax(0,1fr) 300px; gap:20px; align-items:start; }
+.ql-wrap{ position:relative; }
+.ql-grid{ display:grid; grid-template-columns:64px repeat(5,1fr); gap:6px; background:var(--card); border:1px solid var(--border); border-radius:12px; padding:14px; overflow-x:auto; scrollbar-width:none; }
+.ql-grid::-webkit-scrollbar{ display:none; }
+.ql-corner{ }
+.ql-head{ font-family:var(--f-mono); font-size:10.5px; color:var(--text-3); text-align:center; padding-bottom:4px; align-self:end; line-height:1.3; }
+.ql-rowlabel{ font-size:11px; color:var(--text-2); display:flex; align-items:center; }
+.ql-cell{ }
+.ql-cell .tcell{ aspect-ratio:1/1; }
+.ql-nav{ position:absolute; top:50%; transform:translateY(-50%); width:30px; height:30px; border-radius:50%; background:rgba(20,16,14,0.85); border:1px solid var(--border-2); color:var(--text-2); cursor:pointer; display:flex; align-items:center; justify-content:center; z-index:4; }
+.ql-nav svg{ width:15px; height:15px; }
+.ql-prev{ left:-12px; } .ql-next{ right:-12px; }
+.ql-nav:hover{ color:var(--accent); border-color:var(--accent-line); }
+.pd-side{ display:flex; flex-direction:column; gap:18px; }
+.qt-box{ background:var(--card); border:1px solid var(--border); border-radius:12px; padding:16px; }
+.qt-title{ display:flex; align-items:center; gap:8px; font-family:var(--f-jp); font-weight:700; font-size:13.5px; color:var(--text); margin-bottom:13px; }
+.qt-title svg{ width:16px; height:16px; color:var(--accent); }
+.qt-title span{ font-family:var(--f-mono); font-size:10px; color:var(--text-faint); font-weight:400; }
+.qt-table{ width:100%; border-collapse:collapse; font-size:12px; }
+.qt-table th{ font-family:var(--f-mono); font-size:11px; color:var(--text-3); font-weight:500; text-align:right; padding:6px 8px; border-bottom:1px solid var(--border); }
+.qt-table th.qt-metric{ text-align:left; }
+.qt-table th.qt-ours{ color:var(--accent); }
+.qt-table td{ text-align:right; padding:7px 8px; color:var(--text-2); border-bottom:1px solid rgba(255,255,255,0.04); }
+.qt-table td.qt-metric{ text-align:left; font-family:var(--f-mono); font-size:11px; color:var(--text-3); }
+.qt-table td.qt-ours{ color:var(--accent); font-weight:700; font-family:var(--f-head); }
+.pd-legend{ display:flex; flex-wrap:wrap; gap:12px; margin-bottom:8px; }
+.pd-legend span{ display:inline-flex; align-items:center; gap:6px; font-family:var(--f-mono); font-size:10.5px; color:var(--text-3); }
+.pd-legend i{ width:10px; height:3px; border-radius:2px; display:block; }
+.pd-linechart{ width:100%; height:150px; display:block; }
+.pd-axis{ text-align:center; font-family:var(--f-mono); font-size:10px; color:var(--text-faint); margin-top:2px; }
+
+/* ablation + contributions */
+.pd-abl-grid{ display:grid; grid-template-columns: minmax(0,1.7fr) minmax(0,1fr); gap:34px; align-items:start; }
+.abl-table{ width:100%; border-collapse:collapse; font-size:12.5px; background:var(--card); border:1px solid var(--border); border-radius:12px; overflow:hidden; }
+.abl-table th{ font-family:var(--f-mono); font-size:10.5px; color:var(--text-3); font-weight:500; text-align:center; padding:11px 8px; border-bottom:1px solid var(--border); line-height:1.3; }
+.abl-table th.abl-set{ text-align:left; }
+.abl-table td{ text-align:center; padding:12px 8px; color:var(--text-2); border-bottom:1px solid rgba(255,255,255,0.04); }
+.abl-table tr:last-child td{ border-bottom:none; }
+.abl-table td.abl-set{ text-align:left; font-weight:500; color:var(--text); }
+.abl-best{ background:rgba(232,146,79,0.06); }
+.abl-best td.abl-set{ color:var(--accent); font-weight:700; }
+.abl-num{ color:var(--accent); font-weight:700; font-family:var(--f-head); }
+.abl-c{ color:#5fc466; font-weight:700; } .abl-x{ color:#c46a5f; }
+.pd-contrib .sec-en{ font-family:var(--f-mono); font-size:13px; color:var(--text-faint); font-weight:400; }
+.contrib-list{ list-style:none; display:flex; flex-direction:column; gap:14px; margin-top:4px; }
+.contrib-list li{ display:flex; align-items:flex-start; gap:11px; font-size:13px; color:var(--text-2); line-height:1.6; }
+
+/* publication + presentation */
+.pd-pub-grid{ display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+.pd-pub-card{ background:var(--card); border:1px solid var(--border); border-radius:14px; padding:22px; }
+.pd-card-head{ display:flex; align-items:center; gap:9px; font-family:var(--f-head); font-size:15px; font-weight:600; color:var(--text); margin-bottom:16px; }
+.pd-card-head svg{ width:17px; height:17px; color:var(--accent); }
+.pd-pub-title{ font-family:var(--f-jp); font-weight:700; font-size:16px; color:var(--text); margin-top:13px; line-height:1.5; }
+.pd-authors{ font-size:13px; color:var(--text-2); margin-top:10px; }
+.pd-affil{ font-size:12.5px; color:var(--text-3); margin-top:3px; }
+.pd-pub-chips{ margin-top:14px; }
+.pd-pub-btns{ display:flex; gap:9px; margin-top:18px; }
+.pd-pillbtn{ display:inline-flex; align-items:center; gap:6px; font-family:var(--f-mono); font-size:12px; color:var(--text-2); background:rgba(255,255,255,0.03); border:1px solid var(--border-2); border-radius:8px; padding:7px 12px; transition:.16s; }
+.pd-pillbtn svg{ width:13px; height:13px; }
+.pd-pillbtn:hover{ border-color:var(--accent-line); color:var(--accent); }
+.pd-pres-row{ display:flex; gap:18px; margin-top:6px; align-items:center; }
+.pd-pres-info{ flex:1; }
+.pd-pres-date{ font-size:13px; color:var(--text-2); }
+.pd-pres-dur{ font-size:12.5px; color:var(--text-3); margin-top:6px; }
+.pd-slide{ width:200px; flex:none; background:#0f1115; border:1px solid rgba(255,255,255,0.06); border-radius:10px; overflow:hidden; }
+.pd-slide-img{ position:relative; height:84px; }
+.pd-slide-img .tcell{ height:100%; aspect-ratio:auto; border-radius:0; }
+.pd-slide-logo{ position:absolute; top:8px; left:10px; font-family:var(--f-head); font-weight:700; font-size:12px; color:#fff; text-shadow:0 1px 4px rgba(0,0,0,0.6); }
+.pd-slide-cap{ padding:10px 11px 12px; }
+.pd-slide-t{ font-family:var(--f-head); font-size:11px; font-weight:600; color:var(--text); line-height:1.35; }
+.pd-slide-a{ font-size:10px; color:var(--text-faint); margin-top:6px; }
+
+/* related work */
+.pd-related{ display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
+.rw-item{ display:flex; gap:13px; align-items:flex-start; background:var(--card); border:1px solid var(--border); border-radius:12px; padding:16px; min-width:0; }
+.rw-ic{ width:38px; height:38px; border-radius:10px; flex:none; display:flex; align-items:center; justify-content:center; color:var(--accent); background:var(--accent-soft); border:1px solid var(--accent-line); }
+.rw-ic svg{ width:19px; height:19px; }
+.rw-t{ font-family:var(--f-head); font-size:13.5px; font-weight:600; color:var(--text); }
+.rw-d{ font-size:11.5px; color:var(--text-3); line-height:1.6; margin-top:6px; }
+
+/* rail stack pills */
+.pd-stack-wrap{ display:flex; flex-wrap:wrap; gap:8px; }
+.pd-stack{ font-family:var(--f-mono); font-size:12px; color:var(--text-2); background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:8px; padding:6px 11px; }
+
+@media (max-width:1180px){
+  .pd-meta6{ grid-template-columns:repeat(3,1fr); }
+  .pd-results{ grid-template-columns:1fr; }
+  .md-flow{ flex-wrap:wrap; }
+  .pd-tldr{ flex-direction:column; align-items:flex-start; }
+  .pd-tldr-tags{ max-width:none; }
+}
+@media (max-width:900px){
+  .pd-meta6{ grid-template-columns:repeat(2,1fr); }
+  .pd-abl-grid{ grid-template-columns:1fr; }
+  .pd-pub-grid{ grid-template-columns:1fr; }
+  .pd-related{ grid-template-columns:1fr 1fr; }
+  .pd-pres-row{ flex-direction:column; align-items:flex-start; }
+}
+
+/* ===================== CASE STUDY ===================== */
+.cso-head{ flex-wrap:wrap; }
+.cso-n{ white-space:nowrap; }
+@media (max-width:1180px) and (min-width:901px){
+  .cso{ grid-template-columns:1fr; }
+  .cso-arrow{ transform:rotate(90deg); justify-self:center; }
+}
+
+.crumbs{ display:flex; align-items:center; gap:10px; font-family:var(--f-mono); font-size:13px; color:var(--text-3); margin-bottom:26px; }
+.crumbs a{ color:var(--text-3); transition:.16s; } .crumbs a:hover{ color:var(--accent); }
+.crumb-sep{ color:var(--text-faint); }
+.crumb-cur{ color:var(--text); }
+
+/* hero */
+.cs-hero{ display:grid; grid-template-columns: minmax(0,1fr) minmax(0,1.05fr); gap:40px; align-items:start; }
+.cat-badge{ display:inline-block; font-family:var(--f-mono); font-size:12px; font-weight:600; color:var(--accent); background:var(--accent-soft); border:1px solid var(--accent-line); border-radius:7px; padding:5px 12px; }
+.cs-title{ font-family:var(--f-head); font-weight:600; font-size:48px; line-height:1.08; letter-spacing:-0.02em; color:#f3ece4; margin-top:18px; }
+.cs-lead{ font-family:var(--f-jp); font-weight:700; font-size:17px; color:var(--accent-2); margin-top:18px; line-height:1.6; }
+.cs-body{ font-size:14.5px; color:var(--text-2); line-height:1.85; margin-top:14px; max-width:520px; }
+.cs-cta{ display:flex; gap:13px; margin-top:26px; }
+.cs-cta .btn svg{ width:16px; height:16px; }
+.cs-hero-shot .frame{ padding:11px; border-radius:16px; background:linear-gradient(160deg, rgba(232,146,79,0.20), rgba(255,255,255,0.03) 45%, rgba(120,90,200,0.12)); border:1px solid rgba(255,240,230,0.08); box-shadow:0 30px 70px rgba(0,0,0,0.5); }
+
+/* framed light screenshot */
+.shot{ background:#fbfbfd; border-radius:9px; overflow:hidden; border:1px solid rgba(0,0,0,0.06); box-shadow:0 2px 10px rgba(0,0,0,0.18); }
+.shot-bar{ height:26px; background:#eef0f4; border-bottom:1px solid #e1e4ec; display:flex; align-items:center; gap:7px; padding:0 11px; }
+.shot-dots{ display:flex; gap:5px; } .shot-dots i{ width:8px; height:8px; border-radius:50%; display:block; }
+.shot-url{ flex:1; max-width:60%; height:11px; border-radius:6px; background:#dde1ea; margin-left:6px; }
+.shot-body{ height:300px; }
+.cs-hero-shot .shot-body{ height:340px; }
+.shot-mobile{ background:transparent; border:none; box-shadow:none; display:flex; justify-content:center; }
+.shot-mobile .shot-body{ height:300px; display:flex; justify-content:center; }
+
+/* mock: chat */
+.b-chat{ display:flex; height:100%; }
+.b-side{ width:30%; background:#f4f5f8; border-right:1px solid #e4e7ef; padding:11px 9px; display:flex; flex-direction:column; gap:11px; }
+.b-li{ display:flex; align-items:center; gap:7px; }
+.b-dot{ width:14px; height:14px; border-radius:50%; background:#d6dbe4; flex:none; }
+.b-row{ height:7px; border-radius:4px; background:#d9dde6; }
+.b-conv{ flex:1; padding:14px; display:flex; flex-direction:column; gap:11px; background:#fbfbfd; }
+.b-bubble{ display:flex; flex-direction:column; gap:6px; padding:10px 11px; border-radius:9px; max-width:80%; }
+.b-bubble.in{ background:#fff; border:1px solid #e6e9f0; align-self:flex-start; }
+.b-bubble.out{ background:#fbe6cf; border:1px solid #f1d2ab; align-self:flex-end; }
+.b-ln{ height:6px; border-radius:3px; background:#dde1ea; display:block; }
+.b-bubble.out .b-ln{ background:#e7b886; }
+.b-hl{ height:6px; width:55%; border-radius:3px; background:#f5c98a; display:block; }
+.b-inputbar{ margin-top:auto; display:flex; gap:8px; align-items:center; }
+.b-input{ flex:1; height:22px; border-radius:7px; background:#fff; border:1px solid #e1e5ee; }
+.b-send{ width:22px; height:22px; border-radius:6px; background:linear-gradient(160deg,#f0a05a,#e3823c); flex:none; }
+
+/* mock: dashboard */
+.b-dash{ display:flex; height:100%; }
+.b-dside{ width:22%; background:#f1f3f7; border-right:1px solid #e4e7ef; padding:12px 8px; display:flex; flex-direction:column; gap:10px; }
+.b-pill{ height:8px; border-radius:4px; background:#d9dde6; display:block; }
+.b-dmain{ flex:1; padding:12px; display:flex; flex-direction:column; gap:11px; background:#fbfbfd; }
+.b-cards{ display:flex; gap:9px; }
+.b-mini{ flex:1; background:#fff; border:1px solid #e6e9f0; border-radius:7px; padding:9px; display:flex; flex-direction:column; gap:7px; }
+.b-block{ background:#fff; border:1px solid #e6e9f0; border-radius:7px; padding:11px; }
+.b-bars{ display:flex; align-items:flex-end; gap:6px; height:80px; }
+.b-bars span{ flex:1; border-radius:2px 2px 0 0; background:linear-gradient(180deg,#9b6fe0,#6f4fd0); }
+.b-rows{ display:flex; flex-direction:column; gap:8px; }
+
+/* mock: upload */
+.b-upload{ height:100%; padding:18px; display:flex; flex-direction:column; gap:13px; background:#fbfbfd; }
+.b-drop{ border:2px dashed #cdd3df; border-radius:10px; flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:9px; background:#f6f7fa; }
+.b-cloud{ width:38px; height:26px; border-radius:13px; background:#dbe0ea; position:relative; }
+.b-cloud::after{ content:""; position:absolute; left:50%; top:-7px; transform:translateX(-50%); border-left:7px solid transparent; border-right:7px solid transparent; border-bottom:9px solid #b9c0cf; }
+.b-files{ display:flex; flex-direction:column; gap:8px; }
+.b-file{ display:flex; align-items:center; gap:9px; background:#fff; border:1px solid #e6e9f0; border-radius:7px; padding:8px 10px; }
+.b-ftag{ font-family:var(--f-mono); font-size:9px; font-weight:600; color:#7a6cae; background:#ece8fa; border-radius:4px; padding:2px 6px; }
+.b-check{ margin-left:auto; width:14px; height:14px; border-radius:50%; background:#5fc466; flex:none; }
+
+/* mock: cite */
+.b-cite{ display:flex; flex-direction:column; height:100%; background:#fbfbfd; }
+.b-srcs{ border-top:1px solid #e4e7ef; padding:11px 14px; display:flex; flex-direction:column; gap:8px; background:#f6f7fa; }
+.b-src{ display:flex; align-items:center; gap:8px; }
+.b-srcdot{ width:11px; height:11px; border-radius:3px; background:#e8a06a; flex:none; }
+
+/* mock: phone */
+.phone{ width:150px; height:100%; max-height:300px; background:#11151c; border-radius:22px; padding:8px; position:relative; box-shadow:0 16px 40px rgba(0,0,0,0.4); border:1px solid #2a2f3a; }
+.phone-notch{ position:absolute; top:8px; left:50%; transform:translateX(-50%); width:46px; height:5px; border-radius:3px; background:#2a2f3a; z-index:2; }
+.phone-screen{ width:100%; height:100%; border-radius:15px; background:#fbfbfd; padding:14px 10px 10px; display:flex; flex-direction:column; gap:9px; overflow:hidden; }
+.p-top{ display:flex; justify-content:center; padding-bottom:4px; }
+.p-input{ margin-top:auto; height:20px; border-radius:7px; background:#eef0f4; border:1px solid #e1e5ee; }
+
+/* meta strip */
+.meta-strip{ display:grid; grid-template-columns:repeat(5,1fr); gap:12px; }
+.meta-card{ background:var(--card); border:1px solid var(--border); border-radius:12px; padding:14px; display:flex; gap:11px; align-items:flex-start; min-width:0; }
+.meta-ic{ width:30px; height:30px; border-radius:8px; flex:none; display:flex; align-items:center; justify-content:center; color:var(--accent); background:var(--accent-soft); }
+.meta-ic svg{ width:16px; height:16px; }
+.meta-l{ font-family:var(--f-mono); font-size:11px; color:var(--text-faint); letter-spacing:0.04em; }
+.meta-v{ font-size:13px; color:var(--text); font-weight:500; margin-top:4px; line-height:1.45; }
+.meta-sub{ display:block; font-family:var(--f-mono); font-size:11px; color:var(--text-faint); font-weight:400; margin-top:2px; }
+.ok-dot{ display:inline-block; width:8px; height:8px; border-radius:50%; background:#5fd07a; margin-right:6px; box-shadow:0 0 0 3px rgba(95,208,122,0.16); }
+
+/* content grid */
+.cs-grid{ display:grid; grid-template-columns: minmax(0,1fr) 232px; gap:40px; margin-top:40px; align-items:start; }
+.cs-col{ display:flex; flex-direction:column; gap:40px; min-width:0; }
+.cs-section{ min-width:0; }
+
+/* TL;DR */
+.tldr{ display:flex; gap:18px; align-items:flex-start; background:var(--card); border:1px solid var(--border); border-radius:14px; padding:22px 24px; }
+.tldr-ic{ width:46px; height:46px; border-radius:11px; flex:none; display:flex; align-items:center; justify-content:center; color:var(--accent); background:var(--accent-soft); border:1px solid var(--accent-line); }
+.tldr-ic svg{ width:23px; height:23px; }
+.tldr p{ font-size:14.5px; color:var(--text-2); line-height:1.9; }
+
+/* challenge/solution/outcome */
+.cso{ display:grid; grid-template-columns: 1fr auto 1fr auto 1fr; gap:14px; align-items:stretch; }
+.cso-card{ background:var(--card); border:1px solid var(--border); border-radius:14px; padding:20px; display:flex; flex-direction:column; }
+.cso-head{ display:flex; align-items:center; gap:12px; margin-bottom:15px; }
+.cso-ic{ width:38px; height:38px; border-radius:10px; flex:none; display:flex; align-items:center; justify-content:center; color:var(--accent); background:var(--accent-soft); border:1px solid var(--accent-line); }
+.cso-ic svg{ width:19px; height:19px; }
+.cso-n{ font-family:var(--f-jp); font-weight:700; font-size:15px; color:var(--text); }
+.cso-en{ font-family:var(--f-mono); font-size:11px; color:var(--text-faint); margin-top:1px; }
+.cso-body{ font-size:13px; color:var(--text-2); line-height:1.8; }
+.cso-list{ list-style:none; display:flex; flex-direction:column; gap:8px; margin-top:14px; }
+.cso-list li{ position:relative; padding-left:15px; font-size:12.5px; color:var(--text-3); line-height:1.55; }
+.cso-list li::before{ content:""; position:absolute; left:0; top:7px; width:5px; height:5px; border-radius:50%; background:var(--accent); }
+.cso-arrow{ align-self:center; color:var(--accent); } .cso-arrow svg{ width:20px; height:20px; }
+.fact-badges{ display:flex; flex-wrap:wrap; gap:8px; margin-top:16px; }
+.fact-badge{ display:inline-flex; align-items:center; gap:6px; font-family:var(--f-jp); font-size:12px; font-weight:500; color:var(--accent-2); background:var(--accent-soft); border:1px solid var(--accent-line); border-radius:8px; padding:6px 11px; }
+.fact-badge svg{ width:13px; height:13px; }
+
+/* right rail */
+.cs-rail{ display:flex; flex-direction:column; gap:30px; position:sticky; top:24px; }
+.rail-head{ display:flex; align-items:center; gap:12px; font-family:var(--f-head); font-size:15px; font-weight:600; color:var(--text); margin-bottom:16px; }
+.rail-head .sec-rule{ height:1px; flex:1; background:linear-gradient(90deg,var(--accent-line),transparent); }
+.ov-list{ display:flex; flex-direction:column; gap:16px; }
+.ov-row{ display:flex; gap:12px; align-items:flex-start; }
+.ov-ic{ width:28px; height:28px; border-radius:8px; flex:none; display:flex; align-items:center; justify-content:center; color:var(--accent); background:var(--accent-soft); }
+.ov-ic svg{ width:15px; height:15px; }
+.ov-l{ font-family:var(--f-mono); font-size:11px; color:var(--text-faint); }
+.ov-v{ font-size:13px; color:var(--text); margin-top:3px; }
+.ov-link{ display:inline-flex; align-items:center; gap:5px; font-size:13px; color:var(--accent); margin-top:3px; }
+.ov-link svg{ width:13px; height:13px; }
+.hl-list{ list-style:none; display:flex; flex-direction:column; gap:13px; }
+.hl-list li{ display:flex; align-items:flex-start; gap:10px; font-size:13px; color:var(--text-2); line-height:1.5; }
+.hl-ic{ width:17px; height:17px; border-radius:50%; flex:none; display:flex; align-items:center; justify-content:center; color:var(--accent); background:var(--accent-soft); margin-top:1px; }
+.hl-ic svg{ width:11px; height:11px; }
+.rel-list{ display:flex; flex-direction:column; gap:13px; }
+.rel-link{ display:flex; align-items:center; gap:8px; font-size:13.5px; color:var(--text-2); transition:.16s; }
+.rel-link svg{ width:14px; height:14px; color:var(--accent); margin-left:auto; }
+.rel-link:hover{ color:var(--accent); }
+
+/* wide sections */
+.cs-wide{ margin-top:54px; }
+
+/* gallery */
+.gal-nav{ display:flex; gap:8px; }
+.gal-btn{ width:32px; height:32px; border-radius:9px; background:var(--surface); border:1px solid var(--border-2); color:var(--text-2); cursor:pointer; display:flex; align-items:center; justify-content:center; transition:.16s; }
+.gal-btn svg{ width:16px; height:16px; }
+.gal-btn:hover{ border-color:var(--accent-line); color:var(--accent); }
+.gal-track{ display:grid; grid-auto-flow:column; grid-auto-columns:calc((100% - 3*18px)/4); gap:18px; overflow-x:auto; scroll-behavior:smooth; padding-bottom:6px; scrollbar-width:none; }
+.gal-track::-webkit-scrollbar{ display:none; }
+.gal-card{ display:flex; flex-direction:column; }
+.gal-shot{ background:#0f1115; border:1px solid rgba(255,255,255,0.05); border-radius:11px; padding:9px; }
+.gal-shot .shot-body{ height:140px; }
+.gal-shot .shot-mobile .shot-body{ height:140px; }
+.gal-shot .phone{ width:84px; }
+.gal-t{ font-family:var(--f-jp); font-weight:700; font-size:14.5px; color:var(--text); margin-top:14px; }
+.gal-d{ font-size:12.5px; color:var(--text-3); line-height:1.65; margin-top:7px; }
+
+/* features */
+.feat-list{ display:flex; flex-direction:column; gap:16px; }
+.feat{ display:grid; grid-template-columns: 1fr 1fr; gap:28px; align-items:center; background:var(--card); border:1px solid var(--border); border-radius:16px; padding:24px 28px; }
+.feat.rev .feat-info{ order:2; } .feat.rev .feat-shot{ order:1; }
+.feat-info{ display:flex; gap:18px; align-items:flex-start; }
+.feat-ic{ width:52px; height:52px; border-radius:13px; flex:none; display:flex; align-items:center; justify-content:center; color:var(--accent); background:radial-gradient(circle at 50% 35%, rgba(232,146,79,0.16), transparent 70%); border:1px solid var(--accent-line); }
+.feat-ic svg{ width:25px; height:25px; }
+.feat-t{ font-family:var(--f-jp); font-weight:700; font-size:18px; color:var(--text); }
+.feat-d{ font-size:13.5px; color:var(--text-2); line-height:1.8; margin-top:9px; }
+.feat-tags{ display:flex; flex-wrap:wrap; gap:7px; margin-top:14px; }
+.ftag{ font-family:var(--f-mono); font-size:11px; color:var(--text-2); background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:6px; padding:4px 9px; }
+.feat-shot{ background:#0f1115; border:1px solid rgba(255,255,255,0.06); border-radius:12px; padding:11px; }
+.feat-shot .shot-body{ height:170px; }
+
+/* stack */
+.stack-strip{ display:flex; flex-wrap:wrap; gap:12px; }
+.stack-item{ display:inline-flex; align-items:center; gap:10px; font-family:var(--f-mono); font-size:13.5px; color:var(--text); background:var(--card); border:1px solid var(--border); border-radius:11px; padding:11px 16px; transition:.16s; }
+.stack-item:hover{ border-color:var(--accent-line); }
+.stack-mark{ width:24px; height:24px; border-radius:7px; flex:none; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:var(--accent); background:var(--accent-soft); border:1px solid var(--accent-line); }
+
+/* contact cta */
+.cs-contact{ margin-top:60px; background:linear-gradient(180deg, var(--surface), rgba(26,20,17,0.4)); border:1px solid var(--border); border-radius:18px; padding:42px; text-align:center; }
+.cs-contact-lead{ font-family:var(--f-jp); font-size:16px; color:var(--text); }
+.cs-contact-btns{ display:flex; justify-content:center; gap:14px; margin-top:22px; }
+.cs-contact-btns .btn svg{ width:17px; height:17px; }
+.btn-ic-img{ width:22px; height:22px; object-fit:contain; display:block; }
+
+@media (max-width:1180px){
+  .cs-grid{ grid-template-columns:1fr; }
+  .cs-rail{ position:static; flex-direction:row; flex-wrap:wrap; gap:36px; }
+  .cs-rail .rail-block{ flex:1; min-width:200px; }
+  .meta-strip{ grid-template-columns:repeat(3,1fr); }
+  .gal-track{ grid-auto-columns:calc((100% - 18px)/2); }
+}
+@media (max-width:900px){
+  .cs-hero{ grid-template-columns:1fr; }
+  .cso{ grid-template-columns:1fr; }
+  .cso-arrow{ transform:rotate(90deg); justify-self:center; }
+  .feat{ grid-template-columns:1fr; }
+  .feat.rev .feat-info{ order:1; } .feat.rev .feat-shot{ order:2; }
+  .meta-strip{ grid-template-columns:repeat(2,1fr); }
+  .gal-track{ grid-auto-columns:80%; }
+  .cs-title{ font-size:36px; }
+}
+
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar">
+    <div class="id-block">
+      <div class="avatar-frame">
+        <img class="av-photo" src="assets/avatar.png" alt="Haruto Miyakawa">
+        <img class="av-frame" src="assets/frame.png" alt="">
+      </div>
+      <div>
+        <div class="id-name">Haruto Miyakawa</div>
+        <div class="id-role">Web Engineer /<br>AI Builder</div>
+      </div>
+    </div>
+
+    <nav class="nav">
+      <a class="nav-item" href="Home.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20h14V9.5"/><path d="M9.5 20v-6h5v6"/></svg>
+        Home
+      </a>
+      <a class="nav-item" href="Works.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7"/><path d="M3 12h18"/></svg>
+        Works
+      </a>
+      <a class="nav-item active" href="Research.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/><path d="M9 12h6M9 16h6"/></svg>
+        Research
+      </a>
+      <a class="nav-item" href="About.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M5 20c0-3.5 3-6 7-6s7 2.5 7 6"/></svg>
+        About
+      </a>
+    </nav>
+
+    <div>
+      <div class="side-label">Contact</div>
+      <div class="contact">
+        <a href="#"><img class="ic-img" src="assets/github.png" alt="">GitHub</a>
+        <a href="#"><img class="ic-img" src="assets/x.png" alt="">X (Twitter)</a>
+        <a href="#"><img class="ic-img" src="assets/mail.png" alt="">Mail</a>
+      </div>
+    </div>
+
+    <div class="lantern-wrap"><img src="assets/lantern.png" alt=""></div>
+
+    <div class="available">
+      <div class="avail-title"><span class="avail-dot"></span>Available for work</div>
+      <div class="avail-sub">Let's build something<br>meaningful together.</div>
+      <a class="avail-mail" href="/cdn-cgi/l/email-protection#abc3cec7c7c4ebc3cad9dedfc4c6c2d2cac0cadcca85cfcedd"><span class="__cf_email__" data-cfemail="3a525f5656557a525b484f4e555753435b515b4d5b145e5f4c">[email&#160;protected]</span></a>
+      <div class="avail-copy">© 2024 Haruto Miyakawa</div>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <main class="main">
+    <!-- BREADCRUMB -->
+    <nav class="crumbs">
+      <a href="Home.html">Home</a><span class="crumb-sep">/</span>
+      <a href="Research.html">Research</a><span class="crumb-sep">/</span>
+      <span class="crumb-cur">Generative Terrain Modeling Using Diffusion Models</span>
+    </nav>
+
+    <!-- HERO -->
+    <section class="cs-hero">
+      <div class="cs-hero-main">
+        <span class="status-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l4 5-4 13-4-13 4-5Z"/></svg>ICCV 2024 Accepted</span>
+        <h1 class="cs-title">Generative Terrain<br>Modeling Using<br>Diffusion Models</h1>
+        <p class="cs-lead">拡散モデルを用いた高解像度地形生成手法の提案</p>
+        <p class="cs-body">本研究では、拡散モデルを3Dノイズ場に適用することで、地形の自然さと地形多様性を両立する高解像度地形生成手法を提案します。従来の手法と比較して、地形の連続性と細かな地形特徴において定量・定性的に優れた結果を示しました。</p>
+        <div class="cs-cta">
+          <a class="btn btn-pub" href="#">Read Paper <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6M20 4l-9 9M19 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5"/></svg></a>
+          <a class="btn btn-ghost" href="#">GitHub <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6M20 4l-9 9M19 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5"/></svg></a>
+        </div>
+      </div>
+      <div class="cs-hero-shot"><div class="frame"><div class="pd-keyvis"><div class="tcell t-hero"><span class="t-sky"></span><span class="t-mtn"></span></div></div></div></div>
+    </section>
+
+    <div class="cs-grid">
+      <div class="cs-col">
+        <section class="cs-section" data-section><div class="meta-strip pd-meta6" data-items><div class="meta-card" data-items><div class="meta-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V8l8-4 8 4v13M4 21h16M9 21v-5h6v5M8 11h.01M12 11h.01M16 11h.01M8 14h.01M16 14h.01"/></svg></div><div><div class="meta-l">Conference</div><div class="meta-v">ICCV 2024<span class="meta-sub">Oral Presentation</span></div></div></div><div class="meta-card" data-items><div class="meta-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8.5 8.5h.01M15.5 15.5h.01M16 8 8 16"/></svg></div><div><div class="meta-l">Acceptance Rate</div><div class="meta-v">23.6%</div></div></div><div class="meta-card" data-items><div class="meta-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c0-3 2.5-5 5.5-5s5.5 2 5.5 5"/><path d="M16 6.5a3 3 0 0 1 0 6M21 19c0-2.4-1.6-4.2-3.8-4.8"/></svg></div><div><div class="meta-l">Authors</div><div class="meta-v">Haruto Miyakawa<span class="meta-sub">et al.</span></div></div></div><div class="meta-card" data-items><div class="meta-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-4h6v4M8 10h.01M12 10h.01M16 10h.01M8 13.5h.01M12 13.5h.01M16 13.5h.01"/></svg></div><div><div class="meta-l">Affiliation</div><div class="meta-v">Tokyo University<span class="meta-sub">情報工学研究科</span></div></div></div><div class="meta-card" data-items><div class="meta-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M4 9h16M8 3v4M16 3v4"/></svg></div><div><div class="meta-l">Period</div><div class="meta-v">2024.01 – 2024.07</div></div></div><div class="meta-card" data-items><div class="meta-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5l2.4 4.9 5.4.8-3.9 3.8.9 5.4-4.8-2.5-4.8 2.5.9-5.4L4 9.2l5.4-.8L12 3.5Z"/></svg></div><div><div class="meta-l">Role</div><div class="meta-v">First Author<span class="meta-sub">Lead Researcher</span></div></div></div></div></section>
+
+        <section class="cs-section" data-section>
+          <div class="sec-head"><div class="sec-title"><span class="star">✦</span> 研究概要 (TL;DR)</div><div class="sec-rule"></div></div>
+          <div class="tldr pd-tldr" data-items>
+            <p>拡散モデルを3Dノイズ場に適用する新しい地形生成手法を提案します。マルチスケールの条件付き地形制約を組み合わせることで、自然で多様性のある高解像な地形を効率的に生成できます。</p>
+            <div class="pd-tldr-tags"><span class="chip">Generative AI</span><span class="chip">Diffusion Model</span><span class="chip">3D Generation</span><span class="chip">Terrain</span><span class="chip">Procedural Generation</span></div>
+          </div>
+        </section>
+
+        <section class="cs-section" data-section><div class="cso" data-items>
+  <div class="cso-card" data-items>
+    <div class="cso-head"><span class="cso-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.8.4-1 .9-1 1.7M12 16.5h.01"/></svg></span><div><div class="cso-n">01 課題</div><div class="cso-en">Problem</div></div></div>
+    <p class="cso-body">従来の地形生成手法には以下の課題がありました。</p>
+    <ul class="cso-list"><li>高解像度での生成における計算コストの増大</li><li>地形の自然さと多様性のトレードオフ</li><li>細かな地形特徴の再現が困難</li></ul>
+  </div>
+  <div class="cso-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+  <div class="cso-card" data-items>
+    <div class="cso-head"><span class="cso-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 1 4 10.5c-.7.6-1 1.2-1 2H9c0-.8-.3-1.4-1-2A6 6 0 0 1 12 3Z"/></svg></span><div><div class="cso-n">02 提案手法</div><div class="cso-en">Approach</div></div></div>
+    <p class="cso-body">拡散モデルをベースとした新しい枠組みを提案。</p>
+    <ul class="cso-list"><li>3Dノイズ場における拡散過程の設計</li><li>マルチスケール条件付けによる制御</li><li>地形制約を組み込んだサンプリング</li></ul>
+  </div>
+  <div class="cso-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+  <div class="cso-card cso-res" data-items>
+    <div class="cso-head"><span class="cso-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5M4 19h16M8 15l3-4 3 2 4-6"/></svg></span><div><div class="cso-n">03 結果</div><div class="cso-en">Results</div></div></div>
+    <p class="cso-body">既存手法と比較して、定量・定性的に優れた性能を達成しました。</p>
+    <div class="res-stats">
+      <div class="res-stat"><div class="res-num">22.3<span>%</span></div><div class="res-lab">FID</div><div class="res-sub">↓ Lower is better</div></div>
+      <div class="res-stat"><div class="res-num">18.7<span>%</span></div><div class="res-lab">RMSE</div><div class="res-sub">↓ Lower is better</div></div>
+      <div class="res-stat"><div class="res-num">31.2<span>%</span></div><div class="res-lab">多様性スコア</div><div class="res-sub">↑ Higher is better</div></div>
+    </div>
+  </div></div></section>
+
+        <section class="cs-section" data-section>
+          <div class="sec-head"><div class="sec-title"><span class="star">✦</span> 手法概要 (Method Overview)</div><div class="sec-rule"></div></div>
+          <div class="md-flow" data-items><div class="md-step " data-items><div class="md-label">入力条件<span class="md-en">Condition</span></div><div class="md-viz"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></svg></div><p class="md-cap">地形タイプ、標高範囲、地形特徴マップなど</p></div><div class="md-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div><div class="md-step " data-items><div class="md-label">3Dノイズ場の初期化<span class="md-en">Initialization</span></div><div class="md-viz md-noise"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="7" r="1"/><circle cx="11" cy="5" r="1"/><circle cx="16" cy="8" r="1"/><circle cx="8" cy="12" r="1"/><circle cx="14" cy="13" r="1"/><circle cx="18" cy="11" r="1"/><circle cx="6" cy="17" r="1"/><circle cx="12" cy="18" r="1"/><circle cx="17" cy="16" r="1"/></svg></div></div><div class="md-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div><div class="md-step md-wide" data-items><div class="md-label">拡散過程<span class="md-en">Diffusion Process</span></div><div class="md-diffuse"><span class="dcube n0"></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg><span class="dcube n1"></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg><span class="dcube n2"></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg><span class="dcube n3"></span></div><div class="md-T"><span>T</span><span class="md-dots"></span><span>0</span></div></div><div class="md-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div><div class="md-step " data-items><div class="md-label">条件付き生成<span class="md-en">Conditional Generation</span></div><div class="md-viz"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 7.5v9L12 21l8-4.5v-9L12 3Z"/><path d="m4 7.5 8 4.5 8-4.5M12 12v9"/></svg></div></div><div class="md-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div><div class="md-step " data-items><div class="md-label">高解像度地形<span class="md-en">High-res Terrain</span></div><div class="md-viz md-mtn"><div class="tcell t-mtn"><span class="t-sky"></span><span class="t-mtn"></span></div></div></div></div>
+        </section>
+      </div>
+
+      <aside class="cs-rail">
+        <section class="rail-block" data-section><div class="rail-head"><span>プロジェクト概要</span><span class="sec-rule"></span></div><div class="ov-list" data-items><div class="ov-row" data-items><div class="ov-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M4 9h16M8 3v4M16 3v4"/></svg></div><div><div class="ov-l">期間</div><div class="ov-v">2024.01 – 2024.07</div></div></div><div class="ov-row" data-items><div class="ov-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></svg></div><div><div class="ov-l">分野</div><div class="ov-v">Computer Vision /<br>Generative AI</div></div></div><div class="ov-row" data-items><div class="ov-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M3 9h18M8 21h8"/></svg></div><div><div class="ov-l">タイプ</div><div class="ov-v">研究・論文</div></div></div><div class="ov-row" data-items><div class="ov-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8.5 12 2.5 2.5L16 9"/></svg></div><div><div class="ov-l">ステータス</div><div class="ov-v">ICCV 2024 採択</div></div></div><div class="ov-row" data-items><div class="ov-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1"/><path d="M14 10a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1"/></svg></div><div><div class="ov-l">リンク</div><a class="ov-link" href="#">arXiv: 2405.12345v1</a><a class="ov-link" href="#">Project Page <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6M20 4l-9 9M19 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5"/></svg></a></div></div></div></section>
+        <section class="rail-block" data-section><div class="rail-head"><span>ハイライト</span><span class="sec-rule"></span></div><ul class="hl-list" data-items><li data-items><span class="hl-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>高解像度地形の高品質生成を実現</li><li data-items><span class="hl-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>自然さと多様性をバランスよく両立</li><li data-items><span class="hl-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>計算効率の高い生成プロセス</li><li data-items><span class="hl-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>様々な地形タイプに対応可能</li><li data-items><span class="hl-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>ゲーム・CG・シミュレーションへの応用が期待</li></ul></section>
+        <section class="rail-block" data-section><div class="rail-head"><span>技術スタック</span><span class="sec-rule"></span></div><div class="pd-stack-wrap" data-items><span class="pd-stack" data-items>Python</span><span class="pd-stack" data-items>PyTorch</span><span class="pd-stack" data-items>JAX</span><span class="pd-stack" data-items>Diffusers</span><span class="pd-stack" data-items>NumPy</span><span class="pd-stack" data-items>Scipy</span><span class="pd-stack" data-items>Trimesh</span><span class="pd-stack" data-items>NVIDIA CUDA</span></div></section>
+        <section class="rail-block" data-section><div class="rail-head"><span>関連リンク</span><span class="sec-rule"></span></div><div class="rel-list" data-items><a class="rel-link" href="#" data-items>GitHub リポジトリ <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6M20 4l-9 9M19 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5"/></svg></a><a class="rel-link" href="#" data-items>発表スライド（予定） <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6M20 4l-9 9M19 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5"/></svg></a></div></section>
+      </aside>
+    </div>
+
+    <!-- QUALITATIVE + QUANTITATIVE -->
+    <section class="cs-section cs-wide" data-section>
+      <div class="sec-head"><div class="sec-title"><span class="star">✦</span> 結果の可視化 (Qualitative Results)</div><div class="sec-rule"></div></div>
+      <div class="pd-results" data-items>
+        <div class="ql-wrap">
+          <button class="ql-nav ql-prev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></button>
+          <button class="ql-nav ql-next"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
+          <div class="ql-grid" id="qlGrid"><div class="ql-cell ql-corner"></div><div class="ql-head">Input (Condition)</div><div class="ql-head">Ours (Proposed)</div><div class="ql-head">Baseline (PGM)</div><div class="ql-head">Baseline (StyleGAN)</div><div class="ql-head">Ground Truth</div><div class="ql-rowlabel">山岳地形</div><div class="ql-cell"><div class="tcell t-mtn"><span class="t-sky"></span><span class="t-mtn"></span></div></div><div class="ql-cell"><div class="tcell t-mtn"><span class="t-sky"></span><span class="t-mtn"></span></div></div><div class="ql-cell"><div class="tcell t-mtn"><span class="t-sky"></span><span class="t-mtn"></span></div></div><div class="ql-cell"><div class="tcell t-mtn"><span class="t-sky"></span><span class="t-mtn"></span></div></div><div class="ql-cell"><div class="tcell t-mtn"><span class="t-sky"></span><span class="t-mtn"></span></div></div><div class="ql-rowlabel">渓谷地形</div><div class="ql-cell"><div class="tcell t-valley"><span class="t-sky"></span><span class="t-mtn"></span></div></div><div class="ql-cell"><div class="tcell t-valley"><span class="t-sky"></span><span class="t-mtn"></span></div></div><div class="ql-cell"><div class="tcell t-valley"><span class="t-sky"></span><span class="t-mtn"></span></div></div><div class="ql-cell"><div class="tcell t-valley"><span class="t-sky"></span><span class="t-mtn"></span></div></div><div class="ql-cell"><div class="tcell t-valley"><span class="t-sky"></span><span class="t-mtn"></span></div></div><div class="ql-rowlabel">平原地形</div><div class="ql-cell"><div class="tcell t-plain"><span class="t-sky"></span><span class="t-mtn"></span></div></div><div class="ql-cell"><div class="tcell t-plain"><span class="t-sky"></span><span class="t-mtn"></span></div></div><div class="ql-cell"><div class="tcell t-plain"><span class="t-sky"></span><span class="t-mtn"></span></div></div><div class="ql-cell"><div class="tcell t-plain"><span class="t-sky"></span><span class="t-mtn"></span></div></div><div class="ql-cell"><div class="tcell t-plain"><span class="t-sky"></span><span class="t-mtn"></span></div></div></div>
+        </div>
+        <div class="pd-side">
+          <div class="qt-box">
+            <div class="qt-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M3 14h18M9 4v16"/></svg> 定量評価 <span>(Quantitative Results)</span></div>
+            <table class="qt-table"><thead><tr><th class="qt-metric">Metric</th><th class="qt-ours">Ours</th><th>PGM</th><th>StyleGAN</th></tr></thead><tbody><tr><td class="qt-metric">FID (↓)</td><td class="qt-ours">22.3</td><td>28.7</td><td>32.1</td></tr><tr><td class="qt-metric">RMSE (↓)</td><td class="qt-ours">18.7</td><td>23.4</td><td>27.9</td></tr><tr><td class="qt-metric">多様性スコア (↑)</td><td class="qt-ours">31.2</td><td>22.1</td><td>19.3</td></tr><tr><td class="qt-metric">地形連続性 (↑)</td><td class="qt-ours">0.882</td><td>0.756</td><td>0.701</td></tr><tr><td class="qt-metric">細部再現性 (↑)</td><td class="qt-ours">0.873</td><td>0.692</td><td>0.634</td></tr></tbody></table>
+          </div>
+          <div class="qt-box">
+            <div class="qt-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5M4 19h16"/><path d="M7 16c2-1 3-5 5-5s3 3 5 1"/></svg> サンプリング効率の比較</div>
+            <div class="pd-legend"><span><i style="background:#e8a05a"></i>Ours (Proposed)</span><span><i style="background:#5fc4a0"></i>PGM</span><span><i style="background:#e8865a"></i>StyleGAN</span></div>
+            <svg viewBox="0 0 260 160" class="pd-linechart" preserveAspectRatio="none">
+  <line x1="34" y1="10" x2="34" y2="132" stroke="rgba(255,255,255,0.12)"/>
+  <line x1="34" y1="132" x2="250" y2="132" stroke="rgba(255,255,255,0.12)"/>
+  <polyline points="46,118 86,100 126,86 166,74 206,66 246,60" fill="none" stroke="#e8a05a" stroke-width="2"/>
+  <polyline points="46,98 86,76 126,58 166,46 206,38 246,34" fill="none" stroke="#5fc4a0" stroke-width="2"/>
+  <polyline points="46,80 86,56 126,42 166,32 206,26 246,22" fill="none" stroke="#e8865a" stroke-width="2" opacity="0.85"/>
+</svg>
+            <div class="pd-axis"><span>Sampling Steps</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ABLATION + CONTRIBUTIONS -->
+    <section class="cs-section cs-wide" data-section>
+      <div class="pd-abl-grid" data-items>
+        <div>
+          <div class="sec-head"><div class="sec-title"><span class="star">✦</span> アブレーションスタディ (Ablation Study)</div></div>
+          <table class="abl-table"><thead><tr><th class="abl-set">Setting</th><th>Multi-scale<br>Condition</th><th>Terrain<br>Constraint</th><th>FID (↓)</th><th>RMSE (↓)</th><th>多様性スコア (↑)</th></tr></thead><tbody><tr class="abl-best"><td class="abl-set">Full Model (Ours)</td><td><span class="abl-c">✓</span></td><td><span class="abl-c">✓</span></td><td class="abl-num">22.3</td><td class="abl-num">18.7</td><td class="abl-num">31.2</td></tr><tr class=""><td class="abl-set">w/o Multi-scale</td><td><span class="abl-x">✕</span></td><td><span class="abl-c">✓</span></td><td class="">27.9</td><td class="">22.4</td><td class="">24.1</td></tr><tr class=""><td class="abl-set">w/o Terrain Constraint</td><td><span class="abl-c">✓</span></td><td><span class="abl-x">✕</span></td><td class="">30.1</td><td class="">24.8</td><td class="">21.3</td></tr><tr class=""><td class="abl-set">w/o Both</td><td><span class="abl-x">✕</span></td><td><span class="abl-x">✕</span></td><td class="">34.6</td><td class="">28.7</td><td class="">17.6</td></tr></tbody></table>
+        </div>
+        <div class="pd-contrib">
+          <div class="sec-head"><div class="sec-title">貢献 <span class="sec-en">(Contributions)</span></div></div>
+          <ul class="contrib-list"><li><span class="hl-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>3Dノイズ場における拡散モデルの新しい適用方法を提案</li><li><span class="hl-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>マルチスケール条件付けによる多様な地形制御を実現</li><li><span class="hl-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>地形制約を組み込んだ効率的なサンプリング手法を設計</li><li><span class="hl-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>既存手法を上回る高品質・高多様性の地形生成を達成</li></ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- PUBLICATION + PRESENTATION -->
+    <section class="cs-section cs-wide" data-section>
+      <div class="pd-pub-grid" data-items>
+        <div class="pd-pub-card">
+          <div class="pd-card-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h7l4 4v14H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/><path d="M14 3v4h4M9 13h6M9 17h4"/></svg> Publication</div>
+          <span class="status-badge sb-sm">ICCV 2024 (Accepted)</span>
+          <h3 class="pd-pub-title">Generative Terrain Modeling Using Diffusion Models</h3>
+          <p class="pd-authors">Haruto Miyakawa*, Taro Yamada, Hanako Suzuki</p>
+          <p class="pd-affil">Tokyo University</p>
+          <div class="chips pd-pub-chips"><span class="chip">Diffusion Models</span><span class="chip">3D Generation</span><span class="chip">Terrain</span><span class="chip">Procedural Generation</span></div>
+          <div class="pd-pub-btns"><a class="pd-pillbtn" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h7l4 4v14H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/><path d="M14 3v4h4M9 13h6M9 17h4"/></svg> PDF</a><a class="pd-pillbtn" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h12a2 2 0 0 1 2 2v13l-4-2-4 2-4-2V5ZM4 5a2 2 0 0 0-2 2v11"/></svg> arXiv</a><a class="pd-pillbtn" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h7l4 4v14H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/><path d="M14 3v4h4M9 12h6M9 16h4"/></svg> BibTeX</a></div>
+        </div>
+        <div class="pd-pub-card">
+          <div class="pd-card-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M12 16v4M8 20h8"/></svg> Presentation</div>
+          <span class="status-badge sb-sm">ICCV 2024 Oral Presentation</span>
+          <div class="pd-pres-row">
+            <div class="pd-pres-info"><p class="pd-pres-date">発表予定日: 2024年10月</p><p class="pd-pres-dur">Duration: 12 min + 3 min Q&amp;A</p></div>
+            <div class="pd-slide"><div class="pd-slide-img"><div class="tcell t-hero"><span class="t-sky"></span><span class="t-mtn"></span></div><span class="pd-slide-logo">ICCV</span></div><div class="pd-slide-cap"><div class="pd-slide-t">Generative Terrain Modeling Using Diffusion Models</div><div class="pd-slide-a">Haruto Miyakawa et al.</div></div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RELATED WORK -->
+    <section class="cs-section cs-wide" data-section>
+      <div class="sec-head"><div class="sec-title"><span class="star">✦</span> 関連研究 (Related Work)</div><div class="sec-rule"></div></div>
+      <div class="pd-related" data-items>
+        <div class="rw-item"><div class="rw-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18L14 8l-3 5-2-3-6 10Z"/></svg></div><div><div class="rw-t">Terrain Generation</div><div class="rw-d">Houdini, Unity Terrain などの従来のプロシージャル手法</div></div></div>
+        <div class="rw-item"><div class="rw-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></svg></div><div><div class="rw-t">Generative Models</div><div class="rw-d">GANやVAEを用いた地形生成手法</div></div></div>
+        <div class="rw-item"><div class="rw-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="7" r="1"/><circle cx="11" cy="5" r="1"/><circle cx="16" cy="8" r="1"/><circle cx="8" cy="12" r="1"/><circle cx="14" cy="13" r="1"/><circle cx="18" cy="11" r="1"/><circle cx="6" cy="17" r="1"/><circle cx="12" cy="18" r="1"/><circle cx="17" cy="16" r="1"/></svg></div><div><div class="rw-t">Diffusion Models</div><div class="rw-d">画像生成分野での拡散モデルの成功例</div></div></div>
+        <div class="rw-item"><div class="rw-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 7.5v9L12 21l8-4.5v-9L12 3Z"/><path d="m4 7.5 8 4.5 8-4.5M12 12v9"/></svg></div><div><div class="rw-t">3D Generation</div><div class="rw-d">3Dオブジェクト生成や3Dシーン生成の研究</div></div></div>
+      </div>
+    </section>
+
+    <!-- CONTACT CTA -->
+    <section class="cs-contact" data-section>
+      <p class="cs-contact-lead">ご質問や共同研究のご相談など、お気軽にご連絡ください。</p>
+      <div class="cs-contact-btns">
+        <a class="btn btn-ghost" href="#"><img class="btn-ic-img" src="assets/github.png" alt="">GitHub で見る</a>
+        <a class="btn btn-primary" href="/cdn-cgi/l/email-protection#2e464b4242416e464f5c5b5a414347574f454f594f004a4b58"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3.5 6.5 8.5 6 8.5-6"/></svg>メールを送る</a>
+      </div>
+    </section>
+  
+  </main>
+</div>
+
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+  // qualitative horizontal scroll
+  const ql = document.getElementById('qlGrid');
+  const qprev = document.querySelector('.ql-prev'), qnext = document.querySelector('.ql-next');
+  if (qprev) qprev.addEventListener('click', () => ql.scrollBy({left:-220, behavior:'smooth'}));
+  if (qnext) qnext.addEventListener('click', () => ql.scrollBy({left:220, behavior:'smooth'}));
+
+  // conditional sections: hide [data-section] whose first [data-items] body is empty
+  document.querySelectorAll('[data-section]').forEach(sec => {
+    const body = sec.querySelector('[data-items]');
+    if (body && body.children.length === 0) sec.hidden = true;
+  });
+  document.querySelectorAll('.meta-card[data-items], .ov-row[data-items]').forEach(row => {
+    const v = row.querySelector('.meta-v, .ov-v, .ov-link');
+    if (v && !v.textContent.trim()) row.hidden = true;
+  });
+</script>
+</body>
+</html>

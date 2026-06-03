@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Haruto Miyakawa — Web Engineer / AI Builder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ============ TOKENS ============ */
+:root{
+  --bg:           #110b09;
+  --bg-grad-top:  #1a110d;
+  --bg-grad-bot:  #0d0907;
+  --sidebar:      #0d0807;
+  --sidebar-line: rgba(232,148,86,0.12);
+  --surface:      #1a1411;
+  --surface-2:    #211915;
+  --card:         #181210;
+  --border:       rgba(255,240,230,0.07);
+  --border-2:     rgba(255,240,230,0.10);
+  --text:         #ece3da;
+  --text-2:       #b9ada2;
+  --text-3:       #8a7d72;
+  --text-faint:   #6f635a;
+  --accent:       #e8924f;
+  --accent-2:     #f0a766;
+  --accent-soft:  rgba(232,146,79,0.14);
+  --accent-line:  rgba(232,146,79,0.30);
+  --radius:       12px;
+
+  --f-head: 'Space Grotesk', sans-serif;
+  --f-jp:   'Zen Kaku Gothic New', sans-serif;
+  --f-mono: 'JetBrains Mono', monospace;
+}
+
+*{ box-sizing:border-box; margin:0; padding:0; }
+html{ scroll-behavior:smooth; }
+body{
+  font-family: var(--f-jp);
+  background: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+::selection{ background: var(--accent-soft); color:#fff; }
+a{ color:inherit; text-decoration:none; }
+
+/* ============ SHELL ============ */
+.shell{
+  display:grid;
+  grid-template-columns: 232px 1fr;
+  min-height:100vh;
+  background:
+    radial-gradient(1200px 600px at 78% -8%, rgba(232,120,60,0.10), transparent 60%),
+    linear-gradient(180deg, var(--bg-grad-top), var(--bg) 30%, var(--bg-grad-bot));
+}
+
+/* ============ SIDEBAR ============ */
+.sidebar{
+  position:sticky; top:0; align-self:start;
+  height:100vh;
+  background: linear-gradient(180deg, #0e0a08, #0b0706);
+  border-right:1px solid var(--sidebar-line);
+  padding:30px 22px 24px;
+  display:flex; flex-direction:column;
+  gap:22px;
+  overflow:hidden;
+}
+.id-block{ display:flex; flex-direction:column; gap:14px; align-items:flex-start; }
+.avatar-frame{ position:relative; width:178px; height:183px; flex:none; align-self:center; }
+.av-photo{
+  position:absolute; inset:18px;
+  width:calc(100% - 36px); height:calc(100% - 36px);
+  object-fit:cover; object-position:center 26%;
+  border-radius:6px; display:block;
+}
+.av-frame{
+  position:absolute; inset:0;
+  width:100%; height:100%; display:block;
+  pointer-events:none;
+  filter:drop-shadow(0 6px 18px rgba(0,0,0,0.45));
+}
+.id-name{
+  font-family:var(--f-head);
+  font-size:26px; font-weight:600; letter-spacing:-0.01em;
+  color:var(--text); line-height:1.06;
+}
+.id-role{
+  font-family:var(--f-mono);
+  font-size:13px; font-weight:500;
+  color:var(--accent);
+  line-height:1.45;
+  margin-top:5px;
+}
+
+/* nav */
+.nav{ display:flex; flex-direction:column; gap:3px; margin-top:2px; }
+.nav-item{
+  display:flex; align-items:center; gap:13px;
+  padding:11px 13px;
+  border-radius:10px;
+  font-size:15px; color:var(--text-2);
+  border:1px solid transparent;
+  transition:.18s ease;
+}
+.nav-item svg{ width:19px; height:19px; flex:none; color:var(--text-3); transition:.18s ease; }
+.nav-item:hover{ background:rgba(255,255,255,0.03); color:var(--text); }
+.nav-item:hover svg{ color:var(--accent); }
+.nav-item.active{
+  background: linear-gradient(180deg, rgba(232,146,79,0.13), rgba(232,146,79,0.06));
+  border-color: rgba(232,146,79,0.22);
+  color:#fff; font-weight:500;
+}
+.nav-item.active svg{ color:var(--accent); }
+
+/* contact */
+.side-label{
+  font-family:var(--f-mono);
+  font-size:12px; font-weight:600; letter-spacing:0.08em;
+  color:var(--accent);
+  text-transform:none;
+}
+.contact{ display:flex; flex-direction:column; gap:11px; margin-top:11px; }
+.contact a{
+  display:flex; align-items:center; gap:12px;
+  font-size:14px; color:var(--text-2);
+  transition:.18s ease;
+}
+.contact a svg{ width:18px; height:18px; flex:none; }
+.contact a .ic-img{ width:18px; height:18px; flex:none; object-fit:contain; display:block; }
+.contact a:hover{ color:var(--accent); transform:translateX(2px); }
+
+/* lantern */
+.lantern-wrap{
+  margin-top:auto;
+  position:relative;
+  display:flex; justify-content:center;
+  padding:6px 0 14px;
+}
+.lantern-wrap::after{
+  content:""; position:absolute; left:50%; top:46%;
+  width:140px; height:140px; transform:translate(-50%,-50%);
+  background: radial-gradient(circle, rgba(255,170,70,0.35), transparent 65%);
+  filter:blur(6px);
+  animation:flicker 4s ease-in-out infinite;
+  pointer-events:none;
+}
+@keyframes flicker{
+  0%,100%{ opacity:.7; }
+  45%{ opacity:1; }
+  60%{ opacity:.78; }
+  75%{ opacity:.95; }
+}
+.lantern-wrap img{ width:150px; height:auto; position:relative; z-index:1; filter:drop-shadow(0 6px 18px rgba(0,0,0,0.5)); }
+
+/* available */
+.available{ display:flex; flex-direction:column; gap:7px; }
+.avail-title{
+  display:flex; align-items:center; gap:9px;
+  font-size:14px; font-weight:700; color:var(--accent);
+}
+.avail-dot{
+  width:9px; height:9px; border-radius:50%;
+  background:#5fd07a;
+  box-shadow:0 0 0 3px rgba(95,208,122,0.18);
+  animation:pulse 2.4s ease-in-out infinite;
+}
+@keyframes pulse{ 0%,100%{ box-shadow:0 0 0 3px rgba(95,208,122,0.18);} 50%{ box-shadow:0 0 0 6px rgba(95,208,122,0.05);} }
+.avail-sub{ font-size:13px; color:var(--text-3); line-height:1.5; }
+.avail-mail{ font-family:var(--f-mono); font-size:13px; color:var(--text-2); margin-top:2px; }
+.avail-mail:hover{ color:var(--accent); }
+
+/* ============ MAIN ============ */
+.main{ padding:30px 44px 60px; position:relative; min-width:0; }
+
+/* ---- HERO ---- */
+.hero{ position:relative; margin-top:2px; }
+.hero-img{
+  position:absolute; top:-72px; right:-44px;
+  width:60%; height:478px;
+  border-radius:0;
+  overflow:hidden;
+  z-index:0;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.25) 22%, rgba(0,0,0,0.7) 42%, #000 62%);
+          mask-image: linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.25) 22%, rgba(0,0,0,0.7) 42%, #000 62%);
+}
+.hero-img img{ width:100%; height:100%; object-fit:cover; object-position:center 38%; display:block; }
+.hero-img::after{
+  content:""; position:absolute; inset:0;
+  background:
+    linear-gradient(0deg, var(--bg) 1%, transparent 28%),
+    linear-gradient(180deg, var(--bg) 0%, transparent 16%);
+}
+.hero-content{ position:relative; z-index:2; padding-top:14px; max-width:780px; }
+.hero-hello{
+  font-family:var(--f-mono);
+  font-size:15px; color:var(--accent); font-weight:500;
+  margin-bottom:18px;
+}
+.hero-h1{
+  font-family:var(--f-head);
+  font-weight:600;
+  font-size:72px; line-height:1.02; letter-spacing:-0.025em;
+  color:#f3ece4;
+  text-shadow:0 2px 24px rgba(0,0,0,0.4);
+}
+.hero-jp{
+  font-family:var(--f-jp); font-weight:700;
+  font-size:24px; color:var(--accent-2);
+  margin-top:26px; letter-spacing:0.01em;
+}
+.hero-body{
+  font-size:16px; color:var(--text-2); line-height:1.85;
+  margin-top:16px; max-width:560px;
+}
+.hero-cta{ display:flex; gap:14px; margin-top:30px; }
+.btn{
+  display:inline-flex; align-items:center; gap:10px;
+  padding:14px 22px; border-radius:11px;
+  font-size:15px; font-weight:500; cursor:pointer;
+  font-family:var(--f-jp);
+  transition:.2s ease; border:1px solid transparent;
+}
+.btn svg{ width:17px; height:17px; }
+.btn-primary{
+  background: linear-gradient(170deg, #f0a05a, #e3823c);
+  color:#26150a; font-weight:700;
+  box-shadow:0 8px 24px rgba(227,130,60,0.28);
+}
+.btn-primary:hover{ transform:translateY(-2px); box-shadow:0 12px 30px rgba(227,130,60,0.4); }
+.btn-ghost{
+  background:rgba(255,255,255,0.02);
+  border-color:var(--border-2); color:var(--text);
+}
+.btn-ghost:hover{ border-color:var(--accent-line); background:var(--accent-soft); }
+
+.taglist{ display:flex; flex-wrap:wrap; gap:9px; margin-top:26px; }
+.tag{
+  font-family:var(--f-mono); font-size:13px;
+  color:var(--text-2);
+  background:rgba(255,255,255,0.025);
+  border:1px solid var(--border);
+  border-radius:8px; padding:7px 13px;
+  transition:.18s ease;
+}
+.tag:hover{ border-color:var(--accent-line); color:var(--accent); }
+.tag.more{ color:var(--text-faint); letter-spacing:0.1em; }
+
+/* ---- LOWER GRID ---- */
+.lower{
+  display:grid;
+  grid-template-columns: minmax(0,1fr) 296px;
+  gap:46px;
+  margin-top:54px;
+  align-items:start;
+}
+.col-left{ display:flex; flex-direction:column; gap:54px; min-width:0; }
+
+/* section heading */
+.sec-head{ display:flex; align-items:center; gap:14px; margin-bottom:24px; }
+.sec-title{
+  font-family:var(--f-head); font-size:22px; font-weight:600;
+  color:var(--text); letter-spacing:-0.01em;
+  display:flex; align-items:center; gap:11px; white-space:nowrap;
+}
+.sec-title .star{ color:var(--accent); }
+.sec-rule{ height:1px; flex:1; background:linear-gradient(90deg, var(--accent-line), transparent); }
+.sec-link{
+  font-family:var(--f-mono); font-size:13px; color:var(--accent);
+  display:flex; align-items:center; gap:7px; white-space:nowrap;
+  transition:.18s ease;
+}
+.sec-link svg{ width:15px; height:15px; }
+.sec-link:hover{ gap:11px; }
+
+/* ---- WORK CARDS ---- */
+.works{ display:grid; grid-template-columns:repeat(3,1fr); gap:18px; }
+.work{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:14px;
+  transition:.22s ease;
+}
+.work:hover{ border-color:var(--accent-line); transform:translateY(-3px); box-shadow:0 18px 40px rgba(0,0,0,0.35); }
+.thumb{
+  position:relative;
+  height:118px; border-radius:9px; overflow:hidden;
+  background:#0f1115;
+  border:1px solid rgba(255,255,255,0.05);
+}
+.thumb-badge{
+  position:absolute; top:9px; left:9px; z-index:3;
+  font-family:var(--f-mono); font-size:11px; font-weight:600;
+  background:rgba(10,10,12,0.8); color:#e9e2da;
+  border:1px solid rgba(255,255,255,0.12);
+  padding:3px 9px; border-radius:7px;
+  backdrop-filter:blur(4px);
+}
+.work-title{ font-family:var(--f-jp); font-weight:700; font-size:16px; color:var(--text); margin-top:14px; }
+.work-desc{ font-size:13px; color:var(--text-3); line-height:1.65; margin-top:7px; }
+.chips{ display:flex; flex-wrap:wrap; gap:6px; margin-top:13px; }
+.chip{
+  font-family:var(--f-mono); font-size:11px; color:var(--text-2);
+  background:rgba(255,255,255,0.03); border:1px solid var(--border);
+  border-radius:6px; padding:4px 9px;
+}
+
+/* mini mockups inside thumbs */
+.mk{ position:absolute; inset:0; }
+/* dashboard mock */
+.mk-dash{ background:linear-gradient(135deg,#f4f5f8,#e9ebf1); display:flex; }
+.mk-dash .mk-side{ width:26%; background:#eef0f5; border-right:1px solid #dfe2ea; padding:8px 6px; display:flex; flex-direction:column; gap:5px; }
+.mk-dash .mk-body{ flex:1; padding:9px; display:flex; flex-direction:column; gap:6px; }
+.mk-row{ height:6px; border-radius:3px; background:#d6dae3; }
+.mk-row.w70{ width:70%; } .mk-row.w50{ width:50%; } .mk-row.w90{ width:90%; } .mk-row.w40{ width:40%; }
+.mk-card{ background:#fff; border:1px solid #e4e7ef; border-radius:5px; padding:7px; display:flex; flex-direction:column; gap:5px; }
+.mk-bars{ display:flex; align-items:flex-end; gap:5px; height:34px; margin-top:auto; }
+.mk-bars span{ flex:1; border-radius:2px 2px 0 0; background:linear-gradient(180deg,#9b6fe0,#6f4fd0); }
+.mk-pill{ height:7px; border-radius:4px; background:#cdd2dc; }
+.mk-dot{ width:7px;height:7px;border-radius:50%;background:#c4cad6; }
+/* travel mock */
+.mk-travel{ background:#f3f4f7; display:flex; flex-direction:column; }
+.mk-photo{ height:48%; background:linear-gradient(180deg,#f3b87a 0%,#e98f6e 30%,#7d6fae 70%,#4a4f86 100%); position:relative; }
+.mk-photo::after{ content:""; position:absolute; inset:0; background:linear-gradient(180deg,transparent 50%,rgba(40,30,60,0.35)); }
+.mk-tcards{ display:flex; gap:5px; padding:8px; }
+.mk-tcard{ flex:1; height:34px; background:#fff; border:1px solid #e4e7ef; border-radius:5px; padding:5px; display:flex; flex-direction:column; gap:4px; }
+.mk-tcard .tt{ height:14px; border-radius:3px; background:linear-gradient(135deg,#e8a06a,#d98f9a); }
+/* chat mock */
+.mk-chat{ background:linear-gradient(135deg,#f5f6f9,#eceef3); display:flex; }
+.mk-chat .mk-list{ width:30%; background:#fff; border-right:1px solid #e4e7ef; padding:7px 5px; display:flex; flex-direction:column; gap:6px; }
+.mk-chat .mk-conv{ flex:1; padding:9px; display:flex; flex-direction:column; gap:7px; }
+.bubble{ max-width:78%; border-radius:8px; padding:6px; display:flex; flex-direction:column; gap:3px; }
+.bubble.in{ background:#fff; border:1px solid #e4e7ef; align-self:flex-start; }
+.bubble.out{ background:#fbe6cf; border:1px solid #f1d2ab; align-self:flex-end; }
+.bubble .ln{ height:4px; border-radius:2px; background:#d6dae3; }
+.bubble.out .ln{ background:#e7b886; }
+.mk-li{ display:flex; align-items:center; gap:5px; }
+
+/* ---- MY PROCESS ---- */
+.process{ display:flex; align-items:flex-start; gap:6px; }
+.pstep{ flex:1; display:flex; flex-direction:column; gap:12px; }
+.picon{
+  width:54px; height:54px; border-radius:50%;
+  border:1.5px solid var(--accent-line);
+  display:flex; align-items:center; justify-content:center;
+  color:var(--accent);
+  background:radial-gradient(circle at 50% 40%, rgba(232,146,79,0.10), transparent 70%);
+}
+.picon svg{ width:24px; height:24px; }
+.pstep h4{ font-family:var(--f-jp); font-size:15px; font-weight:700; color:var(--text); }
+.pstep p{ font-size:12.5px; color:var(--text-3); line-height:1.6; }
+.parrow{ color:var(--text-faint); margin-top:18px; flex:none; }
+.parrow svg{ width:20px; height:20px; }
+
+/* ---- CTA BANNER (available for work) ---- */
+.cta-banner{
+  position:relative; overflow:hidden;
+  border:1px solid rgba(232,146,79,0.26);
+  border-radius:16px;
+  background:
+    linear-gradient(120deg, rgba(232,146,79,0.10), rgba(232,146,79,0.02) 52%, rgba(120,80,200,0.06)),
+    var(--surface);
+  padding:26px 30px;
+}
+.cta-glow{
+  position:absolute; right:-60px; top:-80px;
+  width:280px; height:280px; border-radius:50%;
+  background:radial-gradient(circle, rgba(232,146,79,0.22), transparent 65%);
+  filter:blur(8px); pointer-events:none;
+  animation:flicker 5s ease-in-out infinite;
+}
+.cta-inner{
+  position:relative; z-index:1;
+  display:flex; align-items:center; justify-content:space-between;
+  gap:30px; flex-wrap:wrap;
+}
+.cta-copy{ min-width:240px; }
+.cta-status{
+  display:inline-flex; align-items:center; gap:9px;
+  font-family:var(--f-mono); font-size:12px; font-weight:600; letter-spacing:0.04em;
+  color:var(--accent);
+  padding:5px 12px 5px 11px; border-radius:999px;
+  background:rgba(232,146,79,0.10); border:1px solid rgba(232,146,79,0.22);
+}
+.cta-dot{
+  width:8px; height:8px; border-radius:50%; background:#5fd07a;
+  box-shadow:0 0 0 3px rgba(95,208,122,0.18);
+  animation:pulse 2.4s ease-in-out infinite;
+}
+.cta-head{
+  font-family:var(--f-head); font-weight:600; font-size:27px; line-height:1.18;
+  letter-spacing:-0.015em; color:#f3ece4; margin-top:15px;
+}
+.cta-sub{ font-size:13.5px; color:var(--text-2); line-height:1.7; margin-top:11px; max-width:430px; }
+.cta-actions{ display:flex; flex-direction:column; align-items:flex-end; gap:13px; }
+.cta-mail{ font-family:var(--f-mono); font-size:13px; color:var(--text-3); transition:.18s; }
+.cta-mail:hover{ color:var(--accent); }
+@media (max-width:760px){
+  .cta-inner{ flex-direction:column; align-items:flex-start; }
+  .cta-actions{ align-items:flex-start; }
+}
+
+/* ---- ABOUT / TECH (right col) ---- */
+.col-right{ display:flex; flex-direction:column; gap:42px; }
+.about-name{ font-family:var(--f-jp); font-weight:700; font-size:17px; color:var(--text); margin-bottom:11px; }
+.about-bio{ font-size:13.5px; color:var(--text-2); line-height:1.75; }
+.about-list{ list-style:none; display:flex; flex-direction:column; gap:9px; margin-top:16px; }
+.about-list li{ display:flex; align-items:flex-start; gap:10px; font-size:13.5px; color:var(--text-2); line-height:1.5; }
+.about-list li::before{ content:""; width:6px;height:6px;border-radius:50%; background:var(--accent); margin-top:7px; flex:none; }
+.about-more{ font-family:var(--f-mono); font-size:13px; color:var(--accent); display:inline-flex; align-items:center; gap:7px; margin-top:18px; transition:.18s; }
+.about-more:hover{ gap:11px; }
+.about-more svg{ width:14px; height:14px; }
+
+.tech{ display:flex; flex-direction:column; gap:17px; }
+.tech-item{ display:flex; gap:13px; align-items:flex-start; }
+.tech-emblem{
+  width:30px; height:30px; border-radius:50%; flex:none;
+  border:1.5px solid var(--accent-line);
+  display:flex; align-items:center; justify-content:center; color:var(--accent);
+  background:rgba(232,146,79,0.06);
+}
+.tech-emblem svg{ width:16px; height:16px; }
+.tech-name{ font-family:var(--f-head); font-size:14.5px; font-weight:600; color:var(--text); }
+.tech-desc{ font-size:12.5px; color:var(--text-3); line-height:1.5; margin-top:2px; }
+.tech-foot{ display:flex; justify-content:flex-end; margin-top:8px; }
+
+/* responsive guard */
+@media (max-width:1180px){
+  .lower{ grid-template-columns:1fr; }
+  .hero-img{ width:54%; }
+}
+@media (max-width:920px){
+  .shell{ grid-template-columns:1fr; }
+  .sidebar{ position:static; height:auto; }
+  .hero-img{ position:static; width:100%; height:240px; margin-bottom:20px; }
+  .hero-h1{ font-size:48px; }
+  .works{ grid-template-columns:1fr; }
+  .process{ flex-direction:column; }
+  .parrow{ display:none; }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar">
+    <div class="id-block">
+      <div class="avatar-frame">
+        <img class="av-photo" src="assets/avatar.png" alt="Haruto Miyakawa">
+        <img class="av-frame" src="assets/frame.png" alt="">
+      </div>
+      <div>
+        <div class="id-name">Haruto Miyakawa</div>
+        <div class="id-role">Web Engineer /<br>AI Builder</div>
+      </div>
+    </div>
+
+    <nav class="nav">
+      <a class="nav-item active" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20h14V9.5"/><path d="M9.5 20v-6h5v6"/></svg>
+        Home
+      </a>
+      <a class="nav-item" href="Works.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7"/><path d="M3 12h18"/></svg>
+        Works
+      </a>
+      <a class="nav-item" href="Research.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/><path d="M9 12h6M9 16h6"/></svg>
+        Research
+      </a>
+      <a class="nav-item" href="About.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M5 20c0-3.5 3-6 7-6s7 2.5 7 6"/></svg>
+        About
+      </a>
+    </nav>
+
+    <div>
+      <div class="side-label">Contact</div>
+      <div class="contact">
+        <a href="#"><img class="ic-img" src="assets/github.png" alt="">GitHub</a>
+        <a href="#"><img class="ic-img" src="assets/x.png" alt="">X (Twitter)</a>
+        <a href="#"><img class="ic-img" src="assets/mail.png" alt="">Mail</a>
+      </div>
+    </div>
+
+    <div class="lantern-wrap"><img src="assets/lantern.png" alt=""></div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <main class="main">
+    <!-- HERO -->
+    <section class="hero">
+      <div class="hero-img"><img src="assets/hero.png" alt="Sunset scene"></div>
+      <div class="hero-content">
+        <div class="hero-hello">Hello, I'm Haruto.</div>
+        <h1 class="hero-h1">Build with Code.<br>Create with Purpose.</h1>
+        <p class="hero-jp">技術で価値を生み出し、体験をより良くする。</p>
+        <p class="hero-body">フロントエンドとAIを軸に、課題を解決するプロダクトを開発しています。<br>ユーザーに価値を届けることにこだわり、設計から実装・改善までやり切ります。</p>
+        <div class="hero-cta">
+          <a class="btn btn-primary" href="#works">View My Works <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        </div>
+        <div class="taglist">
+          <span class="tag">TypeScript</span>
+          <span class="tag">Next.js</span>
+          <span class="tag">React</span>
+          <span class="tag">Tailwind CSS</span>
+          <span class="tag">Python</span>
+          <span class="tag">FastAPI</span>
+          <span class="tag">PostgreSQL</span>
+          <span class="tag more">···</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- LOWER -->
+    <div class="lower">
+
+      <!-- LEFT COLUMN -->
+      <div class="col-left">
+
+        <!-- FEATURED WORKS -->
+        <section id="works">
+          <div class="sec-head">
+            <div class="sec-title"><span class="star">✦</span> Featured Works</div>
+            <div class="sec-rule"></div>
+            <a class="sec-link" href="#">View all works <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+          </div>
+          <div class="works">
+
+            <article class="work">
+              <div class="thumb">
+                <span class="thumb-badge">AI</span>
+                <div class="mk mk-dash">
+                  <div class="mk-side">
+                    <div class="mk-pill" style="width:80%"></div>
+                    <div class="mk-pill" style="width:60%"></div>
+                    <div class="mk-pill" style="width:70%"></div>
+                    <div class="mk-pill" style="width:55%"></div>
+                    <div class="mk-pill" style="width:65%"></div>
+                  </div>
+                  <div class="mk-body">
+                    <div class="mk-row w50"></div>
+                    <div class="mk-card">
+                      <div class="mk-row w70"></div>
+                      <div class="mk-row w40"></div>
+                    </div>
+                    <div class="mk-bars"><span style="height:40%"></span><span style="height:70%"></span><span style="height:55%"></span><span style="height:90%"></span><span style="height:65%"></span><span style="height:80%"></span></div>
+                  </div>
+                </div>
+              </div>
+              <h3 class="work-title">つむぐ</h3>
+              <p class="work-desc">note creators向けのAI共同執筆エディタ。書き手のリズムを崩さず、隣で支える。</p>
+              <div class="chips"><span class="chip">Next.js</span><span class="chip">TypeScript</span><span class="chip">Tiptap</span><span class="chip">Claude API</span></div>
+            </article>
+
+            <article class="work">
+              <div class="thumb">
+                <span class="thumb-badge">Web</span>
+                <div class="mk mk-travel">
+                  <div class="mk-photo"></div>
+                  <div style="padding:8px 8px 0;"><div class="mk-row w70" style="background:#c9cdd7"></div></div>
+                  <div class="mk-tcards">
+                    <div class="mk-tcard"><div class="tt"></div><div class="mk-pill" style="width:80%"></div></div>
+                    <div class="mk-tcard"><div class="tt"></div><div class="mk-pill" style="width:70%"></div></div>
+                    <div class="mk-tcard"><div class="tt"></div><div class="mk-pill" style="width:75%"></div></div>
+                  </div>
+                </div>
+              </div>
+              <h3 class="work-title">講義文字起こし</h3>
+              <p class="work-desc">講義音声を自動で文字起こし・整理。聴くことに集中できる。</p>
+              <div class="chips"><span class="chip">Python</span><span class="chip">Whisper</span></div>
+            </article>
+
+            <article class="work">
+              <div class="thumb">
+                <span class="thumb-badge">AI</span>
+                <div class="mk mk-chat">
+                  <div class="mk-list">
+                    <div class="mk-li"><div class="mk-dot"></div><div class="mk-pill" style="width:70%"></div></div>
+                    <div class="mk-li"><div class="mk-dot"></div><div class="mk-pill" style="width:55%"></div></div>
+                    <div class="mk-li"><div class="mk-dot"></div><div class="mk-pill" style="width:65%"></div></div>
+                    <div class="mk-li"><div class="mk-dot"></div><div class="mk-pill" style="width:50%"></div></div>
+                  </div>
+                  <div class="mk-conv">
+                    <div class="bubble in"><div class="ln" style="width:90%"></div><div class="ln" style="width:60%"></div></div>
+                    <div class="bubble out"><div class="ln" style="width:80%"></div><div class="ln" style="width:50%"></div></div>
+                    <div class="bubble in"><div class="ln" style="width:70%"></div></div>
+                  </div>
+                </div>
+              </div>
+              <h3 class="work-title">家電ガイド</h3>
+              <p class="work-desc">条件と好みから最適な家電を案内するPWA。制約付きAIで正確さを担保。</p>
+              <div class="chips"><span class="chip">Next.js</span><span class="chip">TypeScript</span><span class="chip">Supabase</span><span class="chip">Gemini API</span></div>
+            </article>
+
+          </div>
+        </section>
+
+        <!-- MY PROCESS -->
+        <section>
+          <div class="sec-head">
+            <div class="sec-title">My Process</div>
+            <div class="sec-rule"></div>
+          </div>
+          <div class="process">
+            <div class="pstep">
+              <div class="picon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6"/><path d="m20 20-4.3-4.3"/></svg></div>
+              <h4>01. 課題を理解する</h4>
+              <p>ユーザーやビジネスを理解し、本質的な課題を定義します。</p>
+            </div>
+            <div class="parrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></div>
+            <div class="pstep">
+              <div class="picon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 3.5 20.5 9.5 8 22H2v-6z"/><path d="m12 6 6 6"/></svg></div>
+              <h4>02. 設計する</h4>
+              <p>要件を整理し、最適な体験に落とし込む設計を行います。</p>
+            </div>
+            <div class="parrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></div>
+            <div class="pstep">
+              <div class="picon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m8 8-4 4 4 4M16 8l4 4-4 4"/></svg></div>
+              <h4>03. 実装する</h4>
+              <p>品質と保守性を意識して、丁寧に実装します。</p>
+            </div>
+            <div class="parrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></div>
+            <div class="pstep">
+              <div class="picon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5M4 19h16M7 15l3-3 3 2 5-6"/></svg></div>
+              <h4>04. 改善し続ける</h4>
+              <p>データやフィードバックをもとに、継続的に改善します。</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- AVAILABLE FOR WORK -->
+        <section class="cta-banner">
+          <div class="cta-glow"></div>
+          <div class="cta-inner">
+            <div class="cta-copy">
+              <div class="cta-status"><span class="cta-dot"></span>Available for work</div>
+              <h3 class="cta-head">Let's build something<br>meaningful together.</h3>
+              <p class="cta-sub">新しいプロダクトやインターン・業務委託のご相談を歓迎しています。お気軽にご連絡ください。</p>
+            </div>
+            <div class="cta-actions">
+              <a class="btn btn-primary" href="/cdn-cgi/l/email-protection#731b161f1f1c331b120106071c1e1a0a12181204125d171605">Get in touch <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+              <a class="cta-mail" href="/cdn-cgi/l/email-protection#b8d0ddd4d4d7f8d0d9cacdccd7d5d1c1d9d3d9cfd996dcddce"><span class="__cf_email__" data-cfemail="93fbf6fffffcd3fbf2e1e6e7fcfefaeaf2f8f2e4f2bdf7f6e5">[email&#160;protected]</span></a>
+            </div>
+          </div>
+        </section>
+
+      </div>
+
+      <!-- RIGHT COLUMN -->
+      <div class="col-right">
+
+        <!-- ABOUT ME -->
+        <section>
+          <div class="sec-head">
+            <div class="sec-title">About Me</div>
+            <div class="sec-rule"></div>
+          </div>
+          <div class="about-name">宮川 陽翔（みやかわ はると）</div>
+          <p class="about-bio">フロントエンド開発とAI活用が得意な学生エンジニア。ユーザー体験を大切にしたWebプロダクト開発に取り組んでいます。</p>
+          <ul class="about-list">
+            <li>東京の大学に在学中（情報系）</li>
+            <li>インターン・業務委託を積極的に検討中</li>
+            <li>新しい技術のキャッチアップが好きです</li>
+          </ul>
+          <a class="about-more" href="#">More About Me <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        </section>
+
+        <!-- TECH I USE -->
+        <section>
+          <div class="sec-head">
+            <div class="sec-title">Tech I Use</div>
+            <div class="sec-rule"></div>
+          </div>
+          <div class="tech">
+            <div class="tech-item">
+              <div class="tech-emblem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M9 8v8M9 8l6 8M15 9v3" stroke-linecap="round"/></svg></div>
+              <div><div class="tech-name">Next.js</div><div class="tech-desc">フルスタック開発 / SSR / API Routesで高速なWeb体験を実現</div></div>
+            </div>
+            <div class="tech-item">
+              <div class="tech-emblem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3.5" y="3.5" width="17" height="17" rx="3"/><path d="M8 11h5M10.5 11v6M14 16c.6.8 3 .9 3-.6 0-1.4-3-1-3-2.4 0-1.3 2.2-1.2 2.8-.4" stroke-linecap="round"/></svg></div>
+              <div><div class="tech-name">TypeScript</div><div class="tech-desc">型安全な設計で、保守性の高いコードを書く</div></div>
+            </div>
+            <div class="tech-item">
+              <div class="tech-emblem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="2"/><ellipse cx="12" cy="12" rx="9" ry="3.6"/><ellipse cx="12" cy="12" rx="9" ry="3.6" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="9" ry="3.6" transform="rotate(120 12 12)"/></svg></div>
+              <div><div class="tech-name">React</div><div class="tech-desc">再利用性の高いUIコンポーネント設計</div></div>
+            </div>
+            <div class="tech-item">
+              <div class="tech-emblem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10c1-2.5 2.7-3.7 5-3.7 3.5 0 3.7 2.6 6 3.2-1 2.5-2.7 3.7-5 3.7-3.5 0-3.7-2.6-6-3.2Z"/><path d="M2.5 14.5c1-2.5 2.7-3.7 5-3.7 3.5 0 3.7 2.6 6 3.2-1 2.5-2.7 3.7-5 3.7-3.5 0-3.7-2.6-6-3.2Z"/></svg></div>
+              <div><div class="tech-name">Tailwind CSS</div><div class="tech-desc">ユーティリティファーストで高速なUI実装</div></div>
+            </div>
+            <div class="tech-item">
+              <div class="tech-emblem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="2.3"/><g stroke-linecap="round"><path d="M12 5.5v-2M12 20.5v-2M18.1 8.5l1.7-1M4.2 16.5l1.7-1M18.1 15.5l1.7 1M4.2 7.5l1.7 1"/></g></svg></div>
+              <div><div class="tech-name">OpenAI API</div><div class="tech-desc">自然言語処理を活用したAI機能の実装</div></div>
+            </div>
+            <div class="tech-item">
+              <div class="tech-emblem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v12c0 1.7 3.1 3 7 3s7-1.3 7-3V6" stroke-linecap="round"/><path d="M5 12c0 1.7 3.1 3 7 3s7-1.3 7-3"/></svg></div>
+              <div><div class="tech-name">PostgreSQL</div><div class="tech-desc">リレーショナルデータの設計・最適化</div></div>
+            </div>
+            <div class="tech-item">
+              <div class="tech-emblem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M12 3 4.5 18.5 12 21l7.5-2.5L12 3Z"/><path d="M12 3 7 21"/></svg></div>
+              <div><div class="tech-name">Prisma</div><div class="tech-desc">型安全なORMで開発体験と生産性を向上</div></div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </main>
+</div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script></body>
+</html>
