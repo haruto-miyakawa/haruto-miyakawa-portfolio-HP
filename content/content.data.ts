@@ -75,19 +75,19 @@ export interface Work {
   hasCaseStudy: boolean;
 }
 
-/** Home の Featured Works（3枚） */
+/** Home の Featured Works（3枚）。works 本体と一致させる */
 export const featuredWorks: FeaturedWork[] = [
   {
-    badge: "AI",
+    badge: "Web",
     title: "つむぐ",
     description: "note creators向けのAI共同執筆エディタ。書き手のリズムを崩さず、隣で支える。",
-    tags: ["Next.js", "TypeScript", "Tiptap", "Claude API"],
+    tags: ["Next.js", "TypeScript", "React", "Tiptap", "Claude API", "Tailwind CSS"],
     mock: "dash",
   },
   {
-    badge: "Web",
-    title: "講義文字起こし",
-    description: "講義音声を自動で文字起こし・整理。聴くことに集中できる。",
+    badge: "Tool",
+    title: "講義文字起こしアプリ",
+    description: "講義音声を自動で文字起こし・整理。聴くことに集中できる体験へ。",
     tags: ["Python", "Whisper"],
     mock: "travel",
   },
@@ -95,7 +95,7 @@ export const featuredWorks: FeaturedWork[] = [
     badge: "AI",
     title: "家電ガイド",
     description: "条件と好みから最適な家電を案内するPWA。制約付きAIで正確さを担保。",
-    tags: ["Next.js", "TypeScript", "Supabase", "Gemini API"],
+    tags: ["Next.js", "TypeScript", "Supabase", "Gemini API", "PWA"],
     mock: "chat",
   },
 ];
@@ -540,7 +540,7 @@ export const paperDetails: Record<string, PaperDetail> = {
       { label: "収録", value: "IEEE Xplore", icon: "book" },
       { label: "Role", value: "Co-author", sub: "4th author", icon: "user" },
       { label: "著者", value: "7 名（共著）", icon: "people" },
-      { label: "所属", value: "東京工科大学", sub: "コンピュータサイエンス学部", icon: "building" },
+      { label: "所属", value: "東京の大学", sub: "コンピュータサイエンス学部", icon: "building" },
     ],
     tldr:
       "SNSでの「炎上」リスクを検知するフレームワーク。毒性の基準はコミュニティや組織ごとに異なるという問題に対し、「炎上事例(OUT)」と「安全事例(SAFE)」の事例データベースへの類似度マージンでリスクを判定する。データベースを差し替えるだけで「誰の基準で見るか（ペルソナ）」を切り替えられ、再学習を必要としない。",
@@ -596,7 +596,7 @@ export const paperDetails: Record<string, PaperDetail> = {
       authors:
         "Ren Yamauchi, Yuki Fujimatsu, Jinyu Toida, Haruto Miyakawa, Haruto Ichikawa, Rei Oshima, Takafumi Nakanishi",
       authorHighlight: "Haruto Miyakawa",
-      affiliation: "東京工科大学 コンピュータサイエンス学部",
+      affiliation: "東京の大学 コンピュータサイエンス学部",
       tags: ["Explainable AI", "Content Moderation", "NLP", "RoBERTa"],
       links: [{ label: "IEEE Xplore", href: "https://ieeexplore.ieee.org/document/11418320" }],
     },
@@ -702,18 +702,24 @@ export const paperDetails: Record<string, PaperDetail> = {
 /* ============ Home : About 抜粋 / Tech I Use / My Process ============ */
 export const homeAbout = {
   name: "宮川 陽翔（みやかわ はると）",
-  bio: "フロントエンド開発とAI活用が得意な学生エンジニア。ユーザー体験を大切にしたWebプロダクト開発に取り組んでいます。",
-  points: ["東京の大学に在学中（情報系）", "インターン・業務委託を積極的に検討中", "新しい技術のキャッチアップが好きです"],
+  bio: "情報システムを専攻する学生エンジニア。Next.js / TypeScript と AI活用を軸に、ユーザー体験を大切にしたプロダクト開発に取り組んでいます。",
+  points: [
+    "東京の大学に在学中（コンピュータサイエンス専攻・2年生）",
+    "埼玉在住。インターン・業務委託も積極的に検討中",
+    "新しい技術のキャッチアップが好きです",
+  ],
 };
 
 export const homeTech: { name: string; desc: string }[] = [
-  { name: "Next.js", desc: "フルスタック開発 / SSR / API Routesで高速なWeb体験を実現" },
-  { name: "TypeScript", desc: "型安全な設計で、保守性の高いコードを書く" },
+  { name: "Next.js", desc: "フルスタックなWeb開発（App Router / SSR）" },
+  { name: "TypeScript", desc: "型安全な設計で保守性の高いコードを書く" },
   { name: "React", desc: "再利用性の高いUIコンポーネント設計" },
   { name: "Tailwind CSS", desc: "ユーティリティファーストで高速なUI実装" },
-  { name: "OpenAI API", desc: "自然言語処理を活用したAI機能の実装" },
-  { name: "PostgreSQL", desc: "リレーショナルデータの設計・最適化" },
-  { name: "Prisma", desc: "型安全なORMで開発体験と生産性を向上" },
+  { name: "Claude API", desc: "AIを組み込んだプロダクト開発（つむぐ 等）" },
+  { name: "Gemini API", desc: "制約付きAI活用（家電ガイド 等）" },
+  { name: "Python", desc: "研究・データ処理（Whisper / sentence-transformers 等）" },
+  { name: "Supabase / PostgreSQL", desc: "データの設計・管理" },
+  { name: "Vercel / GitHub", desc: "デプロイ / コード管理" },
 ];
 
 export const processSteps: { title: string; desc: string }[] = [
@@ -734,7 +740,7 @@ export const about = {
   ],
   profileRows: [
     { label: "名前", value: "宮川 陽翔（みやかわ はると）", icon: "user" },
-    { label: "所属", value: "東京工科大学 コンピュータサイエンス学部（在学中）", icon: "building" },
+    { label: "所属", value: "東京の大学（コンピュータサイエンス専攻・在学中）", icon: "building" },
     { label: "学年", value: "2年生", icon: "cap" },
     { label: "専攻", value: "コンピュータサイエンス / 情報システム", icon: "atom" },
     { label: "拠点", value: "埼玉, Japan", icon: "pin" },

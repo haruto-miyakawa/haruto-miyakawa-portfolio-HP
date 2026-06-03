@@ -264,12 +264,6 @@ export const icons: Record<string, ReactNode> = {
     </Stroke>
   ),
   /* about の Tech I Use エンブレム */
-  openai: (
-    <Stroke sw={1.5}>
-      <circle cx="12" cy="12" r="2.4" />
-      <path d="M12 5.5v-2M12 20.5v-2M18.1 8.5l1.7-1M4.2 16.5l1.7-1M18.1 15.5l1.7 1M4.2 7.5l1.7 1" />
-    </Stroke>
-  ),
   postgres: (
     <Stroke sw={1.5}>
       <ellipse cx="12" cy="6" rx="7" ry="3" />
@@ -283,12 +277,6 @@ export const icons: Record<string, ReactNode> = {
       <ellipse cx="12" cy="12" rx="9" ry="3.6" />
       <ellipse cx="12" cy="12" rx="9" ry="3.6" transform="rotate(60 12 12)" />
       <ellipse cx="12" cy="12" rx="9" ry="3.6" transform="rotate(120 12 12)" />
-    </Stroke>
-  ),
-  prisma: (
-    <Stroke sw={1.5}>
-      <path d="M12 3 4.5 18.5 12 21l7.5-2.5L12 3Z" />
-      <path d="M12 3 7 21" />
     </Stroke>
   ),
   tailwind: (
@@ -320,25 +308,9 @@ export const homeTechIcons: Record<string, ReactNode> = {
   ),
   React: icons.react,
   "Tailwind CSS": icons.tailwind,
-  "OpenAI API": (
-    <Stroke sw={1.5}>
-      <circle cx="12" cy="12" r="2.3" />
-      <g strokeLinecap="round">
-        <path d="M12 5.5v-2M12 20.5v-2M18.1 8.5l1.7-1M4.2 16.5l1.7-1M18.1 15.5l1.7 1M4.2 7.5l1.7 1" />
-      </g>
-    </Stroke>
-  ),
-  PostgreSQL: (
-    <Stroke sw={1.6}>
-      <ellipse cx="12" cy="6" rx="7" ry="3" />
-      <path d="M5 6v12c0 1.7 3.1 3 7 3s7-1.3 7-3V6" />
-      <path d="M5 12c0 1.7 3.1 3 7 3s7-1.3 7-3" />
-    </Stroke>
-  ),
-  Prisma: (
-    <Stroke sw={1.6}>
-      <path d="M12 3 4.5 18.5 12 21l7.5-2.5L12 3Z" />
-      <path d="M12 3 7 21" />
-    </Stroke>
-  ),
+  "Claude API": icons.sparkle,
+  "Gemini API": icons.sun,
+  Python: icons.codeStack,
+  "Supabase / PostgreSQL": icons.postgres,
+  "Vercel / GitHub": icons.github,
 };
