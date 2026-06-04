@@ -86,9 +86,9 @@ export const featuredWorks: FeaturedWork[] = [
   },
   {
     badge: "Tool",
-    title: "講義文字起こしアプリ",
-    description: "講義音声を自動で文字起こし・整理。聴くことに集中できる体験へ。",
-    tags: ["Python", "Whisper"],
+    title: "講義議事録ジェネレーター",
+    description: "音声をWhisperで文字起こしし、Geminiで議事録に整形するツール。聴くことに集中できる。",
+    tags: ["Python", "Whisper", "Gemini API"],
     mock: "travel",
   },
   {
@@ -117,9 +117,9 @@ export const works: Work[] = [
     slug: "lecture-minutes",
     badge: "Tool",
     category: "tool",
-    title: "講義文字起こしアプリ",
-    description: "講義音声を自動で文字起こし・整理。聴くことに集中できる体験へ。",
-    tags: ["Python", "Whisper"],
+    title: "講義議事録ジェネレーター",
+    description: "音声をWhisperで文字起こしし、Geminiで議事録に整形するツール。聴くことに集中できる。",
+    tags: ["Python", "Whisper", "Gemini API"],
     mock: "travel",
     footRight: "Case Study",
     hasCaseStudy: true,
@@ -265,36 +265,42 @@ export const caseStudies: Record<string, CaseStudy> = {
     github: "https://github.com/haruto-miyakawa/tsumugu",
   },
 
-  /* 2. 講義文字起こしアプリ */
+  /* 2. 講義議事録ジェネレーター */
   "lecture-minutes": {
     slug: "lecture-minutes",
     categoryLabel: "ツール・ライブラリ",
-    title: "講義文字起こしアプリ",
-    lead: "講義音声を自動で文字起こし・整理。聴くことに集中できる体験へ。",
+    title: "講義議事録ジェネレーター",
+    lead: "音声をWhisperで文字起こしし、Geminiで議事録に整形するツール。聴くことに集中できる。",
     shotMock: "chat",
     meta: [
       { label: "Role", value: "個人開発", icon: "user" },
       { label: "体制", value: "個人 (Solo)", icon: "people" },
       { label: "種類", value: "ツール・ライブラリ", icon: "monitor" },
       { label: "ステータス", value: "公開（OSS）", icon: "checkCircle", status: true },
-      { label: "スタック", value: "Python, Whisper", icon: "codeStack" },
+      { label: "スタック", value: "Python, Whisper, Gemini API", icon: "codeStack" },
     ],
     tldr:
-      "講義中に板書とノートと理解を同時にこなすのは難しい——という自分自身の課題から作った、講義音声の自動文字起こしツールです。録音した音声をWhisperで文字起こしし、長い書き起こしを後から読み返しやすい形に整理します。実装の過程はZennに記事としてまとめ、初動から良い反応をいただきました。企画から実装まで個人で担当しています。",
+      "講義中に板書・ノート・理解を同時にこなすのは難しい——という自分の課題から作った、講義音声の議事録ジェネレーターです。録音した音声をWhisperで文字起こしし、その結果をGeminiで見出し・要点・キーワードを備えた議事録へ自動整形します。聴くことに集中でき、後から読み返せる形に。実装の過程はZennに記事化しました。企画から実装まで個人で担当しています。",
     challenge: {
       heading: "聴く・書く・理解するを同時にできない",
       body: "講義中はノートを取ることに気を取られ、肝心の内容理解がおろそかになりがち。後から見返しても、断片的なメモでは話の流れを追えない——という自分の困りごとが出発点でした。",
       points: ["板書とノートに気を取られ、話そのものを聴けない", "手書きメモは断片的で、後から流れを再構成できない", "録音しても長すぎて、結局聴き直せない"],
     },
     solution: {
-      heading: "録って、起こして、読める形に",
-      body: "音声をWhisperで文字起こしし、生の書き起こしを読み返しやすい単位に整理する流れを組みました。ノートを取る作業から書き手を解放し、講義そのものへ集中できる状態を目指しています。",
-      points: ["Whisperによる自動文字起こし", "長い書き起こしを、読み返しやすい形に整理"],
+      heading: "文字起こしから議事録まで自動で",
+      body: "音声をWhisperで文字起こしし、その結果をGeminiで議事録（見出し・要点・キーワード）に自動整形する流れを組みました。ノートを取る作業から解放し、講義そのものへ集中できる状態を目指しています。",
+      points: [
+        "Whisperによる音声の文字起こし（タイムスタンプ付き）",
+        "Geminiによる議事録への自動整形（見出し・まとめ・キーワード抽出）",
+        "出力に対応（コピー / .txt / .md / PDF ダウンロード）",
+        "ハルシネーション再解析（AIの誤りを再チェック）",
+        "Whisperモデル選択・話者分離などの設定",
+      ],
     },
     outcome: {
-      heading: "自分の困りごとを、動くツールとして解いた",
-      body: "『聴くことに集中して、あとで読み返せる』状態を実際に手に入れられたことが成果です。実装で得た知見はZennに記事化し、初動で良い反応を得られました。",
-      facts: ["Zenn 記事化", "Whisper 音声→テキスト自動化", "個人開発（企画〜実装）"],
+      heading: "文字起こしの先の「議事録」まで自動化できた",
+      body: "ただ文字起こしするだけでなく、Geminiで議事録に整形して『あとで読み返せる』状態まで実現できたことが成果です。実装で得た知見はZennに記事化しました。",
+      facts: ["Whisper×Gemini", "議事録自動整形", "PDF / Markdown 出力"],
     },
     overview: [
       { label: "役割", value: "個人開発", icon: "user" },
@@ -302,7 +308,11 @@ export const caseStudies: Record<string, CaseStudy> = {
       { label: "ステータス", value: "公開（OSS）", icon: "checkCircle", status: true },
       { label: "リポジトリ", value: "GitHub", icon: "link", link: true, href: "https://github.com/haruto-miyakawa/lecture-minutes" },
     ],
-    highlights: ["Whisperによる自動文字起こし", "長い書き起こしを、読み返しやすい形に整理", "実装の知見をZennに記事化"],
+    highlights: [
+      "Whisper文字起こし＋Geminiで議事録に自動整形",
+      "コピー / .txt / .md / PDF で出力",
+      "ハルシネーション再解析・Whisperモデル選択などの設定",
+    ],
     relatedLinks: [
       { label: "GitHub リポジトリ", href: "https://github.com/haruto-miyakawa/lecture-minutes" },
       { label: "Zenn 記事", href: "https://zenn.dev/haruto_miyakawa/articles/4b7754712b7585" },
@@ -310,6 +320,7 @@ export const caseStudies: Record<string, CaseStudy> = {
     stack: [
       { mark: "Py", name: "Python" },
       { mark: "W", name: "Whisper" },
+      { mark: "G", name: "Gemini API" },
     ],
     links: [
       { kind: "github", label: "GitHub", href: "https://github.com/haruto-miyakawa/lecture-minutes" },
