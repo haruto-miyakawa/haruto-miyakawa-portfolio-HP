@@ -350,19 +350,25 @@ img.pixel-art {
   border-radius: 0;
   overflow: hidden;
   z-index: 0;
+  /* 左フェード（右→左で背景へ溶ける）: 広く・滑らかに。左端は画像を薄く（≈12%）残す。
+     旧値: transparent 0%, rgba(0,0,0,.25) 22%, rgba(0,0,0,.7) 42%, #000 62% */
   -webkit-mask-image: linear-gradient(
     90deg,
-    transparent 0%,
-    rgba(0, 0, 0, 0.25) 22%,
-    rgba(0, 0, 0, 0.7) 42%,
-    #000 62%
+    rgba(0, 0, 0, 0.12) 0%,
+    rgba(0, 0, 0, 0.2) 16%,
+    rgba(0, 0, 0, 0.36) 32%,
+    rgba(0, 0, 0, 0.56) 48%,
+    rgba(0, 0, 0, 0.8) 62%,
+    #000 76%
   );
   mask-image: linear-gradient(
     90deg,
-    transparent 0%,
-    rgba(0, 0, 0, 0.25) 22%,
-    rgba(0, 0, 0, 0.7) 42%,
-    #000 62%
+    rgba(0, 0, 0, 0.12) 0%,
+    rgba(0, 0, 0, 0.2) 16%,
+    rgba(0, 0, 0, 0.36) 32%,
+    rgba(0, 0, 0, 0.56) 48%,
+    rgba(0, 0, 0, 0.8) 62%,
+    #000 76%
   );
 }
 .hero-img img {
@@ -1605,8 +1611,18 @@ img.pixel-art {
   content: "";
   position: absolute;
   inset: 0;
+  /* 左フェードを .hero-img の mask と同じ可視度カーブに統一（広く・滑らか）。
+     旧値: linear-gradient(90deg, var(--bg) 2%, rgba(17,11,9,.5) 30%, transparent 60%) */
   background:
-    linear-gradient(90deg, var(--bg) 2%, rgba(17, 11, 9, 0.5) 30%, transparent 60%),
+    linear-gradient(
+      90deg,
+      rgba(17, 11, 9, 0.88) 0%,
+      rgba(17, 11, 9, 0.8) 16%,
+      rgba(17, 11, 9, 0.64) 32%,
+      rgba(17, 11, 9, 0.44) 48%,
+      rgba(17, 11, 9, 0.2) 62%,
+      transparent 76%
+    ),
     linear-gradient(0deg, var(--bg) 1%, transparent 24%),
     linear-gradient(180deg, var(--bg) 0%, transparent 18%);
 }
@@ -2431,8 +2447,18 @@ img.pixel-art {
   content: "";
   position: absolute;
   inset: 0;
+  /* 左フェードを .hero-img の mask と同じ可視度カーブに統一（広く・滑らか）。
+     旧値: linear-gradient(90deg, var(--bg) 1%, rgba(17,11,9,.45) 26%, transparent 58%) */
   background:
-    linear-gradient(90deg, var(--bg) 1%, rgba(17, 11, 9, 0.45) 26%, transparent 58%),
+    linear-gradient(
+      90deg,
+      rgba(17, 11, 9, 0.88) 0%,
+      rgba(17, 11, 9, 0.8) 16%,
+      rgba(17, 11, 9, 0.64) 32%,
+      rgba(17, 11, 9, 0.44) 48%,
+      rgba(17, 11, 9, 0.2) 62%,
+      transparent 76%
+    ),
     linear-gradient(0deg, var(--bg) 1%, transparent 22%),
     linear-gradient(180deg, var(--bg) 0%, transparent 14%);
 }
