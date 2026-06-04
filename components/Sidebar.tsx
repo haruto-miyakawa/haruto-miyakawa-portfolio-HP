@@ -44,11 +44,11 @@ export function Sidebar() {
       <div>
         <div className="side-label">Contact</div>
         <div className="contact">
-          <a href={profile.githubUrl}>
+          <a href={profile.githubUrl} target="_blank" rel="noopener noreferrer">
             <img className="ic-img" src="/assets/github.png" alt="" />
             GitHub
           </a>
-          <a href={profile.xUrl}>
+          <a href={profile.xUrl} target="_blank" rel="noopener noreferrer">
             <img className="ic-img" src="/assets/x.png" alt="" />
             X (Twitter)
           </a>

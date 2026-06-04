@@ -19,9 +19,9 @@ export const profile: Profile = {
   name: "Haruto Miyakawa",
   nameJa: "宮川 陽翔（みやかわ はると）",
   roleLines: ["Web Engineer /", "AI Builder"],
-  email: "hello@harutomiyakawa.dev",
-  githubUrl: "#",
-  xUrl: "#",
+  email: "haruto.miyakawa.dev@gmail.com",
+  githubUrl: "https://github.com/haruto-miyakawa",
+  xUrl: "https://x.com/myfuns101010",
   copyright: "© 2024 Haruto Miyakawa",
 };
 
