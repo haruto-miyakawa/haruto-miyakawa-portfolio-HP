@@ -345,33 +345,14 @@ img.pixel-art {
   position: absolute;
   top: -72px;
   right: -44px;
-  width: 60%;
+  width: 94%;
   height: 478px;
   border-radius: 0;
   overflow: hidden;
   z-index: 0;
-  /* 左フェード: タイトル側で写真を完全に透明にし、右へ長くなめらかに立ち上げる
-     （張り付け感を消し、背景〜タイトルへグラデで繋ぐ）。全可視は 88%。
-     旧値1: transparent 0% / .25 22% / .7 42% / #000 62%
-     旧値2: rgba(0,0,0,.12) 0% / .2 16% / .36 32% / .56 48% / .8 62% / #000 76% */
-  -webkit-mask-image: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(0, 0, 0, 0.06) 22%,
-    rgba(0, 0, 0, 0.2) 40%,
-    rgba(0, 0, 0, 0.42) 56%,
-    rgba(0, 0, 0, 0.7) 72%,
-    #000 88%
-  );
-  mask-image: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(0, 0, 0, 0.06) 22%,
-    rgba(0, 0, 0, 0.2) 40%,
-    rgba(0, 0, 0, 0.42) 56%,
-    rgba(0, 0, 0, 0.7) 72%,
-    #000 88%
-  );
+  /* 画像はタイトル領域まで広く被せる（旧 width: 60%）。マスクで切らず、
+     可読性は ::after の「左=暗→右=クリア」scrim で確保する。
+     撤去した旧マスク(左フェード): transparent 0% → .06 22% → .2 40% → .42 56% → .7 72% → #000 88% */
 }
 .hero-img img {
   width: 100%;
@@ -384,9 +365,20 @@ img.pixel-art {
   content: "";
   position: absolute;
   inset: 0;
+  /* 左=暗(文字可読) → 右=クリア の readability scrim ＋ 上下端の溶け込み。画像はタイトル裏に薄く残る。
+     旧: 0deg var(--bg) 1%→transparent 28% / 180deg var(--bg) 0%→transparent 16% */
   background:
-    linear-gradient(0deg, var(--bg) 1%, transparent 28%),
-    linear-gradient(180deg, var(--bg) 0%, transparent 16%);
+    linear-gradient(
+      90deg,
+      var(--bg) 0%,
+      rgba(17, 11, 9, 0.93) 20%,
+      rgba(17, 11, 9, 0.76) 40%,
+      rgba(17, 11, 9, 0.5) 58%,
+      rgba(17, 11, 9, 0.2) 74%,
+      transparent 90%
+    ),
+    linear-gradient(0deg, var(--bg) 0%, rgba(17, 11, 9, 0.4) 14%, transparent 42%),
+    linear-gradient(180deg, var(--bg) 0%, transparent 12%);
 }
 .hero-content {
   position: relative;
@@ -1040,7 +1032,7 @@ img.pixel-art {
     grid-template-columns: 1fr;
   }
   .hero-img {
-    width: 54%;
+    width: 90%; /* 旧 54% */
   }
 }
 @media (max-width: 920px) {
@@ -1080,7 +1072,7 @@ img.pixel-art {
 .whead .hero-img {
   top: -30px;
   height: 300px;
-  width: 62%;
+  width: 94%; /* 旧 62% */
 }
 .whead-content {
   position: relative;
@@ -1571,7 +1563,7 @@ img.pixel-art {
     position: static;
   }
   .whead .hero-img {
-    width: 54%;
+    width: 90%; /* 旧 54% */
   }
 }
 @media (max-width: 820px) {
@@ -1598,7 +1590,7 @@ img.pixel-art {
   position: absolute;
   top: -30px;
   right: -44px;
-  width: 60%;
+  width: 94%; /* 旧 60%。タイトルまで被せる */
   height: 300px;
   overflow: hidden;
   z-index: 0;
@@ -1613,20 +1605,20 @@ img.pixel-art {
   content: "";
   position: absolute;
   inset: 0;
-  /* 左フェードを .hero-img の mask と同じ可視度カーブに統一（タイトル側=透明、長くなめらか）。
-     旧値: var(--bg) 2% / rgba(17,11,9,.5) 30% / transparent 60% */
+  /* 左=暗(文字可読) → 右=クリア の readability scrim ＋ 上下端の溶け込み（.hero-img と統一）。
+     旧値(left): var(--bg) 2% / .5 30% / transparent 60% */
   background:
     linear-gradient(
       90deg,
       var(--bg) 0%,
-      rgba(17, 11, 9, 0.94) 22%,
-      rgba(17, 11, 9, 0.8) 40%,
-      rgba(17, 11, 9, 0.58) 56%,
-      rgba(17, 11, 9, 0.3) 72%,
-      transparent 88%
+      rgba(17, 11, 9, 0.93) 20%,
+      rgba(17, 11, 9, 0.76) 40%,
+      rgba(17, 11, 9, 0.5) 58%,
+      rgba(17, 11, 9, 0.2) 74%,
+      transparent 90%
     ),
-    linear-gradient(0deg, var(--bg) 1%, transparent 24%),
-    linear-gradient(180deg, var(--bg) 0%, transparent 18%);
+    linear-gradient(0deg, var(--bg) 0%, rgba(17, 11, 9, 0.4) 14%, transparent 42%),
+    linear-gradient(180deg, var(--bg) 0%, transparent 12%);
 }
 .rhead-content {
   position: relative;
@@ -2369,7 +2361,7 @@ img.pixel-art {
     gap: 24px;
   }
   .rhead-img {
-    width: 52%;
+    width: 90%; /* 旧 52% */
   }
 }
 @media (max-width: 900px) {
@@ -2434,7 +2426,7 @@ img.pixel-art {
   position: absolute;
   top: 0;
   right: 0;
-  width: 58%;
+  width: 92%; /* 旧 58%。タイトルまで被せる */
   height: 480px;
   overflow: hidden;
   z-index: 0;
@@ -2449,20 +2441,20 @@ img.pixel-art {
   content: "";
   position: absolute;
   inset: 0;
-  /* 左フェードを .hero-img の mask と同じ可視度カーブに統一（タイトル側=透明、長くなめらか）。
-     旧値: var(--bg) 1% / rgba(17,11,9,.45) 26% / transparent 58% */
+  /* 左=暗(文字可読) → 右=クリア の readability scrim ＋ 上下端の溶け込み（.hero-img と統一）。
+     旧値(left): var(--bg) 1% / .45 26% / transparent 58% */
   background:
     linear-gradient(
       90deg,
       var(--bg) 0%,
-      rgba(17, 11, 9, 0.94) 22%,
-      rgba(17, 11, 9, 0.8) 40%,
-      rgba(17, 11, 9, 0.58) 56%,
-      rgba(17, 11, 9, 0.3) 72%,
-      transparent 88%
+      rgba(17, 11, 9, 0.93) 20%,
+      rgba(17, 11, 9, 0.76) 40%,
+      rgba(17, 11, 9, 0.5) 58%,
+      rgba(17, 11, 9, 0.2) 74%,
+      transparent 90%
     ),
-    linear-gradient(0deg, var(--bg) 1%, transparent 22%),
-    linear-gradient(180deg, var(--bg) 0%, transparent 14%);
+    linear-gradient(0deg, var(--bg) 0%, rgba(17, 11, 9, 0.4) 14%, transparent 42%),
+    linear-gradient(180deg, var(--bg) 0%, transparent 12%);
 }
 .ab-hero-content {
   position: relative;
@@ -2694,7 +2686,7 @@ img.pixel-art {
     grid-template-columns: repeat(2, 1fr);
   }
   .ab-hero-img {
-    width: 50%;
+    width: 88%; /* 旧 50% */
   }
 }
 @media (max-width: 720px) {
