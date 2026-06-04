@@ -5,6 +5,7 @@ import { caseStudies, profile } from "@/content/content.data";
 import { Lines } from "@/components/Lines";
 import { Shot } from "@/components/mockups";
 import { Gallery } from "@/components/Gallery";
+import { HeroCarousel } from "@/components/HeroCarousel";
 import { ArrowUpRight, Check, icons } from "@/components/icons";
 
 export function generateStaticParams() {
@@ -78,7 +79,11 @@ export default async function CaseStudyPage({ params }: { params: Promise<{ slug
         </div>
         <div className="cs-hero-shot">
           <div className="frame">
-            <Shot mock={cs.shotMock} url={cs.url} />
+            {cs.heroImages && cs.heroImages.length > 0 ? (
+              <HeroCarousel images={cs.heroImages} />
+            ) : (
+              <Shot mock={cs.shotMock} url={cs.url} />
+            )}
           </div>
         </div>
       </section>
