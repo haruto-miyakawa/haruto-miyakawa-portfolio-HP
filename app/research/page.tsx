@@ -26,7 +26,7 @@ export default function ResearchPage() {
       {/* HEADER */}
       <section className="rhead">
         <div className="rhead-img">
-          <img src="/assets/hero.png" alt="Sunset desk scene" />
+          <img src="/assets/hero-Research.png" alt="夕暮れの机（ノートPCと本）" />
         </div>
         <div className="rhead-content">
           <div className="cta-status">

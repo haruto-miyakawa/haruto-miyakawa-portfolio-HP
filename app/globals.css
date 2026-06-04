@@ -72,11 +72,9 @@ a {
   text-decoration: none;
 }
 
-/* pixel-art images render crisp; smooth artwork (lantern, frame) stays default */
+/* pixel-art images render crisp; smooth painterly artwork (lantern, frame, page heroes) stays default */
 .av-photo,
-.hero-img img,
-.rhead-img img,
-.ab-hero-img img {
+img.pixel-art {
   image-rendering: pixelated;
 }
 

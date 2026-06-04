@@ -52,7 +52,7 @@ export function WorksExplorer() {
     <>
       <section className="whead">
         <div className="hero-img">
-          <img src="/assets/hero.png" alt="Sunset scene" />
+          <img src="/assets/hero-Works.png" alt="夕暮れのキャンプ（テントと焚き火）" />
         </div>
         <div className="whead-content">
           <div className="cta-status">

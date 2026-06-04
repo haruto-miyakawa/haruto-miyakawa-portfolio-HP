@@ -36,7 +36,7 @@ export default function HomePage() {
       {/* HERO */}
       <section className="hero">
         <div className="hero-img">
-          <img src="/assets/hero.png" alt="Sunset scene" />
+          <img className="pixel-art" src="/assets/hero.png" alt="Sunset scene" />
         </div>
         <div className="hero-content">
           <div className="hero-hello">{homeHero.hello}</div>

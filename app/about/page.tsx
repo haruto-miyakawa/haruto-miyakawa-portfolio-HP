@@ -20,7 +20,7 @@ export default function AboutPage() {
   return (
     <>
       <div className="ab-hero-img">
-        <img src="/assets/hero.png" alt="Sunset desk scene" />
+        <img src="/assets/hero-AboutMe.png" alt="夕暮れの書斎（ランタンと本）" />
       </div>
 
       {/* BREADCRUMB */}
