@@ -3521,6 +3521,16 @@ a {
 .gal-shot .phone {
   width: 84px;
 }
+/* 実スクリーンショット（通常のWebアプリ画像）。ピクセルアートではないので image-rendering は既定（滑らか） */
+.gal-img {
+  display: block;
+  width: 100%;
+  height: 140px;
+  object-fit: cover;
+  object-position: center top;
+  border-radius: 7px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
 .gal-t {
   font-family: var(--f-jp);
   font-weight: 700;

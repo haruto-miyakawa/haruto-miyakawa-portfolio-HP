@@ -36,7 +36,11 @@ export function Gallery({ items, url }: { items: NonNullable<CaseStudy["gallery"
         {items.map((g, i) => (
           <article key={i} className="gal-card">
             <div className="gal-shot">
-              <Shot mock={g.mock} url={url} />
+              {g.src ? (
+                <img className="gal-img" src={g.src} alt={g.title} />
+              ) : g.mock ? (
+                <Shot mock={g.mock} url={url} />
+              ) : null}
             </div>
             <h4 className="gal-t">{g.title}</h4>
             <p className="gal-d">{g.desc}</p>

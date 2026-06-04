@@ -184,8 +184,9 @@ export interface CaseStudy {
   overview: { label: string; value: string; icon: string; link?: boolean; href?: string; status?: boolean }[];
   highlights: string[];
   relatedLinks: { label: string; href: string }[];
-  /** 実スクショがある場合のみ。無ければギャラリーセクション自体を非表示 */
-  gallery?: { title: string; desc: string; mock: ShotMock }[];
+  /** 実スクショがある場合のみ。無ければギャラリーセクション自体を非表示。
+   *  src（実画像パス）があれば img として表示、無ければ mock（CSSモック）で描画 */
+  gallery?: { title: string; desc: string; src?: string; mock?: ShotMock }[];
   /** 機能ブレイクダウンがある場合のみ。無ければ「主な機能」セクションを非表示 */
   features?: { title: string; desc: string; tags: string[]; mock: ShotMock; reverse: boolean }[];
   stack: { mark: string; name: string }[];
@@ -245,6 +246,23 @@ export const caseStudies: Record<string, CaseStudy> = {
       "マスコット『つむぎ』の5表情で、AIの介入を和らげる",
     ],
     relatedLinks: [{ label: "GitHub リポジトリ", href: "https://github.com/haruto-miyakawa/tsumugu" }],
+    gallery: [
+      {
+        title: "エディタ",
+        desc: "AIの提案をブロック単位で挿入（ブロックリプレース）。マスコット『つむぎ』が編集者として並走する",
+        src: "/projects/tsumugu/editor.png",
+      },
+      {
+        title: "ホーム",
+        desc: "執筆中の下書きを一覧管理。テーマを一行入れると構成案と下書きを生成",
+        src: "/projects/tsumugu/home.png",
+      },
+      {
+        title: "プレビュー",
+        desc: "note公開前の仕上がり確認",
+        src: "/projects/tsumugu/preview.png",
+      },
+    ],
     stack: [
       { mark: "N", name: "Next.js" },
       { mark: "TS", name: "TypeScript" },
