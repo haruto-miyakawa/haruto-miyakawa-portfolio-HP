@@ -1176,11 +1176,18 @@ img.pixel-art {
 }
 .wthumb {
   position: relative;
-  height: 150px;
+  aspect-ratio: 16 / 9; /* 旧: height: 150px。全カード共通の 16:9 でサムネ高さを揃える */
   border-radius: 9px;
   overflow: hidden;
   background: #0f1115;
   border: 1px solid rgba(255, 255, 255, 0.05);
+}
+/* 将来の実スクショは枠を cover で満たす（現状のモックは .mk が inset:0 で充填） */
+.wthumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 .wbadge {
   position: absolute;
