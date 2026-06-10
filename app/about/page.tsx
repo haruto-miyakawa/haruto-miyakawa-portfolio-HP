@@ -5,7 +5,7 @@ import { Lines } from "@/components/Lines";
 import { icons } from "@/components/icons";
 
 export const metadata: Metadata = {
-  title: "About — Haruto Miyakawa",
+  title: "About",
   description: "妥協なき創作を、誠実に。Web Engineer / AI Builder, Haruto Miyakawa の自己紹介。",
 };
 
@@ -20,7 +20,7 @@ export default function AboutPage() {
   return (
     <>
       <div className="ab-hero-img">
-        <img src="/assets/hero-AboutMe.png" alt="夕暮れの書斎（ランタンと本）" />
+        <img src="/assets/hero-AboutMe.webp" alt="夕暮れの書斎（ランタンと本）" decoding="async" fetchPriority="high" />
       </div>
 
       {/* BREADCRUMB */}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { publications, researchTabs, type PaperBadge } from "@/content/content.data";
 import { ResearchThumb } from "@/components/mockups";
@@ -85,9 +86,9 @@ export function ResearchGrid() {
               </div>
               <div className="rc-foot">
                 <span className="rc-venue">{pub.venue}</span>
-                <a className="rc-link" href="#">
+                <Link className="rc-link" href={`/research/${pub.slug}`}>
                   {pub.linkLabel} <ArrowRight />
-                </a>
+                </Link>
               </div>
             </article>
           );

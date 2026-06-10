@@ -36,7 +36,7 @@ export default function HomePage() {
       {/* HERO */}
       <section className="hero">
         <div className="hero-img">
-          <img className="pixel-art" src="/assets/hero.png" alt="Sunset scene" />
+          <img className="pixel-art" src="/assets/hero.webp" alt="夕暮れの風景" decoding="async" fetchPriority="high" />
         </div>
         <div className="hero-content">
           <div className="hero-hello">{homeHero.hello}</div>

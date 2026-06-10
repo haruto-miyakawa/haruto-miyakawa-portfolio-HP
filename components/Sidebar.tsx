@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { navItems, profile, type NavKey } from "@/content/content.data";
-import { navIcons } from "@/components/icons";
+import { navIcons, GithubIcon, XIcon, MailIcon } from "@/components/icons";
 import { Lines } from "@/components/Lines";
 
 function activeKey(pathname: string): NavKey {
@@ -18,39 +18,62 @@ export function Sidebar() {
   const pathname = usePathname();
   const current = activeKey(pathname);
   const [open, setOpen] = useState(false);
+  const drawerRef = useRef<HTMLElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
 
   // ルート遷移したらドロワーを閉じる
   useEffect(() => {
     setOpen(false);
   }, [pathname]);
 
-  // ドロワー展開中は背面スクロールをロックし、Esc で閉じる
+  // 展開中: 背面スクロールをロック / フォーカスをドロワー内にトラップ / Escで閉じる / 閉じたらトリガーへ復帰
   useEffect(() => {
     if (!open) return;
+    const drawer = drawerRef.current;
+    const trigger = triggerRef.current;
+    const focusables = drawer
+      ? Array.from(drawer.querySelectorAll<HTMLElement>('a[href], button, [tabindex]:not([tabindex="-1"])'))
+      : [];
+    focusables[0]?.focus();
+
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
+      if (e.key === "Escape") {
+        setOpen(false);
+        return;
+      }
+      if (e.key !== "Tab" || focusables.length === 0) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
     };
     document.addEventListener("keydown", onKey);
-    const prev = document.body.style.overflow;
+    const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => {
       document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = prev;
+      document.body.style.overflow = prevOverflow;
+      trigger?.focus();
     };
   }, [open]);
 
   const contactLinks = (
     <div className="contact">
       <a href={profile.githubUrl} target="_blank" rel="noopener noreferrer">
-        <img className="ic-img" src="/assets/github.png" alt="" />
+        <GithubIcon />
         GitHub
       </a>
       <a href={profile.xUrl} target="_blank" rel="noopener noreferrer">
-        <img className="ic-img" src="/assets/x.png" alt="" />
+        <XIcon />
         X (Twitter)
       </a>
       <a href={`mailto:${profile.email}`}>
-        <img className="ic-img" src="/assets/mail.png" alt="" />
+        <MailIcon />
         Mail
       </a>
     </div>
@@ -88,7 +111,7 @@ export function Sidebar() {
         </div>
 
         <div className="lantern-wrap">
-          <img src="/assets/lantern.png" alt="" />
+          <img src="/assets/lantern.webp" alt="" loading="lazy" decoding="async" />
         </div>
       </aside>
 
@@ -99,6 +122,7 @@ export function Sidebar() {
           <span className="tb-name">{profile.name}</span>
         </Link>
         <button
+          ref={triggerRef}
           type="button"
           className={`menu-btn${open ? " open" : ""}`}
           aria-label={open ? "メニューを閉じる" : "メニューを開く"}
@@ -115,6 +139,7 @@ export function Sidebar() {
       {/* ===== モバイル：ドロワー ＋ 背面オーバーレイ ===== */}
       <div className={`drawer-backdrop${open ? " open" : ""}`} onClick={() => setOpen(false)} aria-hidden="true" />
       <aside
+        ref={drawerRef}
         id="mobile-drawer"
         className={`drawer${open ? " open" : ""}`}
         role="dialog"

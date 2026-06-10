@@ -7,7 +7,7 @@ import { ArrowRight, icons } from "@/components/icons";
 import { researchHero, featuredResearch, researchAreas, researchHighlights } from "@/content/content.data";
 
 export const metadata: Metadata = {
-  title: "Research — Haruto Miyakawa",
+  title: "Research",
   description: "探究心を原動力に、実世界の課題解決を目指した研究を行っています。査読付き国際会議での発表と進行中の研究。",
 };
 
@@ -26,7 +26,7 @@ export default function ResearchPage() {
       {/* HEADER */}
       <section className="rhead">
         <div className="rhead-img">
-          <img src="/assets/hero-Research.png" alt="夕暮れの机（ノートPCと本）" />
+          <img src="/assets/hero-Research.webp" alt="夕暮れの机（ノートPCと本）" decoding="async" fetchPriority="high" />
         </div>
         <div className="rhead-content">
           <div className="cta-status">
@@ -97,10 +97,6 @@ export default function ResearchPage() {
           </CardLink>
 
           <ResearchGrid />
-
-          <a className="see-all" href="#">
-            すべての研究を見る <ArrowRight />
-          </a>
         </div>
 
         {/* RIGHT RAIL */}
@@ -141,9 +137,6 @@ export default function ResearchPage() {
               ))}
             </div>
           </section>
-          <a className="cv-link" href="#">
-            CV / Publications <ArrowRight />
-          </a>
         </aside>
       </div>
     </>

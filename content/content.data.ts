@@ -87,7 +87,7 @@ export const featuredWorks: FeaturedWork[] = [
     description: "note creators向けのAI共同執筆エディタ。書き手のリズムを崩さず、隣で支える。",
     tags: ["Next.js", "TypeScript", "React", "Tiptap", "Claude API", "Tailwind CSS"],
     mock: "dash",
-    thumb: "/projects/tsumugu/home.png",
+    thumb: "/projects/tsumugu/home.webp",
   },
   {
     badge: "Tool",
@@ -115,7 +115,7 @@ export const works: Work[] = [
     description: "note creators向けのAI共同執筆エディタ。書き手のリズムを崩さず、隣で支える。",
     tags: ["Next.js", "TypeScript", "React", "Tiptap", "Claude API", "Tailwind CSS"],
     mock: "dash",
-    thumb: "/projects/tsumugu/home.png",
+    thumb: "/projects/tsumugu/home.webp",
     footRight: "Case Study",
     hasCaseStudy: true,
   },
@@ -255,9 +255,9 @@ export const caseStudies: Record<string, CaseStudy> = {
     ],
     relatedLinks: [{ label: "GitHub リポジトリ", href: "https://github.com/haruto-miyakawa/tsumugu" }],
     heroImages: [
-      { src: "/projects/tsumugu/editor.png", caption: "エディタ — AIの提案をブロック単位で挿入（ブロックリプレース）" },
-      { src: "/projects/tsumugu/home.png", caption: "ホーム — 下書きの一覧管理とテーマからの自動生成" },
-      { src: "/projects/tsumugu/preview.png", caption: "プレビュー — note公開前の仕上がり確認" },
+      { src: "/projects/tsumugu/editor.webp", caption: "エディタ — AIの提案をブロック単位で挿入（ブロックリプレース）" },
+      { src: "/projects/tsumugu/home.webp", caption: "ホーム — 下書きの一覧管理とテーマからの自動生成" },
+      { src: "/projects/tsumugu/preview.webp", caption: "プレビュー — note公開前の仕上がり確認" },
     ],
     stack: [
       { mark: "N", name: "Next.js" },
