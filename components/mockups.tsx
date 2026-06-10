@@ -170,6 +170,29 @@ export function WorkMockView({ mock }: { mock: WorkMock }) {
 }
 
 /* ============================================================
+   Work カードのサムネ（実スクショ or ブランド代替タイル）
+   ============================================================ */
+const WORK_MONO: Record<string, string> = {
+  "つむぐ": "つ",
+  "講義議事録ジェネレーター": "講",
+  "家電ガイド": "家",
+};
+const BADGE_HUE: Record<string, string> = { Web: "web", Tool: "tool", AI: "ai" };
+
+export function WorkThumb({ title, badge, thumb }: { title: string; badge: string; thumb?: string }) {
+  if (thumb) {
+    return <img src={thumb} alt={`${title} のスクリーンショット`} loading="lazy" />;
+  }
+  const hue = BADGE_HUE[badge] ?? "web";
+  const mono = WORK_MONO[title] ?? title.slice(0, 1);
+  return (
+    <div className={`bt bt-${hue}`} aria-hidden="true">
+      <span className="bt-mono">{mono}</span>
+    </div>
+  );
+}
+
+/* ============================================================
    Research カードのサムネイル（.rth.th-*）
    ============================================================ */
 export function ResearchThumb({ type }: { type: PaperThumb }) {
@@ -178,11 +201,11 @@ export function ResearchThumb({ type }: { type: PaperThumb }) {
       return (
         <div className="rth th-cubes">
           {[
-            { x: "18%", y: "55%", c: "#5ad1c8", r: "-12deg" },
-            { x: "38%", y: "38%", c: "#e85ad1", r: "8deg" },
-            { x: "55%", y: "60%", c: "#9b7bff", r: "-6deg" },
-            { x: "70%", y: "42%", c: "#5ad17e", r: "14deg" },
-            { x: "84%", y: "62%", c: "#e8a05a", r: "-10deg" },
+            { x: "18%", y: "55%", c: "#e8924f", r: "-12deg" },
+            { x: "38%", y: "38%", c: "#f0b54f", r: "8deg" },
+            { x: "55%", y: "60%", c: "#a586ff", r: "-6deg" },
+            { x: "70%", y: "42%", c: "#df7a72", r: "14deg" },
+            { x: "84%", y: "62%", c: "#8b86e0", r: "-10deg" },
           ].map((cb, i) => (
             <span key={i} className="cb" style={cssVars({ "--x": cb.x, "--y": cb.y, "--c": cb.c, "--r": cb.r })} />
           ))}
@@ -192,10 +215,10 @@ export function ResearchThumb({ type }: { type: PaperThumb }) {
       return (
         <div className="rth th-traffic">
           {[
-            { a: "18deg", t: "30%", c: "#5aa8ff" },
-            { a: "-12deg", t: "50%", c: "#7be0ff" },
-            { a: "8deg", t: "68%", c: "#ff6a5a" },
-            { a: "24deg", t: "80%", c: "#5aa8ff" },
+            { a: "18deg", t: "30%", c: "#e8924f" },
+            { a: "-12deg", t: "50%", c: "#f0b54f" },
+            { a: "8deg", t: "68%", c: "#df7a72" },
+            { a: "24deg", t: "80%", c: "#a586ff" },
           ].map((tl, i) => (
             <span key={i} className="tl" style={cssVars({ "--a": tl.a, "--t": tl.t, "--c": tl.c })} />
           ))}

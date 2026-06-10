@@ -31,17 +31,42 @@
   --surface: #1a1411;
   --surface-2: #211915;
   --card: #181210;
-  --border: rgba(255, 240, 230, 0.07);
-  --border-2: rgba(255, 240, 230, 0.1);
+  --border: rgba(255, 240, 230, 0.09); /* 旧 0.07: カード境界を視認しやすく */
+  --border-2: rgba(255, 240, 230, 0.14); /* 旧 0.10 */
   --text: #ece3da;
-  --text-2: #b9ada2;
-  --text-3: #8a7d72;
-  --text-faint: #6f635a;
+  --text-2: #c0b5aa; /* 旧 #b9ada2 */
+  --text-3: #a99d90; /* 旧 #8a7d72: 本文コントラストを AA まで引き上げ */
+  --text-faint: #897c6f; /* 旧 #6f635a: キャプションの可読性確保 */
   --accent: #e8924f;
   --accent-2: #f0a766;
   --accent-soft: rgba(232, 146, 79, 0.14);
   --accent-line: rgba(232, 146, 79, 0.3);
-  --radius: 12px;
+
+  /* ---- スケール（プロ仕上げ用 / 2026-06-11 追加） ---- */
+  /* 角丸 */
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 16px;
+  --r-xl: 20px;
+  --r-pill: 999px;
+  --radius: 12px; /* 後方互換（既存ルールが参照） */
+
+  /* 余白（4pt グリッド） */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 24px;
+  --sp-6: 32px;
+  --sp-7: 48px;
+  --sp-8: 64px;
+  --sp-9: 88px;
+
+  /* エレベーション（影）の段階 */
+  --sh-1: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --sh-2: 0 8px 24px rgba(0, 0, 0, 0.28);
+  --sh-3: 0 22px 50px rgba(0, 0, 0, 0.42);
+  --sh-accent: 0 12px 36px rgba(232, 146, 79, 0.13);
 
   --f-head: var(--font-space-grotesk), "Space Grotesk", sans-serif;
   --f-jp: var(--font-zen-kaku), "Zen Kaku Gothic New", sans-serif;
@@ -62,6 +87,7 @@ body {
   color: var(--text);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  overflow-x: clip; /* オフスクリーンのモバイルドロワーで横スクロールが出ないようにクリップ（sticky は維持） */
 }
 ::selection {
   background: var(--accent-soft);
@@ -1046,9 +1072,10 @@ img.pixel-art {
   .shell {
     grid-template-columns: 1fr;
   }
+  /* 旧: .sidebar { position: static; height: auto } でサイドバー全体を上に積んでいた。
+     モバイルでは下の .topbar + .drawer に置き換えるため非表示にする。 */
   .sidebar {
-    position: static;
-    height: auto;
+    display: none;
   }
   .hero-img {
     position: static;
@@ -2205,7 +2232,7 @@ img.pixel-art {
   overflow: hidden;
 }
 .th-cubes {
-  background: radial-gradient(120% 120% at 50% 30%, #1b2436, #0b0f18);
+  background: radial-gradient(120% 120% at 50% 30%, #261a2c, #0f0a12); /* 旧: 寒色ネイビー #1b2436→#0b0f18。夕暮れのダスクに */
 }
 .th-cubes .cb {
   position: absolute;
@@ -2226,15 +2253,15 @@ img.pixel-art {
   border-radius: 2px;
 }
 .th-traffic {
-  background: linear-gradient(180deg, #0a1626, #091020);
+  background: linear-gradient(180deg, #1c1320, #0d0a12); /* 旧: 寒色ネイビー #0a1626→#091020 */
 }
 .th-traffic::before {
   content: "";
   position: absolute;
   inset: 0;
   background-image:
-    linear-gradient(rgba(90, 168, 255, 0.07) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(90, 168, 255, 0.07) 1px, transparent 1px);
+    linear-gradient(rgba(232, 146, 79, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(232, 146, 79, 0.06) 1px, transparent 1px);
   background-size: 22px 22px;
 }
 .th-traffic .tl {
@@ -4625,4 +4652,708 @@ img.pixel-art {
     flex-direction: column;
     align-items: flex-start;
   }
+}
+
+/* =========================================================================
+   RICH ANIMATIONS（追加: 2026-06-11）
+   - 既存のレイアウト/カラー/構造はそのまま。装飾的なモーションのみを付与。
+   - 大きな動きは @media (prefers-reduced-motion: no-preference) 内に限定。
+   - スクロール演出は @supports (animation-timeline: view()) でガード。
+     非対応ブラウザ（Firefox 等）では初期状態＝全表示なので安全にデグレ。
+   - カードの出現は transform ではなく translate プロパティを使い、
+     既存の :hover { transform: translateY(...) } と干渉しないようにしている。
+   ========================================================================= */
+
+@keyframes hpRise {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes hpImg {
+  from {
+    opacity: 0;
+    transform: scale(1.045);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes hpReveal {
+  from {
+    opacity: 0;
+    translate: 0 22px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+@keyframes hpSheen {
+  from {
+    left: -60%;
+  }
+  to {
+    left: 130%;
+  }
+}
+
+/* --- 色のみのホバー（モーションではないので reduced-motion でも維持） --- */
+.chip {
+  transition: border-color 0.18s ease, color 0.18s ease, background-color 0.18s ease;
+}
+.chip:hover {
+  border-color: var(--accent-line);
+  color: var(--accent);
+}
+
+/* カード hover にアクセントのグローを重ねる（影のみ強化。border/transform は既存ルールのまま）。
+   旧: .work/.wcard = 0 18px 40px rgba(0,0,0,.35) / .rcard = 0 16px 38px rgba(0,0,0,.34)
+       .feat-paper = 0 18px 44px rgba(0,0,0,.35) */
+.work:hover,
+.wcard:hover {
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35), 0 8px 30px rgba(232, 146, 79, 0.12);
+}
+.rcard:hover {
+  box-shadow: 0 16px 38px rgba(0, 0, 0, 0.34), 0 8px 28px rgba(232, 146, 79, 0.12);
+}
+.feat-paper:hover {
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.35), 0 10px 34px rgba(232, 146, 79, 0.12);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* === 1) ページ読み込み時の入場（ファーストビュー） === */
+  /* hero/各ヘッダーの写真は淡くフェード＋微ズームで現れる */
+  .hero-img img,
+  .rhead-img img,
+  .ab-hero-img img {
+    animation: hpImg 1s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+  }
+  /* ヘッダー内テキストを下から順番にせり上げる */
+  .hero-content > *,
+  .whead-content > *,
+  .rhead-content > *,
+  .ab-hero-content > * {
+    animation: hpRise 0.7s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+  }
+  :is(.hero-content, .whead-content, .rhead-content, .ab-hero-content) > *:nth-child(1) {
+    animation-delay: 0.05s;
+  }
+  :is(.hero-content, .whead-content, .rhead-content, .ab-hero-content) > *:nth-child(2) {
+    animation-delay: 0.13s;
+  }
+  :is(.hero-content, .whead-content, .rhead-content, .ab-hero-content) > *:nth-child(3) {
+    animation-delay: 0.21s;
+  }
+  :is(.hero-content, .whead-content, .rhead-content, .ab-hero-content) > *:nth-child(4) {
+    animation-delay: 0.29s;
+  }
+  :is(.hero-content, .whead-content, .rhead-content, .ab-hero-content) > *:nth-child(5) {
+    animation-delay: 0.37s;
+  }
+  :is(.hero-content, .whead-content, .rhead-content, .ab-hero-content) > *:nth-child(6) {
+    animation-delay: 0.45s;
+  }
+  .crumbs {
+    animation: hpRise 0.6s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+  }
+
+  /* === 2) ホバーのマイクロインタラクション === */
+  /* サムネ内のモック/画像をゆっくりズーム（枠は overflow:hidden でクリップ済み） */
+  .thumb .mk,
+  .thumb img,
+  .wthumb .mk,
+  .wthumb img,
+  .rthumb .rth {
+    transition: transform 0.5s cubic-bezier(0.22, 0.61, 0.36, 1);
+  }
+  .work:hover .thumb .mk,
+  .work:hover .thumb img,
+  .wcard:hover .wthumb .mk,
+  .wcard:hover .wthumb img,
+  .rcard:hover .rthumb .rth {
+    transform: scale(1.06);
+  }
+
+  /* feat-paper も他カード同様に少し持ち上げる（出現は translate プロパティなので非干渉） */
+  .feat-paper:hover {
+    transform: translateY(-3px);
+  }
+
+  /* サイドナビをホバーでわずかにスライド */
+  .nav-item:hover {
+    transform: translateX(3px);
+  }
+
+  /* primary ボタンに光沢の走り（シーン）を一度だけ通す */
+  .btn-primary {
+    position: relative;
+    overflow: hidden;
+  }
+  .btn-primary::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -60%;
+    width: 40%;
+    height: 100%;
+    background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.42), transparent);
+    transform: skewX(-18deg);
+    pointer-events: none;
+  }
+  .btn-primary:hover::before {
+    animation: hpSheen 0.7s ease;
+  }
+
+  /* === 3) スクロール連動の出現演出（対応ブラウザのみ） === */
+  @supports (animation-timeline: view()) {
+    /* ブロック単位：ホバーで transform を持たない要素をまとめてせり上げ */
+    .col-left > section,
+    .col-right > section,
+    .feat-paper,
+    .re-main > .sec-head,
+    .re-rail > section,
+    .filter {
+      animation: hpReveal 0.8s ease-out both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 38%;
+    }
+    /* カード単位：opacity + translate プロパティ（hover の transform と独立） */
+    .works-grid .wcard,
+    .rgrid .rcard,
+    .ab-cards .ab-card {
+      animation: hpReveal 0.7s ease-out both;
+      animation-timeline: view();
+      animation-range: entry 2% entry 40%;
+    }
+    /* 同一行を左→右へ少しずつ遅らせてカスケードさせる */
+    :is(.works-grid .wcard, .rgrid .rcard, .ab-cards .ab-card):nth-child(3n + 2) {
+      animation-range: entry 9% entry 47%;
+    }
+    :is(.works-grid .wcard, .rgrid .rcard, .ab-cards .ab-card):nth-child(3n + 3) {
+      animation-range: entry 16% entry 54%;
+    }
+  }
+}
+
+/* =========================================================================
+   MOBILE NAV（追加: 2026-06-11）
+   - デスクトップは従来の .sidebar のまま。≤920px で .sidebar を隠し、
+     代わりに sticky な .topbar ＋ スライドイン .drawer を表示する。
+   - オフスクリーン時は visibility:hidden でフォーカス不可、body は overflow-x:clip。
+   ========================================================================= */
+.topbar {
+  display: none; /* ≤920px で flex に */
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 16px;
+  padding-top: max(10px, env(safe-area-inset-top));
+  background: linear-gradient(180deg, rgba(14, 10, 8, 0.96), rgba(11, 7, 6, 0.9));
+  border-bottom: 1px solid var(--sidebar-line);
+  backdrop-filter: blur(10px);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+.tb-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.tb-av {
+  width: 34px;
+  height: 34px;
+  flex: none;
+  border-radius: 8px;
+  object-fit: cover;
+  object-position: center 26%;
+  border: 1px solid var(--accent-line);
+}
+.tb-name {
+  font-family: var(--f-head);
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.menu-btn {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border-2);
+  border-radius: 10px;
+  cursor: pointer;
+}
+.menu-btn span {
+  display: block;
+  width: 20px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--text);
+  transition: transform 0.26s ease, opacity 0.2s ease;
+}
+.menu-btn.open span:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+.menu-btn.open span:nth-child(2) {
+  opacity: 0;
+}
+.menu-btn.open span:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
+.drawer-backdrop {
+  display: none; /* ≤920px で block に */
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  background: rgba(8, 5, 4, 0.6);
+  backdrop-filter: blur(2px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.drawer-backdrop.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.drawer {
+  display: none; /* ≤920px で flex に */
+  position: fixed;
+  top: 0;
+  right: 0;
+  z-index: 90;
+  height: 100dvh;
+  width: min(86vw, 330px);
+  flex-direction: column;
+  gap: 26px;
+  padding: 22px 20px calc(22px + env(safe-area-inset-bottom));
+  padding-top: max(22px, env(safe-area-inset-top));
+  background: linear-gradient(180deg, #0e0a08, #0b0706);
+  border-left: 1px solid var(--sidebar-line);
+  box-shadow: -18px 0 50px rgba(0, 0, 0, 0.5);
+  overflow-y: auto;
+  visibility: hidden;
+  transform: translateX(100%);
+  transition: transform 0.32s cubic-bezier(0.22, 0.61, 0.36, 1), visibility 0s linear 0.32s;
+}
+.drawer.open {
+  visibility: visible;
+  transform: translateX(0);
+  transition: transform 0.32s cubic-bezier(0.22, 0.61, 0.36, 1), visibility 0s linear 0s;
+}
+.drawer-id .id-name {
+  font-size: 22px;
+}
+.drawer-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.drawer-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px;
+  border-radius: 12px;
+  font-size: 16px;
+  color: var(--text-2);
+  border: 1px solid transparent;
+  transition: 0.18s ease;
+}
+.drawer-item svg {
+  width: 20px;
+  height: 20px;
+  flex: none;
+  color: var(--text-3);
+}
+.drawer-item:active {
+  background: rgba(255, 255, 255, 0.04);
+}
+.drawer-item.active {
+  background: linear-gradient(180deg, rgba(232, 146, 79, 0.13), rgba(232, 146, 79, 0.06));
+  border-color: rgba(232, 146, 79, 0.22);
+  color: #fff;
+  font-weight: 500;
+}
+.drawer-item.active svg {
+  color: var(--accent);
+}
+.drawer-contact {
+  margin-top: auto;
+}
+
+@media (max-width: 920px) {
+  .topbar {
+    display: flex;
+  }
+  .drawer-backdrop {
+    display: block;
+  }
+  .drawer {
+    display: flex;
+  }
+  /* sticky な topbar の高さ分、アンカー(#works 等)のスクロール先をずらす */
+  html {
+    scroll-padding-top: 72px;
+  }
+}
+
+/* =========================================================================
+   PHONE POLISH（追加: 2026-06-11）スマホ幅での余白・タイポ・カラム調整
+   ========================================================================= */
+@media (max-width: 600px) {
+  .main {
+    padding: 18px 16px 56px; /* 旧 30px 44px 60px */
+  }
+
+  /* 大きすぎる見出しを端末幅に合わせて縮小 */
+  .hero-h1 {
+    font-size: 38px; /* 旧(≤920) 48px */
+  }
+  .hero-jp {
+    font-size: 20px; /* 旧 24px */
+    margin-top: 18px;
+  }
+  .hero-body {
+    font-size: 15px;
+  }
+  .whead-title {
+    font-size: 38px; /* 旧(≤820) 46px */
+  }
+  .rhead-title {
+    font-size: 36px; /* 旧(≤900) 44px */
+  }
+  .ab-title {
+    font-size: 38px; /* 旧(≤720) 46px */
+  }
+  .ab-catch {
+    font-size: 19px; /* 旧 22px */
+  }
+  .sec-title {
+    font-size: 19px; /* 旧 22px */
+  }
+  .cta-head {
+    font-size: 22px; /* 旧 27px */
+  }
+  .fp-title {
+    font-size: 22px; /* 旧 27px */
+  }
+
+  /* hero バナーを少し低く */
+  .hero-img {
+    height: 200px; /* 旧(≤920) 240px */
+  }
+  .whead .hero-img,
+  .rhead-img,
+  .ab-hero-img {
+    height: 168px; /* 旧 200/180/200px */
+  }
+
+  /* カード/バナーの内側余白を詰める */
+  .cta-banner {
+    padding: 22px 18px; /* 旧 26px 30px */
+  }
+  .ab-card {
+    padding: 20px 16px; /* 旧 24px 22px */
+  }
+  .fp-body {
+    padding: 22px 18px; /* 旧 26px 28px */
+  }
+
+  /* 詳細ページの多カラムをスマホで1カラムに畳む */
+  .cs-hero,
+  .cs-grid,
+  .pd-results,
+  .pd-abl-grid,
+  .cso,
+  .pd-related {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  .cso-arrow {
+    transform: rotate(90deg);
+    justify-self: center;
+  }
+  .meta-strip {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .snap-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 400px) {
+  .main {
+    padding: 16px 13px 52px;
+  }
+  .hero-h1 {
+    font-size: 33px;
+  }
+  .whead-title,
+  .ab-title {
+    font-size: 33px;
+  }
+  .rhead-title {
+    font-size: 31px;
+  }
+  .tb-name {
+    font-size: 16px;
+  }
+}
+
+/* =========================================================================
+   PRO PASS（追加: 2026-06-11）— 世界観は維持したままスタジオ品質へ底上げ
+   - コントラスト/可読性、フォーカス可視化、スクロールバー
+   - 角丸・影・境界の統一（トークン化）
+   - 装飾（グロー/点滅）のトーンダウン
+   - 余白リズムの拡張（デスクトップのみ。モバイルは既存の調整を尊重）
+   ========================================================================= */
+
+/* ---- 基本のリズム ---- */
+body {
+  line-height: 1.6;
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ---- フォーカス可視化（キーボード操作の a11y） ---- */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+.nav-item:focus-visible,
+.drawer-item:focus-visible,
+.btn:focus-visible {
+  outline-offset: 3px;
+}
+
+/* ---- スクロールバーを世界観に馴染ませる ---- */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(232, 146, 79, 0.28) transparent;
+}
+::-webkit-scrollbar {
+  width: 11px;
+  height: 11px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(232, 146, 79, 0.26);
+  border: 3px solid transparent;
+  border-radius: 999px;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(232, 146, 79, 0.42);
+  background-clip: padding-box;
+}
+
+/* ---- 角丸の統一（スケールに寄せる） ---- */
+.work,
+.wcard,
+.rcard,
+.ab-card,
+.feat-paper,
+.cta-banner {
+  border-radius: var(--r-lg); /* 旧 14/16px 混在 → 16px に統一 */
+}
+.thumb,
+.wthumb,
+.rthumb {
+  border-radius: var(--r-md); /* 旧 9px → 12px */
+}
+.chip {
+  border-radius: var(--r-sm); /* 旧 6px → 8px */
+  padding: 5px 10px;
+}
+.btn {
+  border-radius: var(--r-md); /* 旧 11px → 12px */
+  font-weight: 600;
+}
+.thumb-badge,
+.wbadge,
+.rvbadge,
+.rstatus,
+.fp-badge {
+  border-radius: var(--r-sm);
+}
+
+/* ---- エレベーションの統一（静止 → ホバーの段階） ---- */
+.work,
+.wcard,
+.rcard,
+.ab-card,
+.feat-paper {
+  box-shadow: var(--sh-1);
+}
+.work:hover,
+.wcard:hover,
+.rcard:hover,
+.feat-paper:hover {
+  box-shadow: var(--sh-3), var(--sh-accent); /* 旧: ばらばらの drop shadow を統一 */
+}
+
+/* ---- 装飾のトーンダウン（個性は残しつつ過剰な点滅/グローを抑制） ---- */
+/* ロウソク的な激しい揺れ → ゆっくりした呼吸に作り替え（同名キーフレームを上書き） */
+@keyframes flicker {
+  0%,
+  100% {
+    opacity: 0.82;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+.cta-glow {
+  opacity: 0.7; /* 旧: 実質 1。グローを控えめに */
+  filter: blur(12px);
+}
+.lantern-wrap::after {
+  opacity: 0.82;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* モーション抑制時はグローの明滅も止める */
+  .cta-glow,
+  .lantern-wrap::after,
+  .cta-dot,
+  .avail-dot {
+    animation: none;
+  }
+}
+
+/* ---- 余白リズムの拡張（デスクトップのみ） ---- */
+@media (min-width: 921px) {
+  .main {
+    padding: 40px 56px 80px; /* 旧 30px 44px 60px */
+  }
+  .lower {
+    gap: 56px; /* 旧 46px */
+    margin-top: 60px; /* 旧 54px */
+  }
+  .col-left {
+    gap: 60px; /* 旧 54px */
+  }
+  .col-right {
+    gap: 48px; /* 旧 42px */
+  }
+  .hero-content {
+    padding-top: 20px; /* 旧 14px */
+  }
+}
+
+/* =========================================================================
+   PASS 2: 作品サムネ刷新（実スクショ ＋ ブランド代替タイル / 2026-06-11）
+   - tsumugu は実スクショ <img>。他はダッシュボード風モックを廃し、
+     温かいグラデ＋微グリッド＋大きな和文モノグラムの「ブランドタイル」に。
+   - 全サムネで同じフレーム（内枠・角丸・ホバーズーム）を共有して統一感を出す。
+   ========================================================================= */
+.thumb,
+.wthumb {
+  container-type: inline-size; /* モノグラムをカード幅に追従させる */
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.045); /* 全サムネ共通の上品な内枠 */
+}
+.bt {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: linear-gradient(155deg, #1e1612 0%, #130d0a 72%);
+}
+.bt::before {
+  /* コーナーのソフトグロー（色相は variant 依存） */
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(95% 95% at 18% 8%, var(--bt-glow), transparent 60%);
+}
+.bt::after {
+  /* 方眼テクスチャ（右下へフェード） */
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 22px 22px;
+  -webkit-mask-image: radial-gradient(125% 92% at 80% 100%, #000, transparent 72%);
+  mask-image: radial-gradient(125% 92% at 80% 100%, #000, transparent 72%);
+}
+.bt-mono {
+  position: relative;
+  z-index: 1;
+  font-family: var(--f-jp);
+  font-weight: 700;
+  font-size: clamp(50px, 27cqw, 112px);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--bt-fg);
+  text-shadow: 0 6px 34px rgba(0, 0, 0, 0.45);
+}
+.bt-web {
+  --bt-glow: rgba(232, 146, 79, 0.3);
+  --bt-fg: rgba(242, 186, 130, 0.9);
+}
+.bt-tool {
+  --bt-glow: rgba(240, 181, 79, 0.26);
+  --bt-fg: rgba(245, 205, 140, 0.9);
+}
+.bt-ai {
+  --bt-glow: rgba(165, 134, 255, 0.26);
+  --bt-fg: rgba(199, 181, 255, 0.9);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* ブランドタイルも実スクショと同様にホバーでゆっくりズーム */
+  .thumb .bt,
+  .wthumb .bt {
+    transition: transform 0.5s cubic-bezier(0.22, 0.61, 0.36, 1);
+  }
+  .work:hover .thumb .bt,
+  .wcard:hover .wthumb .bt {
+    transform: scale(1.05);
+  }
+}
+
+/* =========================================================================
+   PASS 3: ページ別の詰め（2026-06-11）
+   ========================================================================= */
+/* Home hero のeyebrowに編集的なアクセント罫線を添える */
+.hero-hello {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+.hero-hello::before {
+  content: "";
+  width: 26px;
+  height: 1.5px;
+  flex: none;
+  background: var(--accent);
+}
+/* タグチップの角丸をスケールに統一 */
+.tagchip {
+  border-radius: var(--r-sm); /* 旧 7px */
 }

@@ -59,6 +59,8 @@ export interface FeaturedWork {
   description: string;
   tags: string[];
   mock: WorkMock;
+  /** 実スクショのサムネ（あれば mock タイルより優先） */
+  thumb?: string;
 }
 
 export interface Work {
@@ -69,6 +71,8 @@ export interface Work {
   description: string;
   tags: string[];
   mock: WorkMock;
+  /** 実スクショのサムネ（あれば mock タイルより優先） */
+  thumb?: string;
   /** カード右下リンクのラベル */
   footRight: "Case Study" | "GitHub";
   /** 詳細（ケーススタディ）ページを持つか */
@@ -83,6 +87,7 @@ export const featuredWorks: FeaturedWork[] = [
     description: "note creators向けのAI共同執筆エディタ。書き手のリズムを崩さず、隣で支える。",
     tags: ["Next.js", "TypeScript", "React", "Tiptap", "Claude API", "Tailwind CSS"],
     mock: "dash",
+    thumb: "/projects/tsumugu/home.png",
   },
   {
     badge: "Tool",
@@ -110,6 +115,7 @@ export const works: Work[] = [
     description: "note creators向けのAI共同執筆エディタ。書き手のリズムを崩さず、隣で支える。",
     tags: ["Next.js", "TypeScript", "React", "Tiptap", "Claude API", "Tailwind CSS"],
     mock: "dash",
+    thumb: "/projects/tsumugu/home.png",
     footRight: "Case Study",
     hasCaseStudy: true,
   },

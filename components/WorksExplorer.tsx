@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { works, workCategories } from "@/content/content.data";
-import { WorkMockView } from "@/components/mockups";
+import { WorkThumb } from "@/components/mockups";
 import { ArrowRight, PlusCircle } from "@/components/icons";
 
 export function WorksExplorer() {
@@ -96,7 +96,7 @@ export function WorksExplorer() {
                     <span className="bdot" />
                     {work.badge}
                   </span>
-                  <WorkMockView mock={work.mock} />
+                  <WorkThumb title={work.title} badge={work.badge} thumb={work.thumb} />
                 </div>
                 <h3 className="wtitle">{work.title}</h3>
                 <p className="wdesc">{work.description}</p>

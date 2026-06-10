@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { SectionHead } from "@/components/SectionHead";
-import { WorkMockView } from "@/components/mockups";
+import { WorkThumb } from "@/components/mockups";
 import { Lines } from "@/components/Lines";
 import { ArrowRight, homeTechIcons } from "@/components/icons";
 import { featuredWorks, homeHero, homeAbout, homeTech, processSteps, profile } from "@/content/content.data";
@@ -75,7 +75,7 @@ export default function HomePage() {
                 <article key={work.title} className="work">
                   <div className="thumb">
                     <span className="thumb-badge">{work.badge}</span>
-                    <WorkMockView mock={work.mock} />
+                    <WorkThumb title={work.title} badge={work.badge} thumb={work.thumb} />
                   </div>
                   <h3 className="work-title">{work.title}</h3>
                   <p className="work-desc">{work.description}</p>
