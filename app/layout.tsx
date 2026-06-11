@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Space_Grotesk, Zen_Kaku_Gothic_New, JetBrains_Mono } from "next/font/google";
+import { Space_Grotesk, Zen_Kaku_Gothic_New, JetBrains_Mono, DotGothic16 } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Sidebar } from "@/components/Sidebar";
@@ -27,6 +27,14 @@ const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin"],
   weight: ["400", "500", "600"],
   variable: "--font-jetbrains-mono",
+  display: "swap",
+});
+
+// Game mode only — applied to headings/UI labels via [data-mode="game"] CSS rule
+const dotGothic16 = DotGothic16({
+  subsets: ["latin"],
+  weight: ["400"],
+  variable: "--font-dot-gothic16",
   display: "swap",
 });
 
@@ -87,10 +95,20 @@ const personJsonLd = {
   knowsAbout: ["Frontend Engineering", "AI", "LLM", "Explainable AI", "Next.js", "TypeScript"],
 };
 
+// Inline script: reads localStorage before React hydrates to prevent FOUC.
+// Runs synchronously in <head> — must stay tiny and have no external deps.
+const fouc = `(function(){try{var m=localStorage.getItem('site-mode');if(m==='game')document.documentElement.dataset.mode='game';}catch(e){}})();`;
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ja" className={`${spaceGrotesk.variable} ${zenKaku.variable} ${jetbrainsMono.variable}`}>
+    <html lang="ja" className={`${spaceGrotesk.variable} ${zenKaku.variable} ${jetbrainsMono.variable} ${dotGothic16.variable}`}>
+      {/* FOUC prevention: set data-mode before first paint */}
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: fouc }} />
+      </head>
       <body>
+        {/* Screen wipe overlay for mode transitions (~400 ms total) */}
+        <div id="mode-wipe" aria-hidden="true" />
         <a className="skip-link" href="#main">
           メインコンテンツへスキップ
         </a>

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { WorkThumb } from "@/components/mockups";
 import { ArrowRight } from "@/components/icons";
-import { LABEL_CASE_STUDY } from "@/constants/labels";
+import { LABEL_CASE_STUDY, LABEL_GAME_CLEAR, LABEL_GAME_NOW_PLAYING } from "@/constants/labels";
 
 interface WorkLike {
   title: string;
@@ -12,6 +12,7 @@ interface WorkLike {
   slug?: string;
   hasCaseStudy?: boolean;
   footRight?: string;
+  gameStatus?: "complete" | "in-progress";
 }
 
 type WorkCardProps = {
@@ -44,8 +45,14 @@ export function WorkCard({ work, variant, visible = true, onClick }: WorkCardPro
     );
   }
 
+  const gameStatusLabel = work.gameStatus === "in-progress" ? LABEL_GAME_NOW_PLAYING : LABEL_GAME_CLEAR;
+  const gameBadgeClass = work.gameStatus === "in-progress" ? "qc-badge qc-playing" : "qc-badge qc-clear";
+
   return (
-    <article className={`wcard${visible ? "" : " hide"}`} onClick={onClick}>
+    <article className={`wcard quest-card${visible ? "" : " hide"}`} onClick={onClick}>
+      <span className={gameBadgeClass} aria-label={work.gameStatus === "in-progress" ? "進行中" : "完了"}>
+        {gameStatusLabel}
+      </span>
       <div className="wthumb">
         <span className="wbadge">
           <span className="bdot" />

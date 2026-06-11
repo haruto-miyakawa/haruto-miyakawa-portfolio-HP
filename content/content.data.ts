@@ -77,6 +77,8 @@ export interface Work {
   footRight: "Case Study" | "GitHub";
   /** 詳細（ケーススタディ）ページを持つか */
   hasCaseStudy: boolean;
+  /** Game mode quest badge — derived from actual work status, no fabricated data */
+  gameStatus: "complete" | "in-progress";
 }
 
 /** Home の Featured Works（2枚）。works 本体と一致させる */
@@ -111,6 +113,7 @@ export const works: Work[] = [
     thumb: "/projects/tsumugu/home.webp",
     footRight: "Case Study",
     hasCaseStudy: true,
+    gameStatus: "complete",
   },
   {
     slug: "lecture-minutes",
@@ -123,6 +126,7 @@ export const works: Work[] = [
     thumb: "/projects/lecture-minutes/editor.webp",
     footRight: "Case Study",
     hasCaseStudy: true,
+    gameStatus: "complete",
   },
   {
     slug: "guide-manual",
@@ -134,6 +138,7 @@ export const works: Work[] = [
     mock: "chat",
     footRight: "Case Study",
     hasCaseStudy: true,
+    gameStatus: "complete",
   },
 ];
 

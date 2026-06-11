@@ -5553,3 +5553,317 @@ body {
     animation-duration: 1.8s;
   }
 }
+
+/* ============================================================
+   GAME MODE
+   All rules scoped to [data-mode="game"] except:
+   - .dl-pro / .dl-game (dual-span defaults apply in both modes)
+   - #mode-wipe (always present, triggered by JS)
+   ============================================================ */
+
+/* ── Dual-span display toggle ──────────────────────────────── */
+.dl-game { display: none; }
+[data-mode="game"] .dl-game { display: inline; }
+[data-mode="game"] .dl-pro  { display: none; }
+
+/* ── Screen wipe overlay (~400 ms total) ───────────────────── */
+#mode-wipe {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: #0c0814;
+  pointer-events: none;
+  opacity: 0;
+}
+#mode-wipe.wipe-in {
+  animation: wipeIn 0.22s ease forwards;
+}
+#mode-wipe.wipe-out {
+  animation: wipeOut 0.22s ease forwards;
+}
+@keyframes wipeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes wipeOut {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #mode-wipe.wipe-in,
+  #mode-wipe.wipe-out { animation: none; }
+}
+
+/* ── Game palette: dusk quantized token overrides ──────────── */
+/* Values reuse the same CSS var names defined in :root above.
+   No new token names, no color hardcoding in component files. */
+[data-mode="game"] {
+  --bg: #1c1027;
+  --bg-grad-top: #261440;
+  --bg-grad-bot: #130b1e;
+  --sidebar: #110d1e;
+  --sidebar-line: rgba(232, 160, 80, 0.18);
+  --surface: #221430;
+  --surface-2: #291840;
+  --card: #1e1228;
+  --border: rgba(232, 160, 80, 0.13);
+  --border-2: rgba(232, 160, 80, 0.22);
+  --text: #f5e6cc;
+  --text-2: #c8b690;
+  --text-3: #a08060;
+  --text-faint: #7a6050;
+  --accent: #e8a040;
+  --accent-2: #f5b860;
+  --accent-soft: rgba(232, 160, 64, 0.16);
+  --accent-line: rgba(232, 160, 64, 0.35);
+  /* DotGothic16 for headings/UI labels only */
+  --f-head: var(--font-dot-gothic16), "DotGothic16", monospace;
+}
+
+/* ── Shell gradient overrides (uses :root vars, auto-updates) ─ */
+[data-mode="game"] .shell {
+  background:
+    radial-gradient(1200px 600px at 78% -8%, rgba(100, 40, 180, 0.12), transparent 60%),
+    linear-gradient(180deg, var(--bg-grad-top), var(--bg) 30%, var(--bg-grad-bot));
+}
+
+/* ── PRO/GAME mode toggle button ───────────────────────────── */
+.mode-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-2);
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-family: var(--f-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--text-2);
+  cursor: pointer;
+  transition: 0.18s ease;
+  white-space: nowrap;
+}
+.mode-toggle:hover {
+  border-color: var(--accent-line);
+  color: var(--accent);
+}
+.mt-sep { color: var(--text-faint); }
+/* Highlight active side */
+[data-mode="game"] .mt-game { color: var(--accent); font-weight: 700; }
+:not([data-mode="game"]) .mt-pro { color: var(--accent); font-weight: 700; }
+
+.sidebar-mode-toggle {
+  margin-top: 8px;
+  display: flex;
+  justify-content: center;
+}
+.drawer-mode-toggle {
+  margin-top: 16px;
+  padding: 0 6px;
+}
+/* Topbar mode toggle */
+.topbar .mode-toggle {
+  font-size: 10px;
+  padding: 4px 8px;
+}
+
+/* ── PRESS START link (game mode only) ────────────────────── */
+.press-start-link {
+  display: none; /* hidden in pro mode */
+  font-family: var(--f-head);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  border: 1px solid var(--accent-line);
+  border-radius: 8px;
+  padding: 8px 14px;
+  text-align: center;
+  background: var(--accent-soft);
+  transition: 0.18s ease;
+  margin-top: 4px;
+  animation: pressStartBlink 1.4s step-end infinite;
+}
+.press-start-link:hover {
+  background: rgba(232, 160, 64, 0.24);
+}
+[data-mode="game"] .press-start-link {
+  display: block;
+}
+@keyframes pressStartBlink {
+  0%, 60%, 100% { opacity: 1; }
+  30%            { opacity: 0.2; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .press-start-link { animation: none; }
+}
+
+/* ── RPG Message window ───────────────────────────────────── */
+.msg-window {
+  background: rgba(12, 8, 20, 0.94);
+  border: 2px solid var(--accent);
+  border-radius: 4px;
+  padding: 14px 18px;
+  font-family: var(--f-head);
+  position: relative;
+}
+.msg-body { display: flex; flex-direction: column; gap: 8px; position: relative; }
+.msg-line {
+  font-size: 14px;
+  color: var(--text);
+  line-height: 1.8;
+  letter-spacing: 0.04em;
+}
+.msg-cursor {
+  position: absolute;
+  right: 0;
+  bottom: -4px;
+  color: var(--accent);
+  font-size: 12px;
+  animation: msgBlink 0.8s step-end infinite;
+}
+@keyframes msgBlink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .msg-cursor { animation: none; }
+}
+
+/* ── RPG Quest card (Works page game mode) ────────────────── */
+.quest-card {
+  position: relative;
+}
+.qc-badge {
+  position: absolute;
+  top: -10px;
+  right: 12px;
+  z-index: 4;
+  font-family: var(--f-head);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: 1px solid;
+}
+.qc-clear {
+  color: #8fe3a6;
+  background: rgba(14, 26, 18, 0.9);
+  border-color: rgba(95, 208, 122, 0.5);
+}
+.qc-playing {
+  color: var(--accent-2);
+  background: rgba(28, 18, 12, 0.9);
+  border-color: var(--accent-line);
+}
+/* Hide quest badges in pro mode */
+:not([data-mode="game"]) .quest-card .qc-badge { display: none; }
+
+/* ── RPG Status window (About page game mode) ─────────────── */
+.status-window {
+  font-family: var(--f-head);
+  border: 1px solid var(--accent-line);
+  border-radius: 4px;
+  background: rgba(12, 8, 20, 0.6);
+  overflow: hidden;
+}
+.sw-titlebar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 12px;
+  background: rgba(232, 160, 64, 0.12);
+  border-bottom: 1px solid var(--accent-line);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+}
+.sw-corner { font-size: 10px; color: var(--accent-line); }
+.sw-title  { letter-spacing: 0.14em; }
+.sw-body   { padding: 12px; }
+.sw-footer {
+  padding: 4px 12px;
+  font-size: 9px;
+  color: var(--accent-line);
+  overflow: hidden;
+  text-overflow: clip;
+  white-space: nowrap;
+  border-top: 1px solid var(--border);
+}
+/* StatusWindow is invisible chrome in pro mode */
+:not([data-mode="game"]) .status-window {
+  background: none;
+  border: none;
+}
+:not([data-mode="game"]) .sw-titlebar,
+:not([data-mode="game"]) .sw-footer { display: none; }
+:not([data-mode="game"]) .sw-body { padding: 0; }
+
+/* ── /play page ───────────────────────────────────────────── */
+.play-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 0;
+  min-height: 60vh;
+}
+.play-loading {
+  font-family: var(--f-head);
+  font-size: 14px;
+  color: var(--text-faint);
+  padding: 60px;
+}
+
+/* ── Canvas exploration scene ─────────────────────────────── */
+.exploration-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  max-width: 640px;
+}
+.exploration-canvas {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  display: block;
+  border: 2px solid var(--accent-line);
+  border-radius: 4px;
+  /* width/height set by JS integer-scale resize handler */
+}
+.exploration-controls {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.ex-btn {
+  font-family: var(--f-head);
+  font-size: 14px;
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-2);
+  border-radius: 6px;
+  color: var(--text);
+  cursor: pointer;
+  transition: 0.15s ease;
+  min-width: 48px;
+}
+.ex-btn:hover,
+.ex-btn:active { border-color: var(--accent-line); background: var(--accent-soft); }
+.ex-btn-examine {
+  padding: 8px 22px;
+  color: var(--accent);
+  border-color: var(--accent-line);
+}
+.exploration-hint {
+  display: flex;
+  gap: 16px;
+  font-family: var(--f-mono);
+  font-size: 10px;
+  color: var(--text-faint);
+  flex-wrap: wrap;
+  justify-content: center;
+}

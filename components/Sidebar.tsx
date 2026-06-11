@@ -6,7 +6,13 @@ import { usePathname } from "next/navigation";
 import { navItems, profile, type NavKey } from "@/content/content.data";
 import { navIcons, GithubIcon, XIcon, MailIcon } from "@/components/icons";
 import { Lines } from "@/components/Lines";
-import { LABEL_CONTACT } from "@/constants/labels";
+import { DualLabel } from "@/components/DualLabel";
+import { ModeToggle } from "@/components/ModeToggle";
+import {
+  LABEL_CONTACT,
+  LABEL_GAME_WORKS, LABEL_GAME_ABOUT, LABEL_GAME_RESEARCH,
+  LABEL_GAME_CONTACT, LABEL_GAME_PRESS_START,
+} from "@/constants/labels";
 
 function activeKey(pathname: string): NavKey {
   if (pathname.startsWith("/works")) return "works";
@@ -14,6 +20,13 @@ function activeKey(pathname: string): NavKey {
   if (pathname.startsWith("/about")) return "about";
   return "home";
 }
+
+const gameLabels: Record<NavKey, string | null> = {
+  home: null,
+  works: LABEL_GAME_WORKS,
+  research: LABEL_GAME_RESEARCH,
+  about: LABEL_GAME_ABOUT,
+};
 
 export function Sidebar() {
   const pathname = usePathname();
@@ -98,21 +111,39 @@ export function Sidebar() {
         </div>
 
         <nav className="nav">
-          {navItems.map((item) => (
-            <Link key={item.key} href={item.href} className={`nav-item${current === item.key ? " active" : ""}`}>
-              {navIcons[item.key]}
-              {item.label}
-            </Link>
-          ))}
+          {navItems.map((item) => {
+            const gameLabel = gameLabels[item.key];
+            return (
+              <Link key={item.key} href={item.href} className={`nav-item${current === item.key ? " active" : ""}`}>
+                {navIcons[item.key]}
+                {gameLabel ? (
+                  <DualLabel pro={item.label} game={gameLabel} />
+                ) : (
+                  item.label
+                )}
+              </Link>
+            );
+          })}
         </nav>
 
         <div>
-          <div className="side-label">{LABEL_CONTACT}</div>
+          <div className="side-label">
+            <DualLabel pro={LABEL_CONTACT} game={LABEL_GAME_CONTACT} />
+          </div>
           {contactLinks}
         </div>
 
+        {/* Game mode only: PRESS START → /play */}
+        <Link href="/play" className="press-start-link" aria-label="探索シーンへ">
+          {LABEL_GAME_PRESS_START}
+        </Link>
+
         <div className="lantern-wrap">
           <img src="/assets/lantern.webp" alt="" loading="lazy" decoding="async" />
+        </div>
+
+        <div className="sidebar-mode-toggle">
+          <ModeToggle />
         </div>
       </aside>
 
@@ -122,6 +153,7 @@ export function Sidebar() {
           <img className="tb-av pixel-art" src="/assets/avatar.png" alt="" />
           <span className="tb-name">{profile.name}</span>
         </Link>
+        <ModeToggle />
         <button
           ref={triggerRef}
           type="button"
@@ -155,22 +187,35 @@ export function Sidebar() {
         </div>
 
         <nav className="drawer-nav">
-          {navItems.map((item) => (
-            <Link
-              key={item.key}
-              href={item.href}
-              className={`drawer-item${current === item.key ? " active" : ""}`}
-              onClick={() => setOpen(false)}
-            >
-              {navIcons[item.key]}
-              {item.label}
-            </Link>
-          ))}
+          {navItems.map((item) => {
+            const gameLabel = gameLabels[item.key];
+            return (
+              <Link
+                key={item.key}
+                href={item.href}
+                className={`drawer-item${current === item.key ? " active" : ""}`}
+                onClick={() => setOpen(false)}
+              >
+                {navIcons[item.key]}
+                {gameLabel ? (
+                  <DualLabel pro={item.label} game={gameLabel} />
+                ) : (
+                  item.label
+                )}
+              </Link>
+            );
+          })}
         </nav>
 
         <div className="drawer-contact">
-          <div className="side-label">{LABEL_CONTACT}</div>
+          <div className="side-label">
+            <DualLabel pro={LABEL_CONTACT} game={LABEL_GAME_CONTACT} />
+          </div>
           {contactLinks}
+        </div>
+
+        <div className="drawer-mode-toggle">
+          <ModeToggle />
         </div>
       </aside>
     </>
