@@ -92,7 +92,7 @@ export const featuredWorks: FeaturedWork[] = [
     tags: ["Next.js", "TypeScript", "React", "Tiptap", "Claude API", "Tailwind CSS"],
     mock: "dash",
     thumb: "/projects/tsumugu/home.webp",
-    gameStatus: "complete",
+    gameStatus: "in-progress",
   },
   {
     badge: "AI",
@@ -100,7 +100,7 @@ export const featuredWorks: FeaturedWork[] = [
     description: "条件と好みから最適な家電を案内するPWA。制約付きAIで正確さを担保。",
     tags: ["Next.js", "TypeScript", "Supabase", "Gemini API", "PWA"],
     mock: "chat",
-    gameStatus: "complete",
+    gameStatus: "in-progress",
   },
 ];
 
@@ -117,7 +117,7 @@ export const works: Work[] = [
     thumb: "/projects/tsumugu/home.webp",
     footRight: "Case Study",
     hasCaseStudy: true,
-    gameStatus: "complete",
+    gameStatus: "in-progress",
   },
   {
     slug: "lecture-minutes",
@@ -142,7 +142,7 @@ export const works: Work[] = [
     mock: "chat",
     footRight: "Case Study",
     hasCaseStudy: true,
-    gameStatus: "complete",
+    gameStatus: "in-progress",
   },
 ];
 
