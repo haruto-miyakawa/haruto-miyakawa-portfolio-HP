@@ -3,6 +3,10 @@ import Link from "next/link";
 import { about } from "@/content/content.data";
 import { Lines } from "@/components/Lines";
 import { icons } from "@/components/icons";
+import {
+  LABEL_NAV_HOME, LABEL_NAV_ABOUT, LABEL_ABOUT_ME, LABEL_TECH_I_USE,
+  LABEL_AB_PROFILE, LABEL_AB_VALUES, LABEL_AB_WHAT_I_DO,
+} from "@/constants/labels";
 
 export const metadata: Metadata = {
   title: "About",
@@ -25,15 +29,15 @@ export default function AboutPage() {
 
       {/* BREADCRUMB */}
       <nav className="crumbs">
-        <Link href="/">Home</Link>
+        <Link href="/">{LABEL_NAV_HOME}</Link>
         <span className="crumb-sep">/</span>
-        <span className="crumb-cur">About</span>
+        <span className="crumb-cur">{LABEL_NAV_ABOUT}</span>
       </nav>
 
       {/* HERO */}
       <section className="ab-hero">
         <div className="ab-hero-content">
-          <h1 className="ab-title">About Me</h1>
+          <h1 className="ab-title">{LABEL_ABOUT_ME}</h1>
           <p className="ab-catch">{about.catch}</p>
           <div className="ab-intro">
             {about.intro.map((p, i) => (
@@ -51,7 +55,7 @@ export default function AboutPage() {
         <section className="ab-card">
           <div className="ab-card-head">
             <span className="ab-card-ic">{cardHeadIcons.profile}</span>
-            <span className="ab-card-title">Profile</span>
+            <span className="ab-card-title">{LABEL_AB_PROFILE}</span>
             <span className="ab-card-rule" />
           </div>
           <div className="pf-list">
@@ -77,7 +81,7 @@ export default function AboutPage() {
         <section className="ab-card">
           <div className="ab-card-head">
             <span className="ab-card-ic">{cardHeadIcons.values}</span>
-            <span className="ab-card-title">Values</span>
+            <span className="ab-card-title">{LABEL_AB_VALUES}</span>
             <span className="ab-card-rule" />
           </div>
           <div className="val-list">
@@ -97,7 +101,7 @@ export default function AboutPage() {
         <section className="ab-card">
           <div className="ab-card-head">
             <span className="ab-card-ic">{cardHeadIcons.whatIDo}</span>
-            <span className="ab-card-title">What I Do</span>
+            <span className="ab-card-title">{LABEL_AB_WHAT_I_DO}</span>
             <span className="ab-card-rule" />
           </div>
           <div className="val-list">
@@ -117,7 +121,7 @@ export default function AboutPage() {
         <section className="ab-card">
           <div className="ab-card-head">
             <span className="ab-card-ic">{cardHeadIcons.tech}</span>
-            <span className="ab-card-title">Tech I Use</span>
+            <span className="ab-card-title">{LABEL_TECH_I_USE}</span>
             <span className="ab-card-rule" />
           </div>
           <div className="tech-grid">

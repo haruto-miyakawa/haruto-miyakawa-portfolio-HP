@@ -5,6 +5,14 @@ import { paperDetails, profile } from "@/content/content.data";
 import { Lines } from "@/components/Lines";
 import { TerrainCell } from "@/components/mockups";
 import { ArrowUpRight, Check, icons } from "@/components/icons";
+import {
+  LABEL_NAV_HOME, LABEL_NAV_RESEARCH,
+  LABEL_RD_TLDR, LABEL_CHALLENGE_N, LABEL_PROBLEM_EN,
+  LABEL_APPROACH_N, LABEL_APPROACH_EN, LABEL_CSO_3_PREFIX,
+  LABEL_RAIL_OVERVIEW, LABEL_RAIL_HIGHLIGHTS, LABEL_RAIL_RELATED, LABEL_TECH_STACK,
+  LABEL_VIEW_ON_GH, LABEL_SEND_MAIL,
+  LABEL_RD_CONTRIB_JP, LABEL_RD_CONTRIB_EN, LABEL_PUBLICATION,
+} from "@/constants/labels";
 
 export function generateStaticParams() {
   return Object.keys(paperDetails).map((slug) => ({ slug }));
@@ -48,9 +56,9 @@ export default async function PaperDetailPage({ params }: { params: Promise<{ sl
   return (
     <>
       <nav className="crumbs">
-        <Link href="/">Home</Link>
+        <Link href="/">{LABEL_NAV_HOME}</Link>
         <span className="crumb-sep">/</span>
-        <Link href="/research">Research</Link>
+        <Link href="/research">{LABEL_NAV_RESEARCH}</Link>
         <span className="crumb-sep">/</span>
         <span className="crumb-cur">{pd.title.replace(/\n/g, " ")}</span>
       </nav>
@@ -111,7 +119,7 @@ export default async function PaperDetailPage({ params }: { params: Promise<{ sl
           <section className="cs-section">
             <div className="sec-head">
               <div className="sec-title">
-                <span className="star">✦</span> 研究概要 (TL;DR)
+                <span className="star">✦</span> {LABEL_RD_TLDR}
               </div>
               <div className="sec-rule" />
             </div>
@@ -134,8 +142,8 @@ export default async function PaperDetailPage({ params }: { params: Promise<{ sl
                 <div className="cso-head">
                   <span className="cso-ic">{csoProblem}</span>
                   <div>
-                    <div className="cso-n">01 課題</div>
-                    <div className="cso-en">Problem</div>
+                    <div className="cso-n">{LABEL_CHALLENGE_N}</div>
+                    <div className="cso-en">{LABEL_PROBLEM_EN}</div>
                   </div>
                 </div>
                 <p className="cso-body">{pd.problem.body}</p>
@@ -150,8 +158,8 @@ export default async function PaperDetailPage({ params }: { params: Promise<{ sl
                 <div className="cso-head">
                   <span className="cso-ic">{csoApproach}</span>
                   <div>
-                    <div className="cso-n">02 提案手法</div>
-                    <div className="cso-en">Approach</div>
+                    <div className="cso-n">{LABEL_APPROACH_N}</div>
+                    <div className="cso-en">{LABEL_APPROACH_EN}</div>
                   </div>
                 </div>
                 <p className="cso-body">{pd.approach.body}</p>
@@ -166,7 +174,7 @@ export default async function PaperDetailPage({ params }: { params: Promise<{ sl
                 <div className="cso-head">
                   <span className="cso-ic">{csoResults}</span>
                   <div>
-                    <div className="cso-n">03 {pd.results.label}</div>
+                    <div className="cso-n">{LABEL_CSO_3_PREFIX}{pd.results.label}</div>
                     <div className="cso-en">{pd.results.en}</div>
                   </div>
                 </div>
@@ -194,7 +202,7 @@ export default async function PaperDetailPage({ params }: { params: Promise<{ sl
         <aside className="cs-rail">
           <section className="rail-block">
             <div className="rail-head">
-              <span>プロジェクト概要</span>
+              <span>{LABEL_RAIL_OVERVIEW}</span>
               <span className="sec-rule" />
             </div>
             <div className="ov-list">
@@ -220,7 +228,7 @@ export default async function PaperDetailPage({ params }: { params: Promise<{ sl
           </section>
           <section className="rail-block">
             <div className="rail-head">
-              <span>ハイライト</span>
+              <span>{LABEL_RAIL_HIGHLIGHTS}</span>
               <span className="sec-rule" />
             </div>
             <ul className="hl-list">
@@ -237,7 +245,7 @@ export default async function PaperDetailPage({ params }: { params: Promise<{ sl
           {pd.stack && pd.stack.length > 0 && (
             <section className="rail-block">
               <div className="rail-head">
-                <span>技術スタック</span>
+                <span>{LABEL_TECH_STACK}</span>
                 <span className="sec-rule" />
               </div>
               <div className="pd-stack-wrap">
@@ -252,7 +260,7 @@ export default async function PaperDetailPage({ params }: { params: Promise<{ sl
           {pd.relatedLinks.length > 0 && (
             <section className="rail-block">
               <div className="rail-head">
-                <span>関連リンク</span>
+                <span>{LABEL_RAIL_RELATED}</span>
                 <span className="sec-rule" />
               </div>
               <div className="rel-list">
@@ -272,7 +280,7 @@ export default async function PaperDetailPage({ params }: { params: Promise<{ sl
         <section className="cs-section cs-wide pd-contrib">
           <div className="sec-head">
             <div className="sec-title">
-              貢献 <span className="sec-en">(Contributions)</span>
+              {LABEL_RD_CONTRIB_JP} <span className="sec-en">{LABEL_RD_CONTRIB_EN}</span>
             </div>
             <div className="sec-rule" />
           </div>
@@ -294,7 +302,7 @@ export default async function PaperDetailPage({ params }: { params: Promise<{ sl
         <section className="cs-section cs-wide">
           <div className="pd-pub-card">
             <div className="pd-card-head">
-              {fileIcon} Publication
+              {fileIcon} {LABEL_PUBLICATION}
             </div>
             <span className="status-badge sb-sm">{pd.publication.statusBadge}</span>
             <h3 className="pd-pub-title">{pd.publication.title}</h3>
@@ -325,12 +333,12 @@ export default async function PaperDetailPage({ params }: { params: Promise<{ sl
           {pd.github && (
             <a className="btn btn-ghost" href={pd.github} target="_blank" rel="noopener noreferrer">
               <img className="btn-ic-img" src="/assets/github.png" alt="" />
-              GitHub で見る
+              {LABEL_VIEW_ON_GH}
             </a>
           )}
           <a className="btn btn-primary" href={`mailto:${profile.email}`}>
             {mailIcon}
-            メールを送る
+            {LABEL_SEND_MAIL}
           </a>
         </div>
       </section>

@@ -5,6 +5,10 @@ import { ResearchThumb } from "@/components/mockups";
 import { Lines } from "@/components/Lines";
 import { ArrowRight, icons } from "@/components/icons";
 import { researchHero, featuredResearch, researchAreas, researchHighlights } from "@/content/content.data";
+import {
+  LABEL_FEATURED_RESEARCH, LABEL_READ_PAPER,
+  LABEL_RESEARCH_INTERESTS, LABEL_RESEARCH_HIGHLIGHTS,
+} from "@/constants/labels";
 
 export const metadata: Metadata = {
   title: "Research",
@@ -55,7 +59,7 @@ export default function ResearchPage() {
         <div className="re-main">
           <div className="sec-head">
             <div className="sec-title">
-              <span className="star">✦</span> Featured Research
+              <span className="star">✦</span> {LABEL_FEATURED_RESEARCH}
             </div>
             <div className="sec-rule" />
           </div>
@@ -90,7 +94,7 @@ export default function ResearchPage() {
                   <span className="fp-where">{featuredResearch.where}</span>
                 </div>
                 <a className="rc-link" href={featuredResearch.paperUrl} target="_blank" rel="noopener noreferrer">
-                  Read Paper <ArrowRight />
+                  {LABEL_READ_PAPER} <ArrowRight />
                 </a>
               </div>
             </div>
@@ -103,7 +107,7 @@ export default function ResearchPage() {
         <aside className="re-rail">
           <section>
             <div className="rail-head">
-              <span>研究関心</span>
+              <span>{LABEL_RESEARCH_INTERESTS}</span>
               <span className="sec-rule" />
             </div>
             <div className="ri-areas">
@@ -120,7 +124,7 @@ export default function ResearchPage() {
           </section>
           <section>
             <div className="rail-head">
-              <span>Research Highlights</span>
+              <span>{LABEL_RESEARCH_HIGHLIGHTS}</span>
               <span className="sec-rule" />
             </div>
             <div className="rh-list">

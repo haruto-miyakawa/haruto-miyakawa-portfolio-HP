@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { profile, navItems } from "@/content/content.data";
 import { GithubIcon, XIcon, MailIcon } from "@/components/icons";
+import { LABEL_ROLE, LABEL_BACK_TO_TOP } from "@/constants/labels";
 
 export function SiteFooter() {
   const year = new Date().getFullYear();
@@ -9,7 +10,7 @@ export function SiteFooter() {
       <div className="sf-top">
         <div className="sf-brand">
           <div className="sf-name">{profile.name}</div>
-          <div className="sf-role">Web Engineer / AI Builder</div>
+          <div className="sf-role">{LABEL_ROLE}</div>
         </div>
         <nav className="sf-nav" aria-label="フッターナビゲーション">
           {navItems.map((item) => (
@@ -33,7 +34,7 @@ export function SiteFooter() {
       <div className="sf-bottom">
         <span>© {year} Haruto Miyakawa</span>
         <a className="sf-toplink" href="#main">
-          トップへ戻る ↑
+          {LABEL_BACK_TO_TOP}
         </a>
       </div>
     </footer>

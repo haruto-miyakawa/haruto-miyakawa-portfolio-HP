@@ -4,6 +4,7 @@ import { useRef } from "react";
 import { Shot } from "@/components/mockups";
 import { ChevronLeft, ChevronRight } from "@/components/icons";
 import type { CaseStudy } from "@/content/content.data";
+import { LABEL_GALLERY } from "@/constants/labels";
 
 export function Gallery({ items, url }: { items: NonNullable<CaseStudy["gallery"]>; url: string }) {
   const trackRef = useRef<HTMLDivElement>(null);
@@ -20,7 +21,7 @@ export function Gallery({ items, url }: { items: NonNullable<CaseStudy["gallery"
     <section className="cs-section cs-wide">
       <div className="sec-head">
         <div className="sec-title">
-          <span className="star">✦</span> 画面ギャラリー
+          <span className="star">✦</span> {LABEL_GALLERY}
         </div>
         <div className="sec-rule" />
         <div className="gal-nav">

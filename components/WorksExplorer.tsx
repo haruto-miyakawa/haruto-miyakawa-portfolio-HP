@@ -6,6 +6,10 @@ import { useRouter } from "next/navigation";
 import { works, workCategories } from "@/content/content.data";
 import { WorkThumb } from "@/components/mockups";
 import { ArrowRight } from "@/components/icons";
+import {
+  LABEL_NAV_WORKS, LABEL_AVAILABLE_FOR_WORK, LABEL_CASE_STUDY, LABEL_WORKS_EMPTY,
+  LABEL_FILTER_CATEGORY, LABEL_FILTER_TAGS, LABEL_FILTER_CLEAR,
+} from "@/constants/labels";
 
 export function WorksExplorer() {
   const router = useRouter();
@@ -57,9 +61,9 @@ export function WorksExplorer() {
         <div className="whead-content">
           <div className="cta-status">
             <span className="cta-dot" />
-            Available for work
+            {LABEL_AVAILABLE_FOR_WORK}
           </div>
-          <h1 className="whead-title">Works</h1>
+          <h1 className="whead-title">{LABEL_NAV_WORKS}</h1>
           <p className="whead-lead">これまでに開発したプロダクトやツールの一覧です。</p>
           <p className="whead-sub">課題解決のプロセスと、実装・改善の工夫を大切にしています。</p>
           {works.length >= 6 && (
@@ -112,7 +116,7 @@ export function WorksExplorer() {
                 <div className="wfoot">
                   {work.hasCaseStudy ? (
                     <Link className="wfoot-b" href={href}>
-                      Case Study <ArrowRight />
+                      {LABEL_CASE_STUDY} <ArrowRight />
                     </Link>
                   ) : (
                     <a className="wfoot-b" href={href}>
@@ -123,13 +127,13 @@ export function WorksExplorer() {
               </article>
             );
           })}
-          {visibleCount === 0 && <div className="works-empty">該当するプロジェクトはありません。</div>}
+          {visibleCount === 0 && <div className="works-empty">{LABEL_WORKS_EMPTY}</div>}
         </div>
 
         {works.length >= 6 && (
           <aside className="filter">
             <div className="filter-sec">
-              <span className="filter-sectitle">カテゴリ</span>
+              <span className="filter-sectitle">{LABEL_FILTER_CATEGORY}</span>
               <span className="sec-rule" />
             </div>
             <div className="filter-list">
@@ -146,11 +150,11 @@ export function WorksExplorer() {
               ))}
             </div>
             <div className="filter-sec" style={{ marginTop: 22 }}>
-              <span className="filter-sectitle">技術タグ</span>
+              <span className="filter-sectitle">{LABEL_FILTER_TAGS}</span>
               <span className="sec-rule" />
               {selTags.size > 0 && (
                 <button className="tag-clear" onClick={() => setSelTags(new Set())}>
-                  クリア
+                  {LABEL_FILTER_CLEAR}
                 </button>
               )}
             </div>

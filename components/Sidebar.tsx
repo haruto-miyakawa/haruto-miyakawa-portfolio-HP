@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { navItems, profile, type NavKey } from "@/content/content.data";
 import { navIcons, GithubIcon, XIcon, MailIcon } from "@/components/icons";
 import { Lines } from "@/components/Lines";
+import { LABEL_CONTACT } from "@/constants/labels";
 
 function activeKey(pathname: string): NavKey {
   if (pathname.startsWith("/works")) return "works";
@@ -106,7 +107,7 @@ export function Sidebar() {
         </nav>
 
         <div>
-          <div className="side-label">Contact</div>
+          <div className="side-label">{LABEL_CONTACT}</div>
           {contactLinks}
         </div>
 
@@ -168,7 +169,7 @@ export function Sidebar() {
         </nav>
 
         <div className="drawer-contact">
-          <div className="side-label">Contact</div>
+          <div className="side-label">{LABEL_CONTACT}</div>
           {contactLinks}
         </div>
       </aside>

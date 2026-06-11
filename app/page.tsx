@@ -4,6 +4,12 @@ import { WorkThumb } from "@/components/mockups";
 import { Lines } from "@/components/Lines";
 import { ArrowRight, homeTechIcons } from "@/components/icons";
 import { featuredWorks, homeHero, homeAbout, homeTech, processSteps, profile } from "@/content/content.data";
+import {
+  LABEL_FEATURED_WORKS, LABEL_VIEW_ALL_WORKS, LABEL_VIEW_MY_WORKS,
+  LABEL_MY_PROCESS, LABEL_AVAILABLE_FOR_WORK, LABEL_GET_IN_TOUCH,
+  LABEL_CTA_HEAD_L1, LABEL_CTA_HEAD_L2,
+  LABEL_ABOUT_ME, LABEL_MORE_ABOUT_ME, LABEL_TECH_I_USE,
+} from "@/constants/labels";
 
 const processIcons = [
   <svg key="s" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
@@ -49,7 +55,7 @@ export default function HomePage() {
           </p>
           <div className="hero-cta">
             <a className="btn btn-primary" href="#works">
-              View My Works <ArrowRight sw={2.2} />
+              {LABEL_VIEW_MY_WORKS} <ArrowRight sw={2.2} />
             </a>
           </div>
           <div className="taglist">
@@ -69,7 +75,7 @@ export default function HomePage() {
         <div className="col-left">
           {/* FEATURED WORKS */}
           <section id="works">
-            <SectionHead title="Featured Works" star link={{ label: "View all works", href: "/works" }} />
+            <SectionHead title={LABEL_FEATURED_WORKS} star link={{ label: LABEL_VIEW_ALL_WORKS, href: "/works" }} />
             <div className="works">
               {featuredWorks.map((work) => (
                 <article key={work.title} className="work">
@@ -93,7 +99,7 @@ export default function HomePage() {
 
           {/* MY PROCESS */}
           <section>
-            <SectionHead title="My Process" />
+            <SectionHead title={LABEL_MY_PROCESS} />
             <div className="process">
               {processSteps.map((step, i) => (
                 <div key={step.title} style={{ display: "contents" }}>
@@ -115,12 +121,12 @@ export default function HomePage() {
               <div className="cta-copy">
                 <div className="cta-status">
                   <span className="cta-dot" />
-                  Available for work
+                  {LABEL_AVAILABLE_FOR_WORK}
                 </div>
                 <h3 className="cta-head">
-                  Let&apos;s build something
+                  {LABEL_CTA_HEAD_L1}
                   <br />
-                  meaningful together.
+                  {LABEL_CTA_HEAD_L2}
                 </h3>
                 <p className="cta-sub">
                   新しいプロダクトやインターン・業務委託のご相談を歓迎しています。お気軽にご連絡ください。
@@ -128,7 +134,7 @@ export default function HomePage() {
               </div>
               <div className="cta-actions">
                 <a className="btn btn-primary" href={`mailto:${profile.email}`}>
-                  Get in touch <ArrowRight sw={2.2} />
+                  {LABEL_GET_IN_TOUCH} <ArrowRight sw={2.2} />
                 </a>
                 <a className="cta-mail" href={`mailto:${profile.email}`}>
                   {profile.email}
@@ -142,7 +148,7 @@ export default function HomePage() {
         <div className="col-right">
           {/* ABOUT ME */}
           <section>
-            <SectionHead title="About Me" />
+            <SectionHead title={LABEL_ABOUT_ME} />
             <div className="about-name">{homeAbout.name}</div>
             <p className="about-bio">{homeAbout.bio}</p>
             <ul className="about-list">
@@ -151,13 +157,13 @@ export default function HomePage() {
               ))}
             </ul>
             <Link className="about-more" href="/about">
-              More About Me <ArrowRight />
+              {LABEL_MORE_ABOUT_ME} <ArrowRight />
             </Link>
           </section>
 
           {/* TECH I USE */}
           <section>
-            <SectionHead title="Tech I Use" />
+            <SectionHead title={LABEL_TECH_I_USE} />
             <div className="tech">
               {homeTech.map((tech) => (
                 <div key={tech.name} className="tech-item">

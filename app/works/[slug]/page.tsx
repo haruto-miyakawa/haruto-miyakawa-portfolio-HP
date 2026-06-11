@@ -7,6 +7,14 @@ import { Shot } from "@/components/mockups";
 import { Gallery } from "@/components/Gallery";
 import { HeroCarousel } from "@/components/HeroCarousel";
 import { ArrowUpRight, Check, icons } from "@/components/icons";
+import {
+  LABEL_NAV_HOME, LABEL_NAV_WORKS,
+  LABEL_CS_TLDR, LABEL_CHALLENGE_N, LABEL_CHALLENGE_EN,
+  LABEL_SOLUTION_N, LABEL_SOLUTION_EN, LABEL_OUTCOME_N, LABEL_OUTCOME_EN,
+  LABEL_CS_FEATURES, LABEL_TECH_STACK,
+  LABEL_RAIL_OVERVIEW, LABEL_RAIL_HIGHLIGHTS, LABEL_RAIL_RELATED,
+  LABEL_VIEW_ON_GH, LABEL_SEND_MAIL,
+} from "@/constants/labels";
 
 export function generateStaticParams() {
   return Object.keys(caseStudies).map((slug) => ({ slug }));
@@ -55,9 +63,9 @@ export default async function CaseStudyPage({ params }: { params: Promise<{ slug
   return (
     <>
       <nav className="crumbs">
-        <Link href="/">Home</Link>
+        <Link href="/">{LABEL_NAV_HOME}</Link>
         <span className="crumb-sep">/</span>
-        <Link href="/works">Works</Link>
+        <Link href="/works">{LABEL_NAV_WORKS}</Link>
         <span className="crumb-sep">/</span>
         <span className="crumb-cur">{cs.title}</span>
       </nav>
@@ -113,7 +121,7 @@ export default async function CaseStudyPage({ params }: { params: Promise<{ slug
           <section className="cs-section">
             <div className="sec-head">
               <div className="sec-title">
-                <span className="star">✦</span> プロジェクトの概要 (TL;DR)
+                <span className="star">✦</span> {LABEL_CS_TLDR}
               </div>
               <div className="sec-rule" />
             </div>
@@ -130,8 +138,8 @@ export default async function CaseStudyPage({ params }: { params: Promise<{ slug
                 <div className="cso-head">
                   <span className="cso-ic">{csoIcons.challenge}</span>
                   <div>
-                    <div className="cso-n">01 課題</div>
-                    <div className="cso-en">Challenge</div>
+                    <div className="cso-n">{LABEL_CHALLENGE_N}</div>
+                    <div className="cso-en">{LABEL_CHALLENGE_EN}</div>
                   </div>
                 </div>
                 <p className="cso-body">
@@ -156,8 +164,8 @@ export default async function CaseStudyPage({ params }: { params: Promise<{ slug
                 <div className="cso-head">
                   <span className="cso-ic">{csoIcons.solution}</span>
                   <div>
-                    <div className="cso-n">02 解決策</div>
-                    <div className="cso-en">Solution</div>
+                    <div className="cso-n">{LABEL_SOLUTION_N}</div>
+                    <div className="cso-en">{LABEL_SOLUTION_EN}</div>
                   </div>
                 </div>
                 <p className="cso-body">
@@ -182,8 +190,8 @@ export default async function CaseStudyPage({ params }: { params: Promise<{ slug
                 <div className="cso-head">
                   <span className="cso-ic">{csoIcons.outcome}</span>
                   <div>
-                    <div className="cso-n">03 成果</div>
-                    <div className="cso-en">Outcome</div>
+                    <div className="cso-n">{LABEL_OUTCOME_N}</div>
+                    <div className="cso-en">{LABEL_OUTCOME_EN}</div>
                   </div>
                 </div>
                 <p className="cso-body">
@@ -214,7 +222,7 @@ export default async function CaseStudyPage({ params }: { params: Promise<{ slug
         <aside className="cs-rail">
           <section className="rail-block">
             <div className="rail-head">
-              <span>プロジェクト概要</span>
+              <span>{LABEL_RAIL_OVERVIEW}</span>
               <span className="sec-rule" />
             </div>
             <div className="ov-list">
@@ -240,7 +248,7 @@ export default async function CaseStudyPage({ params }: { params: Promise<{ slug
           </section>
           <section className="rail-block">
             <div className="rail-head">
-              <span>ハイライト</span>
+              <span>{LABEL_RAIL_HIGHLIGHTS}</span>
               <span className="sec-rule" />
             </div>
             <ul className="hl-list">
@@ -256,7 +264,7 @@ export default async function CaseStudyPage({ params }: { params: Promise<{ slug
           </section>
           <section className="rail-block">
             <div className="rail-head">
-              <span>関連リンク</span>
+              <span>{LABEL_RAIL_RELATED}</span>
               <span className="sec-rule" />
             </div>
             <div className="rel-list">
@@ -278,7 +286,7 @@ export default async function CaseStudyPage({ params }: { params: Promise<{ slug
         <section className="cs-section cs-wide">
           <div className="sec-head">
             <div className="sec-title">
-              <span className="star">✦</span> 主な機能
+              <span className="star">✦</span> {LABEL_CS_FEATURES}
             </div>
             <div className="sec-rule" />
           </div>
@@ -312,7 +320,7 @@ export default async function CaseStudyPage({ params }: { params: Promise<{ slug
       <section className="cs-section cs-wide">
         <div className="sec-head">
           <div className="sec-title">
-            <span className="star">✦</span> 技術スタック
+            <span className="star">✦</span> {LABEL_TECH_STACK}
           </div>
           <div className="sec-rule" />
         </div>
@@ -332,11 +340,11 @@ export default async function CaseStudyPage({ params }: { params: Promise<{ slug
         <div className="cs-contact-btns">
           <a className="btn btn-ghost" href={cs.github} target="_blank" rel="noopener noreferrer">
             <img className="btn-ic-img" src="/assets/github.png" alt="" />
-            GitHub で見る
+            {LABEL_VIEW_ON_GH}
           </a>
           <a className="btn btn-primary" href={`mailto:${profile.email}`}>
             {mailIcon}
-            メールを送る
+            {LABEL_SEND_MAIL}
           </a>
         </div>
       </section>
