@@ -5824,6 +5824,12 @@ body {
   flex-direction: column;
   background: var(--bg);
 }
+.game-mode-toggle {
+  position: absolute;
+  top: max(12px, env(safe-area-inset-top));
+  left: max(12px, env(safe-area-inset-left));
+  z-index: 10;
+}
 .game-return-btn {
   position: absolute;
   top: max(12px, env(safe-area-inset-top));

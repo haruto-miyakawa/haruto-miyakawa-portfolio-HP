@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { LABEL_GAME_EXAMINE } from "@/constants/labels";
+import { ModeToggle } from "@/components/ModeToggle";
 import sceneData from "@/game/scene.json";
 import { profile } from "@/content/content.data";
 
@@ -439,6 +440,11 @@ export default function ExplorationScene() {
 
   return (
     <div className="game-layer">
+      {/* PRO/GAME toggle — top-left, mirrors ✕ button position */}
+      <div className="game-mode-toggle">
+        <ModeToggle />
+      </div>
+
       {/* ✕ もどる — always visible, 44px+ tap target */}
       <button
         type="button"
