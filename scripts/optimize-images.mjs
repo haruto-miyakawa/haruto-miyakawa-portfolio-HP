@@ -16,6 +16,11 @@ const jobs = [
   { in: "projects/tsumugu/editor.png", out: "projects/tsumugu/editor.webp", width: 1440, q: 80 },
   { in: "projects/tsumugu/home.png", out: "projects/tsumugu/home.webp", width: 1440, q: 80 },
   { in: "projects/tsumugu/preview.png", out: "projects/tsumugu/preview.webp", width: 1440, q: 80 },
+  { in: "projects/lecture-minutes/home.png", out: "projects/lecture-minutes/home.webp", width: 1440, q: 80 },
+  { in: "projects/lecture-minutes/transcribe.png", out: "projects/lecture-minutes/transcribe.webp", width: 1440, q: 80 },
+  { in: "projects/lecture-minutes/editor.png", out: "projects/lecture-minutes/editor.webp", width: 1440, q: 80 },
+  { in: "projects/lecture-minutes/settings.png", out: "projects/lecture-minutes/settings.webp", width: 1440, q: 80 },
+  { in: "projects/lecture-minutes/result.png", out: "projects/lecture-minutes/result.webp", width: 1440, q: 80 },
 ];
 
 const kb = (b) => `${(b / 1024).toFixed(0)}KB`;

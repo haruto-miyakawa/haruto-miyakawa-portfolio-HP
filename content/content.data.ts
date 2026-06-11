@@ -120,6 +120,7 @@ export const works: Work[] = [
     description: "音声をWhisperで文字起こしし、Geminiで議事録に整形するツール。聴くことに集中できる。",
     tags: ["Python", "Whisper", "Gemini API"],
     mock: "travel",
+    thumb: "/projects/lecture-minutes/editor.webp",
     footRight: "Case Study",
     hasCaseStudy: true,
   },
@@ -315,6 +316,13 @@ export const caseStudies: Record<string, CaseStudy> = {
     relatedLinks: [
       { label: "GitHub リポジトリ", href: "https://github.com/haruto-miyakawa/lecture-minutes" },
       { label: "Zenn 記事", href: "https://zenn.dev/haruto_miyakawa/articles/4b7754712b7585" },
+    ],
+    heroImages: [
+      { src: "/projects/lecture-minutes/editor.webp", caption: "議事録 — Geminiが見出し・要点・キーワードに自動整形（編集 / PDF / .md 出力）" },
+      { src: "/projects/lecture-minutes/transcribe.webp", caption: "文字起こし — Whisperでタイムスタンプ付きにテキスト化（コピー / .txt 出力）" },
+      { src: "/projects/lecture-minutes/home.webp", caption: "ホーム — 音声ファイルをドロップして処理を開始（mp3 / m4a・複数同時対応）" },
+      { src: "/projects/lecture-minutes/settings.webp", caption: "設定 — Whisperモデル・議事録テンプレート・話者分離・処理時間帯を調整" },
+      { src: "/projects/lecture-minutes/result.webp", caption: "処理キュー — アップロードした音声を順次処理（文字起こし → 議事録生成）" },
     ],
     stack: [
       { mark: "Py", name: "Python" },
