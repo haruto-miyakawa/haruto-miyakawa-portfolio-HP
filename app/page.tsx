@@ -43,7 +43,7 @@ export default function HomePage() {
           <h1 className="hero-h1">
             <Lines text={homeHero.headingLines.join("\n")} />
           </h1>
-          <p className="hero-jp">{homeHero.jp}</p>
+          {homeHero.jp && <p className="hero-jp">{homeHero.jp}</p>}
           <p className="hero-body">
             <Lines text={homeHero.body} />
           </p>

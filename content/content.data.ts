@@ -41,11 +41,11 @@ export const navItems: NavItem[] = [
 
 /* ============ Home : ヒーロー ============ */
 export const homeHero = {
-  hello: "",
-  headingLines: ["現場の課題を、動くプロダクトに。"],
-  jp: "情報系の学部2年。",
+  hello: "Hello, I'm Haruto.",
+  headingLines: ["現場の課題を、", "動くプロダクトに。"],
+  jp: "",
   body:
-    "国際会議 IIAI AAI Winter 2025（IEEE Computer Society 掲載）の共著研究に参加。量販店の現場発ツールから AI 共同執筆エディタ「つむぐ」まで、企画から実装までひとりでやり切ります。",
+    "情報系の学部2年。国際会議 IIAI AAI Winter 2025（IEEE Computer Society 掲載）の共著研究に参加。量販店の現場発ツールから AI 共同執筆エディタ「つむぐ」まで、企画から実装までひとりでやり切ります。",
   tags: ["TypeScript", "Next.js", "React", "Tailwind CSS", "Python", "FastAPI", "PostgreSQL"],
 };
 

@@ -420,11 +420,11 @@ img.pixel-art {
   margin-bottom: 18px;
 }
 .hero-h1 {
-  font-family: var(--f-head);
-  font-weight: 600;
+  font-family: var(--f-jp);
+  font-weight: 900;
   font-size: 72px;
-  line-height: 1.02;
-  letter-spacing: -0.025em;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
   color: #f3ece4;
   text-shadow: 0 2px 24px rgba(0, 0, 0, 0.4);
 }

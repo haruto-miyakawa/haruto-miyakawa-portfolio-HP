@@ -8,4 +8,4 @@ export const SITE_URL =
 export const SITE_NAME = "Haruto Miyakawa";
 export const SITE_TITLE = "Haruto Miyakawa — Web Engineer / AI Builder";
 export const SITE_DESCRIPTION =
-  "フロントエンドとAIを軸に、課題を解決するプロダクトを開発しています。Web Engineer / AI Builder, 宮川陽翔のポートフォリオ。";
+  "情報系の学部2年。企画から実装までひとりでやり切る、宮川陽翔のポートフォリオ。Web Engineer / AI Builder。";
