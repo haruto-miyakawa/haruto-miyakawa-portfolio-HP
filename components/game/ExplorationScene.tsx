@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { LABEL_GAME_EXAMINE, LABEL_GAME_RETURN } from "@/constants/labels";
+import { LABEL_GAME_EXAMINE } from "@/constants/labels";
 import sceneData from "@/game/scene.json";
 import { profile } from "@/content/content.data";
 
@@ -33,9 +33,8 @@ const WORLD_W: number = (sceneData as { worldWidth?: number }).worldWidth ?? INT
 const PLAYER_W = 10;
 const PLAYER_H = 18;
 const PLAYER_SPEED = 1.5;
-const FIXED_DT = 1000 / 60; // ms per tick
+const FIXED_DT = 1000 / 60;
 
-// ─── Palette (uses pro palette variables, not hardcoded) ──────────────────────
 const PAL = {
   sky: "#1c1027",
   ground: "#2a1a0e",
@@ -45,37 +44,27 @@ const PAL = {
   building: "#221430",
   buildingLine: "#e8a040",
   signBg: "#1a0e26",
-  signText: "#f5e6cc",
-  examineText: "#e8a040",
-  dialogBg: "rgba(12,8,20,0.92)",
-  dialogBorder: "#e8a040",
-  dialogText: "#f5e6cc",
-  cursorColor: "#e8a040",
+  wipeBg: "rgba(12,8,20,1)",
 };
 
-// ─── Build offscreen tileset (gray-box placeholder rects) ────────────────────
 function buildTileset(): BackgroundLayer {
   const tileW = 16;
   const tileH = 16;
   const cols = Math.ceil(WORLD_W / tileW) + 2;
   const rows = Math.ceil(INTERNAL_H / tileH);
-  const tiles = new Uint8Array(cols * rows); // all 0 = sky tile
-  // Ground rows
+  const tiles = new Uint8Array(cols * rows);
   const groundRow = Math.floor((INTERNAL_H - 28) / tileH);
   for (let c = 0; c < cols; c++) {
     for (let r = groundRow; r < rows; r++) {
-      tiles[r * cols + c] = 1; // ground tile
+      tiles[r * cols + c] = 1;
     }
   }
-  // Build offscreen canvas for tileset
   const ts = document.createElement("canvas");
-  ts.width = tileW * 2; // tile 0 = sky, tile 1 = ground
+  ts.width = tileW * 2;
   ts.height = tileH;
   const ctx2 = ts.getContext("2d")!;
-  // tile 0: sky
   ctx2.fillStyle = PAL.sky;
   ctx2.fillRect(0, 0, tileW, tileH);
-  // tile 1: ground
   ctx2.fillStyle = PAL.ground;
   ctx2.fillRect(tileW, 0, tileW, tileH);
   return { tiles, tileset: ts, tileWidth: tileW, tileHeight: tileH, cols, rows };
@@ -95,43 +84,34 @@ function drawBackground(ctx: CanvasRenderingContext2D, bg: BackgroundLayer, came
   }
 }
 
-// ─── Draw buildings (gray-box placeholder) ───────────────────────────────────
 function drawBuildings(ctx: CanvasRenderingContext2D, zones: Zone[], cameraX: number) {
   const groundY = INTERNAL_H - 28;
   for (const zone of zones) {
-    if (zone.action === "__return__") continue; // lantern: skip building rect
+    if (zone.action === "__return__") continue;
     const bx = zone.xMin - cameraX;
     const bw = zone.xMax - zone.xMin;
     const bh = 48;
     const by = groundY - bh;
-    // building rect
     ctx.fillStyle = PAL.building;
     ctx.fillRect(bx, by, bw, bh);
     ctx.strokeStyle = PAL.buildingLine;
     ctx.lineWidth = 1;
     ctx.strokeRect(bx + 0.5, by + 0.5, bw - 1, bh - 1);
-    // sign label
+    // Sign background only — label text rendered in DOM overlay
     ctx.fillStyle = PAL.signBg;
     const signH = 12;
     ctx.fillRect(bx + 4, by + 4, bw - 8, signH);
     ctx.strokeStyle = PAL.buildingLine;
     ctx.lineWidth = 0.5;
     ctx.strokeRect(bx + 4.5, by + 4.5, bw - 9, signH - 1);
-    ctx.fillStyle = PAL.signText;
-    ctx.font = "7px monospace";
-    ctx.textAlign = "center";
-    ctx.fillText(zone.label, bx + bw / 2, by + 4 + 9, bw - 10);
   }
-  ctx.textAlign = "left";
 }
 
-// ─── Draw lantern (placeholder circle) ───────────────────────────────────────
 function drawLantern(ctx: CanvasRenderingContext2D, zones: Zone[], cameraX: number) {
   const lantern = zones.find((z) => z.action === "__return__");
   if (!lantern) return;
   const groundY = INTERNAL_H - 28;
-  const lx = ((lantern.xMin + lantern.xMax) / 2) - cameraX;
-  // glow
+  const lx = (lantern.xMin + lantern.xMax) / 2 - cameraX;
   const grad = ctx.createRadialGradient(lx, groundY - 28, 2, lx, groundY - 28, 18);
   grad.addColorStop(0, "rgba(255,170,70,0.5)");
   grad.addColorStop(1, "rgba(255,170,70,0)");
@@ -139,14 +119,12 @@ function drawLantern(ctx: CanvasRenderingContext2D, zones: Zone[], cameraX: numb
   ctx.beginPath();
   ctx.arc(lx, groundY - 28, 18, 0, Math.PI * 2);
   ctx.fill();
-  // body
   ctx.fillStyle = "#e8924f";
   ctx.fillRect(lx - 5, groundY - 40, 10, 14);
   ctx.fillStyle = "#f0b060";
   ctx.fillRect(lx - 3, groundY - 38, 6, 10);
 }
 
-// ─── Draw player ──────────────────────────────────────────────────────────────
 function drawPlayer(ctx: CanvasRenderingContext2D, playerX: number, cameraX: number) {
   const groundY = INTERNAL_H - 28;
   const px = playerX - cameraX - PLAYER_W / 2;
@@ -155,59 +133,10 @@ function drawPlayer(ctx: CanvasRenderingContext2D, playerX: number, cameraX: num
   ctx.fillRect(px - 1, py - 1, PLAYER_W + 2, PLAYER_H + 2);
   ctx.fillStyle = PAL.player;
   ctx.fillRect(px, py, PLAYER_W, PLAYER_H);
-  // head (slightly lighter)
   ctx.fillStyle = "#f0b060";
   ctx.fillRect(px + 1, py, PLAYER_W - 2, PLAYER_H / 3);
 }
 
-// ─── Draw examine prompt ─────────────────────────────────────────────────────
-function drawExaminePrompt(ctx: CanvasRenderingContext2D, label: string) {
-  ctx.fillStyle = PAL.examineText;
-  ctx.font = "bold 7px monospace";
-  ctx.textAlign = "center";
-  ctx.fillText(LABEL_GAME_EXAMINE + " " + label, INTERNAL_W / 2, INTERNAL_H - 6);
-  ctx.textAlign = "left";
-}
-
-// ─── Draw dialog box ─────────────────────────────────────────────────────────
-function drawDialog(ctx: CanvasRenderingContext2D, line: string, page: number, total: number) {
-  const pad = 8;
-  const boxH = 42;
-  const bx = pad;
-  const by = INTERNAL_H - boxH - pad;
-  const bw = INTERNAL_W - pad * 2;
-  // box
-  ctx.fillStyle = PAL.dialogBg;
-  ctx.fillRect(bx, by, bw, boxH);
-  ctx.strokeStyle = PAL.dialogBorder;
-  ctx.lineWidth = 1;
-  ctx.strokeRect(bx + 0.5, by + 0.5, bw - 1, boxH - 1);
-  // inner border
-  ctx.strokeStyle = "rgba(232,160,64,0.3)";
-  ctx.lineWidth = 0.5;
-  ctx.strokeRect(bx + 3, by + 3, bw - 6, boxH - 6);
-  // text
-  ctx.fillStyle = PAL.dialogText;
-  ctx.font = "8px monospace";
-  ctx.fillText(line, bx + 8, by + 16, bw - 16);
-  // page indicator / cursor
-  if (page < total - 1) {
-    ctx.fillStyle = PAL.cursorColor;
-    ctx.font = "8px monospace";
-    ctx.textAlign = "right";
-    ctx.fillText("▼", bx + bw - 8, by + boxH - 8);
-    ctx.textAlign = "left";
-  } else {
-    // last page — show confirm prompt
-    ctx.fillStyle = PAL.cursorColor;
-    ctx.font = "7px monospace";
-    ctx.textAlign = "right";
-    ctx.fillText("[Z] はい  [X] いいえ", bx + bw - 8, by + boxH - 8);
-    ctx.textAlign = "left";
-  }
-}
-
-// ─── Draw wipe overlay ───────────────────────────────────────────────────────
 function drawWipe(ctx: CanvasRenderingContext2D, alpha: number) {
   ctx.fillStyle = `rgba(12,8,20,${alpha})`;
   ctx.fillRect(0, 0, INTERNAL_W, INTERNAL_H);
@@ -216,19 +145,21 @@ function drawWipe(ctx: CanvasRenderingContext2D, alpha: number) {
 // ─── Main component ───────────────────────────────────────────────────────────
 export default function ExplorationScene() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const canvasAreaRef = useRef<HTMLDivElement>(null);
+  const canvasWrapRef = useRef<HTMLDivElement>(null);
+  const examinePromptRef = useRef<HTMLDivElement>(null);
+  const dialogTextRef = useRef<HTMLDivElement>(null);
+  const dialogCursorRef = useRef<HTMLDivElement>(null);
+  const buildingLabelRefs = useRef<(HTMLDivElement | null)[]>([]);
   const router = useRouter();
 
-  // Input state (mutable refs to avoid re-renders in game loop)
   const [uiState, setUiState] = useState<"walk" | "dialog">("walk");
 
   const keysRef = useRef<Set<string>>(new Set());
   const touchRef = useRef<{ left: boolean; right: boolean; examine: boolean }>({
-    left: false,
-    right: false,
-    examine: false,
+    left: false, right: false, examine: false,
   });
 
-  // Game state refs
   const stateRef = useRef<FSMState>("walk");
   const playerXRef = useRef<number>((sceneData as { playerStartX?: number }).playerStartX ?? 160);
   const dialogZoneRef = useRef<Zone | null>(null);
@@ -243,15 +174,39 @@ export default function ExplorationScene() {
 
   const zones: Zone[] = (sceneData as { zones: Zone[] }).zones;
 
-  // ── Examine current zone ───────────────────────────────────────────────────
+  // ── Body scroll lock ───────────────────────────────────────────────────────
+  useEffect(() => {
+    const scrollY = window.scrollY;
+    const prevOverflow = document.body.style.overflow;
+    const prevPosition = document.body.style.position;
+    const prevTop = document.body.style.top;
+    const prevWidth = document.body.style.width;
+    document.body.style.overflow = "hidden";
+    document.body.style.position = "fixed";
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.width = "100%";
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      document.body.style.position = prevPosition;
+      document.body.style.top = prevTop;
+      document.body.style.width = prevWidth;
+      window.scrollTo(0, scrollY);
+    };
+  }, []);
+
+  // ── Examine zone ──────────────────────────────────────────────────────────
   const examineZone = useCallback((zone: Zone) => {
     dialogZoneRef.current = zone;
     dialogPageRef.current = 0;
     stateRef.current = "dialog";
     setUiState("dialog");
+    if (dialogTextRef.current) dialogTextRef.current.textContent = zone.dialog[0];
+    if (dialogCursorRef.current) {
+      dialogCursorRef.current.textContent = zone.dialog.length === 1 ? "▶ けってい" : "▼";
+    }
   }, []);
 
-  // ── Confirm last dialog page (navigate or return) ─────────────────────────
+  // ── Confirm dialog (last page) ────────────────────────────────────────────
   const confirmDialog = useCallback(() => {
     const zone = dialogZoneRef.current;
     if (!zone) return;
@@ -262,7 +217,42 @@ export default function ExplorationScene() {
     setUiState("walk");
   }, []);
 
-  // ── Input handlers ────────────────────────────────────────────────────────
+  // ── Return to previous page (✕ button / Esc in walk state) ───────────────
+  const handleReturn = useCallback(() => {
+    if (stateRef.current === "wipe") return;
+    stateRef.current = "wipe";
+    wipeAlphaRef.current = 0;
+    wipeTargetRef.current = 1;
+    wipeActionRef.current = "__return__";
+    setUiState("walk");
+  }, []);
+
+  // ── Advance dialog page ───────────────────────────────────────────────────
+  const dialogAdvance = useCallback(() => {
+    const zone = dialogZoneRef.current;
+    if (!zone) return;
+    if (dialogPageRef.current < zone.dialog.length - 1) {
+      dialogPageRef.current++;
+      if (dialogTextRef.current) dialogTextRef.current.textContent = zone.dialog[dialogPageRef.current];
+      if (dialogCursorRef.current) {
+        const isLast = dialogPageRef.current >= zone.dialog.length - 1;
+        dialogCursorRef.current.textContent = isLast ? "▶ けってい" : "▼";
+      }
+    } else {
+      confirmDialog();
+    }
+  }, [confirmDialog]);
+
+  // ── Cancel dialog ─────────────────────────────────────────────────────────
+  const dialogCancel = useCallback(() => {
+    if (stateRef.current === "dialog") {
+      stateRef.current = "walk";
+      dialogZoneRef.current = null;
+      setUiState("walk");
+    }
+  }, []);
+
+  // ── Keyboard input ────────────────────────────────────────────────────────
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (["ArrowLeft", "ArrowRight", "z", "Z", "x", "X", "Escape", " "].includes(e.key)) {
@@ -270,36 +260,18 @@ export default function ExplorationScene() {
       }
       keysRef.current.add(e.key);
 
-      // Dialog input
       if (stateRef.current === "dialog") {
-        if (["z", "Z", " ", "Enter"].includes(e.key)) {
-          const zone = dialogZoneRef.current;
-          if (!zone) return;
-          if (dialogPageRef.current < zone.dialog.length - 1) {
-            dialogPageRef.current++;
-          } else {
-            confirmDialog();
-          }
-        }
-        if (["x", "X", "Escape"].includes(e.key)) {
-          stateRef.current = "walk";
-          dialogZoneRef.current = null;
-          setUiState("walk");
-        }
+        if (["z", "Z", " ", "Enter"].includes(e.key)) dialogAdvance();
+        if (["x", "X", "Escape"].includes(e.key)) dialogCancel();
       }
 
-      // Walk: examine
-      if (stateRef.current === "walk" && ["z", "Z", " "].includes(e.key)) {
-        const px = playerXRef.current;
-        const zone = zones.find((z) => px >= z.xMin && px <= z.xMax);
-        if (zone) examineZone(zone);
-      }
-      // ESC from walk: return to normal site
-      if (stateRef.current === "walk" && e.key === "Escape") {
-        wipeActionRef.current = "__return__";
-        stateRef.current = "wipe";
-        wipeAlphaRef.current = 0;
-        wipeTargetRef.current = 1;
+      if (stateRef.current === "walk") {
+        if (["z", "Z", " "].includes(e.key)) {
+          const px = playerXRef.current;
+          const zone = zones.find((z) => px >= z.xMin && px <= z.xMax);
+          if (zone) examineZone(zone);
+        }
+        if (e.key === "Escape") handleReturn();
       }
     };
     const onKeyUp = (e: KeyboardEvent) => keysRef.current.delete(e.key);
@@ -309,7 +281,7 @@ export default function ExplorationScene() {
       window.removeEventListener("keydown", onKey);
       window.removeEventListener("keyup", onKeyUp);
     };
-  }, [zones, examineZone, confirmDialog]);
+  }, [zones, examineZone, dialogAdvance, dialogCancel, handleReturn]);
 
   // ── Game loop ─────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -328,7 +300,6 @@ export default function ExplorationScene() {
         const movingRight = keys.has("ArrowRight") || keys.has("d") || touch.right;
         if (movingLeft) playerXRef.current = Math.max(8, playerXRef.current - PLAYER_SPEED);
         if (movingRight) playerXRef.current = Math.min(WORLD_W - 8, playerXRef.current + PLAYER_SPEED);
-        // Touch examine
         if (touch.examine) {
           touch.examine = false;
           const px = playerXRef.current;
@@ -341,22 +312,15 @@ export default function ExplorationScene() {
         const dir = wipeTargetRef.current === 1 ? 1 : -1;
         wipeAlphaRef.current = Math.min(1, Math.max(0, wipeAlphaRef.current + dir * (FIXED_DT / 200)));
         if (wipeTargetRef.current === 1 && wipeAlphaRef.current >= 1) {
-          // Fully black — execute action
           const action = wipeActionRef.current;
           if (action === "__return__") {
-            // Switch back to pro mode
-            document.documentElement.dataset.mode = "pro";
-            try { localStorage.setItem("site-mode", "pro"); } catch { /* private browsing */ }
+            router.back();
           } else if (action === "__mail__") {
             window.location.href = `mailto:${profile.email}`;
           } else if (action) {
             router.push(action);
           }
-          wipeTargetRef.current = 0; // start fade-out (or router handles navigation)
-          if (action === "__return__") {
-            // Don't navigate, just fade back
-            wipeTargetRef.current = 0;
-          }
+          wipeTargetRef.current = 0;
         }
         if (wipeTargetRef.current === 0 && wipeAlphaRef.current <= 0) {
           stateRef.current = "walk";
@@ -372,7 +336,7 @@ export default function ExplorationScene() {
       }
       const delta = now - (lastTimeRef.current || now);
       lastTimeRef.current = now;
-      accumRef.current += Math.min(delta, 200); // cap to avoid spiral of death
+      accumRef.current += Math.min(delta, 200);
 
       while (accumRef.current >= FIXED_DT) {
         update();
@@ -381,18 +345,14 @@ export default function ExplorationScene() {
 
       const bg = bgRef.current!;
       const px = playerXRef.current;
-      // Camera: center on player, clamped to world bounds
-      const cameraX = Math.min(
-        Math.max(0, px - INTERNAL_W / 2),
-        WORLD_W - INTERNAL_W
-      );
+      const cameraX = Math.min(Math.max(0, px - INTERNAL_W / 2), WORLD_W - INTERNAL_W);
+      const state = stateRef.current;
 
       ctx.clearRect(0, 0, INTERNAL_W, INTERNAL_H);
       drawBackground(ctx, bg, cameraX);
       drawBuildings(ctx, zones, cameraX);
       drawLantern(ctx, zones, cameraX);
 
-      // Ground line
       ctx.strokeStyle = PAL.groundLine;
       ctx.lineWidth = 1;
       ctx.beginPath();
@@ -402,20 +362,44 @@ export default function ExplorationScene() {
 
       drawPlayer(ctx, px, cameraX);
 
-      const state = stateRef.current;
-      if (state === "walk") {
-        const zone = zones.find((z) => px >= z.xMin && px <= z.xMax);
-        if (zone) drawExaminePrompt(ctx, zone.label);
-      }
-      if (state === "dialog") {
-        const zone = dialogZoneRef.current;
-        if (zone) {
-          drawExaminePrompt(ctx, zone.label);
-          drawDialog(ctx, zone.dialog[dialogPageRef.current], dialogPageRef.current, zone.dialog.length);
-        }
-      }
       if (state === "wipe" || wipeAlphaRef.current > 0) {
         drawWipe(ctx, wipeAlphaRef.current);
+      }
+
+      // ── Update DOM text overlays ─────────────────────────────────────────
+      const groundY = INTERNAL_H - 28;
+
+      // Examine prompt
+      const currentZone = state === "walk" ? zones.find((z) => px >= z.xMin && px <= z.xMax) : null;
+      const ep = examinePromptRef.current;
+      if (ep) {
+        const text = currentZone ? `${LABEL_GAME_EXAMINE}　${currentZone.label}` : "";
+        if (ep.textContent !== text) ep.textContent = text;
+        const vis = currentZone ? "block" : "none";
+        if (ep.style.display !== vis) ep.style.display = vis;
+      }
+
+      // Building sign labels — positioned as % of canvas-wrap
+      let zoneIndex = 0;
+      for (let i = 0; i < zones.length; i++) {
+        const zone = zones[i];
+        if (zone.action === "__return__") continue;
+        const labelEl = buildingLabelRefs.current[zoneIndex];
+        zoneIndex++;
+        if (!labelEl) continue;
+        const bx = zone.xMin - cameraX;
+        const bw = zone.xMax - zone.xMin;
+        const bh = 48;
+        const by = groundY - bh;
+        const signCenterX = bx + bw / 2;
+        const signCenterY = by + 4 + 6; // sign midpoint Y in canvas px
+        const visible = signCenterX > -bw && signCenterX < INTERNAL_W + bw;
+        const vis = visible ? "block" : "none";
+        if (labelEl.style.display !== vis) labelEl.style.display = vis;
+        if (visible) {
+          labelEl.style.left = `${(signCenterX / INTERNAL_W) * 100}%`;
+          labelEl.style.top = `${(signCenterY / INTERNAL_H) * 100}%`;
+        }
       }
 
       rafRef.current = requestAnimationFrame(draw);
@@ -423,15 +407,20 @@ export default function ExplorationScene() {
 
     rafRef.current = requestAnimationFrame(draw);
     return () => cancelAnimationFrame(rafRef.current);
-  }, [zones, router, examineZone, confirmDialog]);
+  }, [zones, router, examineZone]);
 
-  // ── Resize: integer scale ─────────────────────────────────────────────────
+  // ── Resize: integer scale with letterbox ─────────────────────────────────
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const resize = () => {
-      const w = canvas.parentElement?.clientWidth ?? INTERNAL_W;
-      const scale = Math.max(1, Math.floor(w / INTERNAL_W));
+      const area = canvasAreaRef.current;
+      if (!area) return;
+      const availW = area.clientWidth;
+      const availH = area.clientHeight;
+      const scaleW = Math.max(1, Math.floor(availW / INTERNAL_W));
+      const scaleH = Math.max(1, Math.floor(availH / INTERNAL_H));
+      const scale = Math.min(scaleW, scaleH);
       canvas.style.width = `${INTERNAL_W * scale}px`;
       canvas.style.height = `${INTERNAL_H * scale}px`;
     };
@@ -445,34 +434,67 @@ export default function ExplorationScene() {
   const setRight = (v: boolean) => { touchRef.current.right = v; };
   const triggerExamine = () => { touchRef.current.examine = true; };
 
-  const dialogCancel = () => {
-    if (stateRef.current === "dialog") {
-      stateRef.current = "walk";
-      dialogZoneRef.current = null;
-      setUiState("walk");
-    }
-  };
-  const dialogAdvance = () => {
-    const zone = dialogZoneRef.current;
-    if (!zone) return;
-    if (dialogPageRef.current < zone.dialog.length - 1) {
-      dialogPageRef.current++;
-    } else {
-      confirmDialog();
-    }
-  };
+  // Building zones (excluding lantern) for DOM sign labels
+  const buildingZones = zones.filter((z) => z.action !== "__return__");
 
   return (
-    <div className="exploration-wrap">
-      <canvas
-        ref={canvasRef}
-        width={INTERNAL_W}
-        height={INTERNAL_H}
-        className="exploration-canvas"
-        aria-label="探索シーン — キーボードまたは画面下のボタンで操作"
-        onClick={() => { if (uiState === "dialog") dialogAdvance(); }}
-      />
-      <div className="exploration-controls" aria-label="タッチ操作">
+    <div className="game-layer">
+      {/* ✕ もどる — always visible, 44px+ tap target */}
+      <button
+        type="button"
+        className="game-return-btn"
+        aria-label="もどる"
+        onClick={handleReturn}
+      >
+        <span className="game-return-x">✕</span>
+        <span className="game-return-label">もどる</span>
+      </button>
+
+      {/* Canvas letterbox area */}
+      <div className="game-canvas-area" ref={canvasAreaRef}>
+        <div className="game-canvas-wrap" ref={canvasWrapRef}>
+          <canvas
+            ref={canvasRef}
+            width={INTERNAL_W}
+            height={INTERNAL_H}
+            className="game-canvas"
+            aria-label="探索シーン — キーボードまたは画面下のボタンで操作"
+            onClick={() => { if (uiState === "dialog") dialogAdvance(); }}
+          />
+
+          {/* Building sign labels — world-space DOM overlays */}
+          {buildingZones.map((zone, i) => (
+            <div
+              key={zone.label}
+              ref={(el) => { buildingLabelRefs.current[i] = el; }}
+              className="game-zone-label"
+              style={{ display: "none" }}
+            >
+              {zone.label}
+            </div>
+          ))}
+
+          {/* Examine prompt — visible when player is in zone (walk state) */}
+          <div
+            className="game-examine"
+            ref={examinePromptRef}
+            style={{ display: "none" }}
+          />
+
+          {/* Dialog window — visible in dialog state */}
+          <div
+            className="game-dialog"
+            style={{ display: uiState === "dialog" ? "flex" : "none" }}
+            onClick={dialogAdvance}
+          >
+            <div className="game-dialog-text" ref={dialogTextRef} />
+            <div className="game-dialog-cursor" ref={dialogCursorRef} />
+          </div>
+        </div>
+      </div>
+
+      {/* Touch controls — below canvas in fullscreen layer */}
+      <div className="game-controls" aria-label="タッチ操作">
         <button
           type="button"
           className="ex-btn"
@@ -512,10 +534,11 @@ export default function ExplorationScene() {
           →
         </button>
       </div>
-      <div className="exploration-hint">
+
+      <div className="game-hint">
         <span>←→ 移動</span>
         <span>Z / スペース　しらべる</span>
-        <span>X / Esc　キャンセル</span>
+        <span>X / Esc　もどる</span>
       </div>
     </div>
   );

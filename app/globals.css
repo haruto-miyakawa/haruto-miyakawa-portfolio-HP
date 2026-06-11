@@ -5802,43 +5802,146 @@ body {
 :not([data-mode="game"]) .sw-footer { display: none; }
 :not([data-mode="game"]) .sw-body { padding: 0; }
 
-/* ── /play page ───────────────────────────────────────────── */
-.play-page {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 20px 0;
-  min-height: 60vh;
-}
+/* ── /play fullscreen game layer ─────────────────────────── */
+.play-page { /* game-layer is position:fixed; this shell is invisible beneath */ }
 .play-loading {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-family: var(--f-head);
-  font-size: 14px;
-  color: var(--text-faint);
-  padding: 60px;
+  font-size: 16px;
+  color: var(--accent);
+  background: #1c1027;
 }
-
-/* ── Canvas exploration scene ─────────────────────────────── */
-.exploration-wrap {
+.game-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+}
+.game-return-btn {
+  position: absolute;
+  top: max(12px, env(safe-area-inset-top));
+  right: max(12px, env(safe-area-inset-right));
+  z-index: 10;
+  width: 52px;
+  height: 52px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
-  width: 100%;
-  max-width: 640px;
+  justify-content: center;
+  gap: 2px;
+  font-family: var(--f-head);
+  background: rgba(12, 8, 20, 0.80);
+  border: 1px solid var(--border-2);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.15s ease;
 }
-.exploration-canvas {
+.game-return-btn:hover,
+.game-return-btn:active {
+  background: rgba(232, 160, 64, 0.18);
+  border-color: var(--accent-line);
+}
+.game-return-x {
+  font-size: 18px;
+  line-height: 1;
+  color: var(--text);
+}
+.game-return-label {
+  font-size: 9px;
+  line-height: 1;
+  color: var(--text-faint);
+}
+.game-canvas-area {
+  flex: 1 1 0;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.game-canvas-wrap {
+  position: relative;
+  display: inline-block; /* sized naturally by canvas child */
+}
+.game-canvas {
+  display: block;
   image-rendering: pixelated;
   image-rendering: crisp-edges;
-  display: block;
-  border: 2px solid var(--accent-line);
-  border-radius: 4px;
-  /* width/height set by JS integer-scale resize handler */
+  /* width/height set by JS resize handler */
 }
-.exploration-controls {
+.game-examine {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--f-head);
+  font-size: 16px;
+  color: var(--accent);
+  white-space: nowrap;
+  pointer-events: none;
+  text-shadow: 0 1px 5px rgba(0, 0, 0, 0.95);
+}
+.game-dialog {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(12, 8, 20, 0.95);
+  border-top: 1.5px solid var(--accent);
+  padding: 12px 14px 10px;
+  flex-direction: column;
+  gap: 6px;
+  cursor: pointer;
+}
+.game-dialog-text {
+  font-family: var(--f-head);
+  font-size: 16px;
+  color: var(--text);
+  line-height: 1.6;
+}
+.game-dialog-cursor {
+  font-family: var(--f-head);
+  font-size: 13px;
+  color: var(--accent);
+  text-align: right;
+}
+.game-zone-label {
+  position: absolute;
+  transform: translateX(-50%);
+  font-family: var(--f-head);
+  font-size: 11px;
+  color: var(--text);
+  pointer-events: none;
+  white-space: nowrap;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+}
+.game-controls {
+  flex-shrink: 0;
   display: flex;
   gap: 10px;
   align-items: center;
+  justify-content: center;
+  padding: 8px 16px max(8px, env(safe-area-inset-bottom));
+  background: rgba(12, 8, 20, 0.65);
+  border-top: 1px solid var(--border-1);
 }
+.game-hint {
+  display: flex;
+  gap: 16px;
+  font-family: var(--f-mono);
+  font-size: 10px;
+  color: var(--text-faint);
+  justify-content: center;
+  padding: 4px 16px max(6px, env(safe-area-inset-bottom));
+}
+@media (max-width: 480px) { .game-hint { display: none; } }
 .ex-btn {
   font-family: var(--f-head);
   font-size: 14px;
@@ -5857,13 +5960,4 @@ body {
   padding: 8px 22px;
   color: var(--accent);
   border-color: var(--accent-line);
-}
-.exploration-hint {
-  display: flex;
-  gap: 16px;
-  font-family: var(--f-mono);
-  font-size: 10px;
-  color: var(--text-faint);
-  flex-wrap: wrap;
-  justify-content: center;
 }
