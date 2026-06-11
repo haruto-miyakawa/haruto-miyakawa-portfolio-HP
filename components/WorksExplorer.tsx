@@ -1,13 +1,11 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { works, workCategories } from "@/content/content.data";
-import { WorkThumb } from "@/components/mockups";
-import { ArrowRight } from "@/components/icons";
+import { WorkCard } from "@/components/WorkCard";
 import {
-  LABEL_NAV_WORKS, LABEL_AVAILABLE_FOR_WORK, LABEL_CASE_STUDY, LABEL_WORKS_EMPTY,
+  LABEL_NAV_WORKS, LABEL_AVAILABLE_FOR_WORK, LABEL_WORKS_EMPTY,
   LABEL_FILTER_CATEGORY, LABEL_FILTER_TAGS, LABEL_FILTER_CLEAR,
 } from "@/constants/labels";
 
@@ -86,45 +84,18 @@ export function WorksExplorer() {
         <div className="works-grid">
           {works.map((work) => {
             const visible = isVisible(work.category, work.tags);
-            const href = work.hasCaseStudy ? `/works/${work.slug}` : "#";
             return (
-              <article
+              <WorkCard
                 key={work.slug}
-                className={`wcard${visible ? "" : " hide"}`}
+                work={work}
+                variant="list"
+                visible={visible}
                 onClick={(e) => {
                   if (work.hasCaseStudy && !(e.target as HTMLElement).closest("a")) {
                     router.push(`/works/${work.slug}`);
                   }
                 }}
-              >
-                <div className="wthumb">
-                  <span className="wbadge">
-                    <span className="bdot" />
-                    {work.badge}
-                  </span>
-                  <WorkThumb title={work.title} badge={work.badge} thumb={work.thumb} />
-                </div>
-                <h3 className="wtitle">{work.title}</h3>
-                <p className="wdesc">{work.description}</p>
-                <div className="chips">
-                  {work.tags.map((tag) => (
-                    <span key={tag} className="chip">
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-                <div className="wfoot">
-                  {work.hasCaseStudy ? (
-                    <Link className="wfoot-b" href={href}>
-                      {LABEL_CASE_STUDY} <ArrowRight />
-                    </Link>
-                  ) : (
-                    <a className="wfoot-b" href={href}>
-                      {work.footRight} <ArrowRight />
-                    </a>
-                  )}
-                </div>
-              </article>
+              />
             );
           })}
           {visibleCount === 0 && <div className="works-empty">{LABEL_WORKS_EMPTY}</div>}

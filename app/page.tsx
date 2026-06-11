@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { SectionHead } from "@/components/SectionHead";
-import { WorkThumb } from "@/components/mockups";
+import { WorkCard } from "@/components/WorkCard";
 import { Lines } from "@/components/Lines";
 import { ArrowRight, homeTechIcons } from "@/components/icons";
 import { featuredWorks, homeHero, homeAbout, homeTech, processSteps, profile } from "@/content/content.data";
@@ -78,21 +78,7 @@ export default function HomePage() {
             <SectionHead title={LABEL_FEATURED_WORKS} star link={{ label: LABEL_VIEW_ALL_WORKS, href: "/works" }} />
             <div className="works">
               {featuredWorks.map((work) => (
-                <article key={work.title} className="work">
-                  <div className="thumb">
-                    <span className="thumb-badge">{work.badge}</span>
-                    <WorkThumb title={work.title} badge={work.badge} thumb={work.thumb} />
-                  </div>
-                  <h3 className="work-title">{work.title}</h3>
-                  <p className="work-desc">{work.description}</p>
-                  <div className="chips">
-                    {work.tags.map((tag) => (
-                      <span key={tag} className="chip">
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                </article>
+                <WorkCard key={work.title} work={work} variant="home" />
               ))}
             </div>
           </section>

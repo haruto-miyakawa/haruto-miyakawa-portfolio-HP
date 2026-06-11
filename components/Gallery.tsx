@@ -4,6 +4,7 @@ import { useRef } from "react";
 import { Shot } from "@/components/mockups";
 import { ChevronLeft, ChevronRight } from "@/components/icons";
 import type { CaseStudy } from "@/content/content.data";
+import { SectionHead } from "@/components/SectionHead";
 import { LABEL_GALLERY } from "@/constants/labels";
 
 export function Gallery({ items, url }: { items: NonNullable<CaseStudy["gallery"]>; url: string }) {
@@ -19,20 +20,20 @@ export function Gallery({ items, url }: { items: NonNullable<CaseStudy["gallery"
 
   return (
     <section className="cs-section cs-wide">
-      <div className="sec-head">
-        <div className="sec-title">
-          <span className="star">✦</span> {LABEL_GALLERY}
-        </div>
-        <div className="sec-rule" />
-        <div className="gal-nav">
-          <button className="gal-btn" onClick={() => scroll(-1)} aria-label="前へ">
-            <ChevronLeft />
-          </button>
-          <button className="gal-btn" onClick={() => scroll(1)} aria-label="次へ">
-            <ChevronRight />
-          </button>
-        </div>
-      </div>
+      <SectionHead
+        title={LABEL_GALLERY}
+        star
+        right={
+          <div className="gal-nav">
+            <button className="gal-btn" onClick={() => scroll(-1)} aria-label="前へ">
+              <ChevronLeft />
+            </button>
+            <button className="gal-btn" onClick={() => scroll(1)} aria-label="次へ">
+              <ChevronRight />
+            </button>
+          </div>
+        }
+      />
       <div className="gal-track" ref={trackRef}>
         {items.map((g, i) => (
           <article key={i} className="gal-card">

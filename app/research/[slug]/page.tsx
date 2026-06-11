@@ -5,6 +5,7 @@ import { paperDetails, profile } from "@/content/content.data";
 import { Lines } from "@/components/Lines";
 import { TerrainCell } from "@/components/mockups";
 import { ArrowUpRight, Check, icons } from "@/components/icons";
+import { SectionHead } from "@/components/SectionHead";
 import {
   LABEL_NAV_HOME, LABEL_NAV_RESEARCH,
   LABEL_RD_TLDR, LABEL_CHALLENGE_N, LABEL_PROBLEM_EN,
@@ -117,12 +118,7 @@ export default async function PaperDetailPage({ params }: { params: Promise<{ sl
 
           {/* TL;DR */}
           <section className="cs-section">
-            <div className="sec-head">
-              <div className="sec-title">
-                <span className="star">✦</span> {LABEL_RD_TLDR}
-              </div>
-              <div className="sec-rule" />
-            </div>
+            <SectionHead title={LABEL_RD_TLDR} star />
             <div className="tldr pd-tldr">
               <p>{pd.tldr}</p>
               <div className="pd-tldr-tags">
@@ -278,12 +274,7 @@ export default async function PaperDetailPage({ params }: { params: Promise<{ sl
       {/* CONTRIBUTIONS（発表済みのみ） */}
       {pd.contributions && pd.contributions.length > 0 && (
         <section className="cs-section cs-wide pd-contrib">
-          <div className="sec-head">
-            <div className="sec-title">
-              {LABEL_RD_CONTRIB_JP} <span className="sec-en">{LABEL_RD_CONTRIB_EN}</span>
-            </div>
-            <div className="sec-rule" />
-          </div>
+          <SectionHead title={<>{LABEL_RD_CONTRIB_JP} <span className="sec-en">{LABEL_RD_CONTRIB_EN}</span></>} />
           <ul className="contrib-list">
             {pd.contributions.map((c) => (
               <li key={c}>

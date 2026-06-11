@@ -6,6 +6,7 @@ import { Lines } from "@/components/Lines";
 import { Shot } from "@/components/mockups";
 import { Gallery } from "@/components/Gallery";
 import { HeroCarousel } from "@/components/HeroCarousel";
+import { SectionHead } from "@/components/SectionHead";
 import { ArrowUpRight, Check, icons } from "@/components/icons";
 import {
   LABEL_NAV_HOME, LABEL_NAV_WORKS,
@@ -119,12 +120,7 @@ export default async function CaseStudyPage({ params }: { params: Promise<{ slug
 
           {/* TL;DR */}
           <section className="cs-section">
-            <div className="sec-head">
-              <div className="sec-title">
-                <span className="star">✦</span> {LABEL_CS_TLDR}
-              </div>
-              <div className="sec-rule" />
-            </div>
+            <SectionHead title={LABEL_CS_TLDR} star />
             <div className="tldr">
               <div className="tldr-ic">{tldrIcon}</div>
               <p>{cs.tldr}</p>
@@ -284,12 +280,7 @@ export default async function CaseStudyPage({ params }: { params: Promise<{ slug
       {/* FEATURES（機能ブレイクダウンがある場合のみ表示） */}
       {cs.features && cs.features.length > 0 && (
         <section className="cs-section cs-wide">
-          <div className="sec-head">
-            <div className="sec-title">
-              <span className="star">✦</span> {LABEL_CS_FEATURES}
-            </div>
-            <div className="sec-rule" />
-          </div>
+          <SectionHead title={LABEL_CS_FEATURES} star />
           <div className="feat-list">
             {cs.features.map((f, i) => (
               <article key={f.title} className={`feat${f.reverse ? " rev" : ""}`}>
@@ -318,12 +309,7 @@ export default async function CaseStudyPage({ params }: { params: Promise<{ slug
 
       {/* TECH STACK */}
       <section className="cs-section cs-wide">
-        <div className="sec-head">
-          <div className="sec-title">
-            <span className="star">✦</span> {LABEL_TECH_STACK}
-          </div>
-          <div className="sec-rule" />
-        </div>
+        <SectionHead title={LABEL_TECH_STACK} star />
         <div className="stack-strip">
           {cs.stack.map((s) => (
             <div key={s.name} className="stack-item">

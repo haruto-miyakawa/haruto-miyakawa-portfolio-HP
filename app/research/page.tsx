@@ -4,6 +4,7 @@ import { CardLink } from "@/components/CardLink";
 import { ResearchThumb } from "@/components/mockups";
 import { Lines } from "@/components/Lines";
 import { ArrowRight, icons } from "@/components/icons";
+import { SectionHead } from "@/components/SectionHead";
 import { researchHero, featuredResearch, researchAreas, researchHighlights } from "@/content/content.data";
 import {
   LABEL_FEATURED_RESEARCH, LABEL_READ_PAPER,
@@ -57,12 +58,7 @@ export default function ResearchPage() {
       {/* BODY GRID */}
       <div className="re-grid">
         <div className="re-main">
-          <div className="sec-head">
-            <div className="sec-title">
-              <span className="star">✦</span> {LABEL_FEATURED_RESEARCH}
-            </div>
-            <div className="sec-rule" />
-          </div>
+          <SectionHead title={LABEL_FEATURED_RESEARCH} star />
 
           {/* FEATURED CARD */}
           <CardLink href={`/research/${detailSlug}`} className="feat-paper">
