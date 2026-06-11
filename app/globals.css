@@ -5620,6 +5620,9 @@ body {
   --f-head: var(--font-dot-gothic16), "DotGothic16", monospace;
 }
 
+/* ── hero-h1: switch to DotGothic16 in game mode ──────────────── */
+[data-mode="game"] .hero-h1 { font-family: var(--f-head); }
+
 /* ── Shell gradient overrides (uses :root vars, auto-updates) ─ */
 [data-mode="game"] .shell {
   background:

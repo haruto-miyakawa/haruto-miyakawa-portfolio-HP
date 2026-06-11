@@ -5,10 +5,12 @@ import { ResearchThumb } from "@/components/mockups";
 import { Lines } from "@/components/Lines";
 import { ArrowRight, icons } from "@/components/icons";
 import { SectionHead } from "@/components/SectionHead";
+import { DualLabel } from "@/components/DualLabel";
 import { researchHero, featuredResearch, researchAreas, researchHighlights } from "@/content/content.data";
 import {
   LABEL_FEATURED_RESEARCH, LABEL_READ_PAPER,
   LABEL_RESEARCH_INTERESTS, LABEL_RESEARCH_HIGHLIGHTS,
+  LABEL_GAME_RESEARCH,
 } from "@/constants/labels";
 
 export const metadata: Metadata = {
@@ -38,7 +40,7 @@ export default function ResearchPage() {
             <span className="cta-dot" />
             {researchHero.statusLabel}
           </div>
-          <h1 className="rhead-title">{researchHero.title}</h1>
+          <h1 className="rhead-title"><DualLabel pro={researchHero.title} game={LABEL_GAME_RESEARCH} /></h1>
           <p className="rhead-lead">{researchHero.lead}</p>
           <p className="rhead-sub">{researchHero.sub}</p>
           <div className="ri-block">

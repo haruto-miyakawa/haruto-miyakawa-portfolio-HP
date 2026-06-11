@@ -110,6 +110,10 @@ export function Sidebar() {
           </div>
         </div>
 
+        <div className="sidebar-mode-toggle">
+          <ModeToggle />
+        </div>
+
         <nav className="nav">
           {navItems.map((item) => {
             const gameLabel = gameLabels[item.key];
@@ -140,10 +144,6 @@ export function Sidebar() {
 
         <div className="lantern-wrap">
           <img src="/assets/lantern.webp" alt="" loading="lazy" decoding="async" />
-        </div>
-
-        <div className="sidebar-mode-toggle">
-          <ModeToggle />
         </div>
       </aside>
 

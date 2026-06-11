@@ -4,9 +4,11 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { works, workCategories } from "@/content/content.data";
 import { WorkCard } from "@/components/WorkCard";
+import { DualLabel } from "@/components/DualLabel";
 import {
   LABEL_NAV_WORKS, LABEL_AVAILABLE_FOR_WORK, LABEL_WORKS_EMPTY,
   LABEL_FILTER_CATEGORY, LABEL_FILTER_TAGS, LABEL_FILTER_CLEAR,
+  LABEL_GAME_WORKS,
 } from "@/constants/labels";
 
 export function WorksExplorer() {
@@ -61,7 +63,7 @@ export function WorksExplorer() {
             <span className="cta-dot" />
             {LABEL_AVAILABLE_FOR_WORK}
           </div>
-          <h1 className="whead-title">{LABEL_NAV_WORKS}</h1>
+          <h1 className="whead-title"><DualLabel pro={LABEL_NAV_WORKS} game={LABEL_GAME_WORKS} /></h1>
           <p className="whead-lead">これまでに開発したプロダクトやツールの一覧です。</p>
           <p className="whead-sub">課題解決のプロセスと、実装・改善の工夫を大切にしています。</p>
           {works.length >= 6 && (

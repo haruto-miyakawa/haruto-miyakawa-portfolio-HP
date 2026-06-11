@@ -4,6 +4,7 @@ import { about } from "@/content/content.data";
 import { Lines } from "@/components/Lines";
 import { icons } from "@/components/icons";
 import { StatusWindow } from "@/components/game/StatusWindow";
+import { DualLabel } from "@/components/DualLabel";
 import {
   LABEL_NAV_HOME, LABEL_NAV_ABOUT, LABEL_ABOUT_ME, LABEL_TECH_I_USE,
   LABEL_AB_PROFILE, LABEL_AB_VALUES, LABEL_AB_WHAT_I_DO,
@@ -40,7 +41,7 @@ export default function AboutPage() {
       <section className="ab-hero">
         <div className="ab-hero-content">
           <StatusWindow title={LABEL_GAME_ABOUT}>
-          <h1 className="ab-title">{LABEL_ABOUT_ME}</h1>
+          <h1 className="ab-title"><DualLabel pro={LABEL_ABOUT_ME} game={LABEL_GAME_ABOUT} /></h1>
           <p className="ab-catch">{about.catch}</p>
           <div className="ab-intro">
             {about.intro.map((p, i) => (

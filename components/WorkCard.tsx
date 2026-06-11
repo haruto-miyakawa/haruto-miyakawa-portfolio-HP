@@ -26,8 +26,15 @@ export function WorkCard({ work, variant, visible = true, onClick }: WorkCardPro
   const href = work.hasCaseStudy && work.slug ? `/works/${work.slug}` : "#";
 
   if (variant === "home") {
+    const homeGameLabel = work.gameStatus === "in-progress" ? LABEL_GAME_NOW_PLAYING : LABEL_GAME_CLEAR;
+    const homeBadgeClass = work.gameStatus === "in-progress" ? "qc-badge qc-playing" : "qc-badge qc-clear";
     return (
-      <article className="work">
+      <article className="work quest-card">
+        {work.gameStatus != null && (
+          <span className={homeBadgeClass} aria-label={work.gameStatus === "in-progress" ? "進行中" : "完了"}>
+            {homeGameLabel}
+          </span>
+        )}
         <div className="thumb">
           <span className="thumb-badge">{work.badge}</span>
           <WorkThumb title={work.title} badge={work.badge} thumb={work.thumb} />

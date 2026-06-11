@@ -61,6 +61,8 @@ export interface FeaturedWork {
   mock: WorkMock;
   /** 実スクショのサムネ（あれば mock タイルより優先） */
   thumb?: string;
+  /** Game mode quest badge — mirrors the corresponding Work entry */
+  gameStatus?: "complete" | "in-progress";
 }
 
 export interface Work {
@@ -90,6 +92,7 @@ export const featuredWorks: FeaturedWork[] = [
     tags: ["Next.js", "TypeScript", "React", "Tiptap", "Claude API", "Tailwind CSS"],
     mock: "dash",
     thumb: "/projects/tsumugu/home.webp",
+    gameStatus: "complete",
   },
   {
     badge: "AI",
@@ -97,6 +100,7 @@ export const featuredWorks: FeaturedWork[] = [
     description: "条件と好みから最適な家電を案内するPWA。制約付きAIで正確さを担保。",
     tags: ["Next.js", "TypeScript", "Supabase", "Gemini API", "PWA"],
     mock: "chat",
+    gameStatus: "complete",
   },
 ];
 
