@@ -16,7 +16,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const cs = caseStudies[slug];
   if (!cs) return {};
-  return { title: `${cs.title} — Works — Haruto Miyakawa`, description: cs.lead };
+  return { title: `${cs.title} — Works`, description: cs.lead };
 }
 
 /* ---- セクション別アイコン（HTML から忠実移植） ---- */

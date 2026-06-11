@@ -14,7 +14,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const pd = paperDetails[slug];
   if (!pd) return {};
-  return { title: `${pd.title.replace(/\n/g, " ")} — Research — Haruto Miyakawa`, description: pd.lead };
+  return { title: `${pd.title.replace(/\n/g, " ")} — Research`, description: pd.lead };
 }
 
 const diamondIcon = (

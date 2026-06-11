@@ -39,7 +39,7 @@ export default function HomePage() {
           <img className="pixel-art" src="/assets/hero.webp" alt="夕暮れの風景" decoding="async" fetchPriority="high" />
         </div>
         <div className="hero-content">
-          <div className="hero-hello">{homeHero.hello}</div>
+          {homeHero.hello && <div className="hero-hello">{homeHero.hello}</div>}
           <h1 className="hero-h1">
             <Lines text={homeHero.headingLines.join("\n")} />
           </h1>

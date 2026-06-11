@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { works, workCategories } from "@/content/content.data";
 import { WorkThumb } from "@/components/mockups";
-import { ArrowRight, PlusCircle } from "@/components/icons";
+import { ArrowRight } from "@/components/icons";
 
 export function WorksExplorer() {
   const router = useRouter();
@@ -62,17 +62,19 @@ export function WorksExplorer() {
           <h1 className="whead-title">Works</h1>
           <p className="whead-lead">これまでに開発したプロダクトやツールの一覧です。</p>
           <p className="whead-sub">課題解決のプロセスと、実装・改善の工夫を大切にしています。</p>
-          <div className="tabs">
-            {workCategories.map((cat) => (
-              <button
-                key={cat.key}
-                className={`tab${curCat === cat.key ? " active" : ""}`}
-                onClick={() => setCurCat(cat.key)}
-              >
-                {cat.label} <span className="tab-n">{catCount(cat.key)}</span>
-              </button>
-            ))}
-          </div>
+          {works.length >= 6 && (
+            <div className="tabs">
+              {workCategories.map((cat) => (
+                <button
+                  key={cat.key}
+                  className={`tab${curCat === cat.key ? " active" : ""}`}
+                  onClick={() => setCurCat(cat.key)}
+                >
+                  {cat.label} <span className="tab-n">{catCount(cat.key)}</span>
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
@@ -109,19 +111,8 @@ export function WorksExplorer() {
                 </div>
                 <div className="wfoot">
                   {work.hasCaseStudy ? (
-                    <Link className="wfoot-a" href={href}>
-                      <PlusCircle />
-                      概要を見る
-                    </Link>
-                  ) : (
-                    <a className="wfoot-a" href={href}>
-                      <PlusCircle />
-                      概要を見る
-                    </a>
-                  )}
-                  {work.hasCaseStudy ? (
                     <Link className="wfoot-b" href={href}>
-                      {work.footRight} <ArrowRight />
+                      Case Study <ArrowRight />
                     </Link>
                   ) : (
                     <a className="wfoot-b" href={href}>
@@ -135,45 +126,47 @@ export function WorksExplorer() {
           {visibleCount === 0 && <div className="works-empty">該当するプロジェクトはありません。</div>}
         </div>
 
-        <aside className="filter">
-          <div className="filter-sec">
-            <span className="filter-sectitle">カテゴリ</span>
-            <span className="sec-rule" />
-          </div>
-          <div className="filter-list">
-            {workCategories.map((cat) => (
-              <label
-                key={cat.key}
-                className={`filter-row${curCat === cat.key ? " active" : ""}`}
-                onClick={() => setCurCat(cat.key)}
-              >
-                <span className="radio" />
-                <span className="filter-label">{cat.label}</span>
-                <span className="filter-n">{catCount(cat.key)}</span>
-              </label>
-            ))}
-          </div>
-          <div className="filter-sec" style={{ marginTop: 22 }}>
-            <span className="filter-sectitle">技術タグ</span>
-            <span className="sec-rule" />
-            {selTags.size > 0 && (
-              <button className="tag-clear" onClick={() => setSelTags(new Set())}>
-                クリア
-              </button>
-            )}
-          </div>
-          <div className="tagfilter">
-            {tagOrder.map(({ tag, count }) => (
-              <button
-                key={tag}
-                className={`tagchip${selTags.has(tag) ? " active" : ""}`}
-                onClick={() => toggleTag(tag)}
-              >
-                {tag} <span className="tc-n">{count}</span>
-              </button>
-            ))}
-          </div>
-        </aside>
+        {works.length >= 6 && (
+          <aside className="filter">
+            <div className="filter-sec">
+              <span className="filter-sectitle">カテゴリ</span>
+              <span className="sec-rule" />
+            </div>
+            <div className="filter-list">
+              {workCategories.map((cat) => (
+                <label
+                  key={cat.key}
+                  className={`filter-row${curCat === cat.key ? " active" : ""}`}
+                  onClick={() => setCurCat(cat.key)}
+                >
+                  <span className="radio" />
+                  <span className="filter-label">{cat.label}</span>
+                  <span className="filter-n">{catCount(cat.key)}</span>
+                </label>
+              ))}
+            </div>
+            <div className="filter-sec" style={{ marginTop: 22 }}>
+              <span className="filter-sectitle">技術タグ</span>
+              <span className="sec-rule" />
+              {selTags.size > 0 && (
+                <button className="tag-clear" onClick={() => setSelTags(new Set())}>
+                  クリア
+                </button>
+              )}
+            </div>
+            <div className="tagfilter">
+              {tagOrder.map(({ tag, count }) => (
+                <button
+                  key={tag}
+                  className={`tagchip${selTags.has(tag) ? " active" : ""}`}
+                  onClick={() => toggleTag(tag)}
+                >
+                  {tag} <span className="tc-n">{count}</span>
+                </button>
+              ))}
+            </div>
+          </aside>
+        )}
       </div>
     </>
   );

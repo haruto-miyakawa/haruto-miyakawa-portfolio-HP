@@ -41,11 +41,11 @@ export const navItems: NavItem[] = [
 
 /* ============ Home : ヒーロー ============ */
 export const homeHero = {
-  hello: "Hello, I'm Haruto.",
-  headingLines: ["Build with Code.", "Create with Purpose."],
-  jp: "技術で価値を生み出し、体験をより良くする。",
+  hello: "",
+  headingLines: ["現場の課題を、動くプロダクトに。"],
+  jp: "情報系の学部2年。",
   body:
-    "フロントエンドとAIを軸に、課題を解決するプロダクトを開発しています。\nユーザーに価値を届けることにこだわり、設計から実装・改善までやり切ります。",
+    "国際会議 IIAI AAI Winter 2025（IEEE Computer Society 掲載）の共著研究に参加。量販店の現場発ツールから AI 共同執筆エディタ「つむぐ」まで、企画から実装までひとりでやり切ります。",
   tags: ["TypeScript", "Next.js", "React", "Tailwind CSS", "Python", "FastAPI", "PostgreSQL"],
 };
 
@@ -79,7 +79,7 @@ export interface Work {
   hasCaseStudy: boolean;
 }
 
-/** Home の Featured Works（3枚）。works 本体と一致させる */
+/** Home の Featured Works（2枚）。works 本体と一致させる */
 export const featuredWorks: FeaturedWork[] = [
   {
     badge: "Web",
@@ -88,13 +88,6 @@ export const featuredWorks: FeaturedWork[] = [
     tags: ["Next.js", "TypeScript", "React", "Tiptap", "Claude API", "Tailwind CSS"],
     mock: "dash",
     thumb: "/projects/tsumugu/home.webp",
-  },
-  {
-    badge: "Tool",
-    title: "講義議事録ジェネレーター",
-    description: "音声をWhisperで文字起こしし、Geminiで議事録に整形するツール。聴くことに集中できる。",
-    tags: ["Python", "Whisper", "Gemini API"],
-    mock: "travel",
   },
   {
     badge: "AI",
@@ -218,7 +211,7 @@ export const caseStudies: Record<string, CaseStudy> = {
       { label: "Role", value: "個人開発", icon: "user" },
       { label: "体制", value: "個人 (Solo)", icon: "people" },
       { label: "種類", value: "Webアプリ", icon: "monitor" },
-      { label: "ステータス", value: "v2.0 開発中", sub: "クローズドβ準備中", icon: "checkCircle", status: true },
+      { label: "ステータス", value: "v2.0 完成", sub: "クローズドβ準備中", icon: "checkCircle", status: true },
       { label: "スタック", value: "Next.js, TypeScript,\nTiptap, Claude API 他", icon: "codeStack" },
     ],
     tldr:
@@ -245,7 +238,7 @@ export const caseStudies: Record<string, CaseStudy> = {
     overview: [
       { label: "役割", value: "個人開発", icon: "user" },
       { label: "種類", value: "Webアプリ", icon: "monitor" },
-      { label: "ステータス", value: "v2.0 開発中", icon: "checkCircle", status: true },
+      { label: "ステータス", value: "v2.0 完成", icon: "checkCircle", status: true },
       { label: "リポジトリ", value: "GitHub", icon: "link", link: true, href: "https://github.com/haruto-miyakawa/tsumugu" },
     ],
     highlights: [
@@ -565,7 +558,7 @@ export const paperDetails: Record<string, PaperDetail> = {
       { label: "収録", value: "IEEE Xplore", icon: "book" },
       { label: "Role", value: "Co-author", sub: "4th author", icon: "user" },
       { label: "著者", value: "7 名（共著）", icon: "people" },
-      { label: "所属", value: "東京の大学", sub: "コンピュータサイエンス学部", icon: "building" },
+      { label: "所属", value: "東京の大学", sub: "情報システム学部", icon: "building" },
     ],
     tldr:
       "SNSでの「炎上」リスクを検知するフレームワーク。毒性の基準はコミュニティや組織ごとに異なるという問題に対し、「炎上事例(OUT)」と「安全事例(SAFE)」の事例データベースへの類似度マージンでリスクを判定する。データベースを差し替えるだけで「誰の基準で見るか（ペルソナ）」を切り替えられ、再学習を必要としない。",
@@ -621,7 +614,7 @@ export const paperDetails: Record<string, PaperDetail> = {
       authors:
         "Ren Yamauchi, Yuki Fujimatsu, Jinyu Toida, Haruto Miyakawa, Haruto Ichikawa, Rei Oshima, Takafumi Nakanishi",
       authorHighlight: "Haruto Miyakawa",
-      affiliation: "東京の大学 コンピュータサイエンス学部",
+      affiliation: "東京の大学 情報システム学部",
       tags: ["Explainable AI", "Content Moderation", "NLP", "RoBERTa"],
       links: [{ label: "IEEE Xplore", href: "https://ieeexplore.ieee.org/document/11418320" }],
     },
@@ -729,7 +722,7 @@ export const homeAbout = {
   name: "宮川 陽翔（みやかわ はると）",
   bio: "情報システムを専攻する学生エンジニア。Next.js / TypeScript と AI活用を軸に、ユーザー体験を大切にしたプロダクト開発に取り組んでいます。",
   points: [
-    "東京の大学に在学中（コンピュータサイエンス専攻・2年生）",
+    "東京の大学に在学中（情報システム専攻・2年生）",
     "埼玉在住。インターン・業務委託も積極的に検討中",
     "新しい技術のキャッチアップが好きです",
   ],
@@ -765,9 +758,9 @@ export const about = {
   ],
   profileRows: [
     { label: "名前", value: "宮川 陽翔（みやかわ はると）", icon: "user" },
-    { label: "所属", value: "東京の大学（コンピュータサイエンス専攻・在学中）", icon: "building" },
+    { label: "所属", value: "東京の大学（情報システム専攻・在学中）", icon: "building" },
     { label: "学年", value: "2年生", icon: "cap" },
-    { label: "専攻", value: "コンピュータサイエンス / 情報システム", icon: "atom" },
+    { label: "専攻", value: "情報システム", icon: "atom" },
     { label: "拠点", value: "埼玉, Japan", icon: "pin" },
     { label: "言語", value: "日本語 / English", icon: "globe" },
     { label: "興味", value: "Web開発 / AI活用 /\nゲーム制作 / 研究", icon: "heart" },
