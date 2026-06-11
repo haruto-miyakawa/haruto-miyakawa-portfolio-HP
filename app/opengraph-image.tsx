@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og";
+import { OG_BG_TOP, OG_BG_MID, OG_BG_BOT, OG_TEXT, OG_ACCENT, OG_ACCENT_2, OG_TEXT_MUTED, OG_FONT_FAMILY } from "@/constants/theme-values";
 
 export const alt = "Haruto Miyakawa — Web Engineer / AI Builder";
 export const size = { width: 1200, height: 630 };
@@ -16,20 +17,20 @@ export default function OpengraphImage() {
           flexDirection: "column",
           justifyContent: "space-between",
           padding: "80px",
-          background: "linear-gradient(135deg, #1a110d 0%, #110b09 58%, #0d0907 100%)",
-          color: "#ece3da",
-          fontFamily: "sans-serif",
+          background: `linear-gradient(135deg, ${OG_BG_TOP} 0%, ${OG_BG_MID} 58%, ${OG_BG_BOT} 100%)`,
+          color: OG_TEXT,
+          fontFamily: OG_FONT_FAMILY,
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 18, fontSize: 28, color: "#e8924f", letterSpacing: 4 }}>
-          <div style={{ width: 46, height: 3, background: "#e8924f" }} />
+        <div style={{ display: "flex", alignItems: "center", gap: 18, fontSize: 28, color: OG_ACCENT, letterSpacing: 4 }}>
+          <div style={{ width: 46, height: 3, background: OG_ACCENT }} />
           PORTFOLIO
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           <div style={{ fontSize: 92, fontWeight: 700, lineHeight: 1.04 }}>Haruto Miyakawa</div>
-          <div style={{ fontSize: 44, color: "#f0a766" }}>Web Engineer / AI Builder</div>
+          <div style={{ fontSize: 44, color: OG_ACCENT_2 }}>Web Engineer / AI Builder</div>
         </div>
-        <div style={{ fontSize: 28, color: "#b9ada2" }}>
+        <div style={{ fontSize: 28, color: OG_TEXT_MUTED }}>
           Building products that solve real problems with frontend &amp; AI.
         </div>
       </div>

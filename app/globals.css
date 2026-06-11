@@ -71,6 +71,21 @@
   --f-head: var(--font-space-grotesk), "Space Grotesk", sans-serif;
   --f-jp: var(--font-zen-kaku), "Zen Kaku Gothic New", sans-serif;
   --f-mono: var(--font-jetbrains-mono), "JetBrains Mono", monospace;
+
+  /* ---- Mockup decorative colors (components/mockups.tsx 専用) ---- */
+  --mk-row-1: #c9cdd7;
+  --mk-row-2: #cdd2dc;
+  --mk-row-3: #dfe2ea;
+  --mk-cube-orange: #e8924f;
+  --mk-cube-amber: #f0b54f;
+  --mk-cube-violet: #a586ff;
+  --mk-cube-rose: #df7a72;
+  --mk-cube-indigo: #8b86e0;
+  --mk-line-orange: #e8a05a;
+  --mk-line-violet: #9b7bff;
+  --mk-wl-red: #f0655b;
+  --mk-wl-amber: #f5bd4f;
+  --mk-wl-green: #5fc466;
 }
 
 * {

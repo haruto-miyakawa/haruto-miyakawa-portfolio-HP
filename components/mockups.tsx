@@ -36,7 +36,7 @@ function MkTravel() {
     <div className="mk mk-travel">
       <div className="mk-photo" />
       <div style={{ padding: "8px 8px 0" }}>
-        <div className="mk-row w70" style={{ background: "#c9cdd7" }} />
+        <div className="mk-row w70" style={{ background: "var(--mk-row-1)" }} />
       </div>
       <div className="mk-tcards">
         {[80, 70, 75].map((w, i) => (
@@ -137,9 +137,9 @@ function MkPortfolio() {
   return (
     <div className="mk mk-portfolio">
       <div className="mk-pf-left">
-        <div className="mk-row w40" style={{ background: "#cdd2dc" }} />
-        <div className="mk-row w70" style={{ background: "#dfe2ea" }} />
-        <div className="mk-row w50" style={{ background: "#dfe2ea" }} />
+        <div className="mk-row w40" style={{ background: "var(--mk-row-2)" }} />
+        <div className="mk-row w70" style={{ background: "var(--mk-row-3)" }} />
+        <div className="mk-row w50" style={{ background: "var(--mk-row-3)" }} />
         <div style={{ display: "flex", gap: 5, marginTop: 4 }}>
           <span className="mk-tagp" />
           <span className="mk-tagp" />
@@ -201,11 +201,11 @@ export function ResearchThumb({ type }: { type: PaperThumb }) {
       return (
         <div className="rth th-cubes">
           {[
-            { x: "18%", y: "55%", c: "#e8924f", r: "-12deg" },
-            { x: "38%", y: "38%", c: "#f0b54f", r: "8deg" },
-            { x: "55%", y: "60%", c: "#a586ff", r: "-6deg" },
-            { x: "70%", y: "42%", c: "#df7a72", r: "14deg" },
-            { x: "84%", y: "62%", c: "#8b86e0", r: "-10deg" },
+            { x: "18%", y: "55%", c: "var(--mk-cube-orange)", r: "-12deg" },
+            { x: "38%", y: "38%", c: "var(--mk-cube-amber)", r: "8deg" },
+            { x: "55%", y: "60%", c: "var(--mk-cube-violet)", r: "-6deg" },
+            { x: "70%", y: "42%", c: "var(--mk-cube-rose)", r: "14deg" },
+            { x: "84%", y: "62%", c: "var(--mk-cube-indigo)", r: "-10deg" },
           ].map((cb, i) => (
             <span key={i} className="cb" style={cssVars({ "--x": cb.x, "--y": cb.y, "--c": cb.c, "--r": cb.r })} />
           ))}
@@ -215,10 +215,10 @@ export function ResearchThumb({ type }: { type: PaperThumb }) {
       return (
         <div className="rth th-traffic">
           {[
-            { a: "18deg", t: "30%", c: "#e8924f" },
-            { a: "-12deg", t: "50%", c: "#f0b54f" },
-            { a: "8deg", t: "68%", c: "#df7a72" },
-            { a: "24deg", t: "80%", c: "#a586ff" },
+            { a: "18deg", t: "30%", c: "var(--mk-cube-orange)" },
+            { a: "-12deg", t: "50%", c: "var(--mk-cube-amber)" },
+            { a: "8deg", t: "68%", c: "var(--mk-cube-rose)" },
+            { a: "24deg", t: "80%", c: "var(--mk-cube-violet)" },
           ].map((tl, i) => (
             <span key={i} className="tl" style={cssVars({ "--a": tl.a, "--t": tl.t, "--c": tl.c })} />
           ))}
@@ -247,13 +247,13 @@ export function ResearchThumb({ type }: { type: PaperThumb }) {
             <polyline
               points="0,60 20,40 40,52 60,28 80,46 100,22 120,40 140,18 160,38 180,24 200,34"
               fill="none"
-              stroke="#e8a05a"
+              style={{ stroke: "var(--mk-line-orange)" }}
               strokeWidth="2"
             />
             <polyline
               points="0,72 20,64 40,68 60,56 80,62 100,50 120,60 140,48 160,58 180,46 200,52"
               fill="none"
-              stroke="#9b7bff"
+              style={{ stroke: "var(--mk-line-violet)" }}
               strokeWidth="1.6"
               opacity="0.7"
             />
@@ -418,7 +418,7 @@ function ShotPhone() {
       <div className="phone-notch" />
       <div className="phone-screen">
         <div className="p-top">
-          <span className="b-pill" style={{ width: "40%", background: "#cdd2dc" }} />
+          <span className="b-pill" style={{ width: "40%", background: "var(--mk-row-2)" }} />
         </div>
         <div className="b-bubble in">
           <span className="b-ln" style={{ width: "90%" }} />
@@ -468,9 +468,9 @@ export function Shot({ mock, url }: { mock: ShotMock; url?: string }) {
     <div className="shot">
       <div className="shot-bar">
         <span className="shot-dots">
-          <i style={{ background: "#f0655b" }} />
-          <i style={{ background: "#f5bd4f" }} />
-          <i style={{ background: "#5fc466" }} />
+          <i style={{ background: "var(--mk-wl-red)" }} />
+          <i style={{ background: "var(--mk-wl-amber)" }} />
+          <i style={{ background: "var(--mk-wl-green)" }} />
         </span>
         {url ? <span className="shot-url">{url}</span> : <span className="shot-url" />}
       </div>

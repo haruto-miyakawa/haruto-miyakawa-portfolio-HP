@@ -6,6 +6,7 @@ import { Sidebar } from "@/components/Sidebar";
 import { SiteFooter } from "@/components/SiteFooter";
 import { profile } from "@/content/content.data";
 import { SITE_URL, SITE_NAME, SITE_TITLE, SITE_DESCRIPTION } from "@/lib/site";
+import { VIEWPORT_THEME_COLOR } from "@/constants/theme-values";
 import "./globals.css";
 
 const spaceGrotesk = Space_Grotesk({
@@ -70,7 +71,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#110b09",
+  themeColor: VIEWPORT_THEME_COLOR,
   colorScheme: "dark",
 };
 
