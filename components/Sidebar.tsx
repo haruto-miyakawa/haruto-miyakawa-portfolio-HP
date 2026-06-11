@@ -214,6 +214,11 @@ export function Sidebar() {
           {contactLinks}
         </div>
 
+        {/* Game mode only: PRESS START → /play */}
+        <Link href="/play" className="press-start-link" aria-label="探索シーンへ" onClick={() => setOpen(false)}>
+          {LABEL_GAME_PRESS_START}
+        </Link>
+
         <div className="drawer-mode-toggle">
           <ModeToggle />
         </div>

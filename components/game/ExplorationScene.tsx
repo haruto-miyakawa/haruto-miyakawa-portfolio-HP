@@ -219,6 +219,8 @@ export default function ExplorationScene() {
   const router = useRouter();
 
   // Input state (mutable refs to avoid re-renders in game loop)
+  const [uiState, setUiState] = useState<"walk" | "dialog">("walk");
+
   const keysRef = useRef<Set<string>>(new Set());
   const touchRef = useRef<{ left: boolean; right: boolean; examine: boolean }>({
     left: false,
@@ -246,6 +248,7 @@ export default function ExplorationScene() {
     dialogZoneRef.current = zone;
     dialogPageRef.current = 0;
     stateRef.current = "dialog";
+    setUiState("dialog");
   }, []);
 
   // ── Confirm last dialog page (navigate or return) ─────────────────────────
@@ -256,6 +259,7 @@ export default function ExplorationScene() {
     wipeAlphaRef.current = 0;
     wipeTargetRef.current = 1;
     wipeActionRef.current = zone.action;
+    setUiState("walk");
   }, []);
 
   // ── Input handlers ────────────────────────────────────────────────────────
@@ -280,6 +284,7 @@ export default function ExplorationScene() {
         if (["x", "X", "Escape"].includes(e.key)) {
           stateRef.current = "walk";
           dialogZoneRef.current = null;
+          setUiState("walk");
         }
       }
 
@@ -444,6 +449,7 @@ export default function ExplorationScene() {
     if (stateRef.current === "dialog") {
       stateRef.current = "walk";
       dialogZoneRef.current = null;
+      setUiState("walk");
     }
   };
   const dialogAdvance = () => {
@@ -464,6 +470,7 @@ export default function ExplorationScene() {
         height={INTERNAL_H}
         className="exploration-canvas"
         aria-label="探索シーン — キーボードまたは画面下のボタンで操作"
+        onClick={() => { if (uiState === "dialog") dialogAdvance(); }}
       />
       <div className="exploration-controls" aria-label="タッチ操作">
         <button
@@ -479,11 +486,21 @@ export default function ExplorationScene() {
         <button
           type="button"
           className="ex-btn ex-btn-examine"
-          aria-label="しらべる / 決定"
-          onClick={stateRef.current === "dialog" ? dialogAdvance : triggerExamine}
+          aria-label={uiState === "dialog" ? "すすむ / 決定" : "しらべる"}
+          onClick={() => { if (uiState === "dialog") dialogAdvance(); else triggerExamine(); }}
         >
-          {LABEL_GAME_EXAMINE.replace("▶", "").trim() || "しらべる"}
+          {uiState === "dialog" ? "▶ すすむ" : (LABEL_GAME_EXAMINE.replace("▶", "").trim() || "しらべる")}
         </button>
+        {uiState === "dialog" && (
+          <button
+            type="button"
+            className="ex-btn"
+            aria-label="キャンセル"
+            onClick={dialogCancel}
+          >
+            もどる
+          </button>
+        )}
         <button
           type="button"
           className="ex-btn"
