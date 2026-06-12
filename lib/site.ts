@@ -1,9 +1,9 @@
-/** サイト全体で使うURL/メタ定数。本番URLは Vercel の環境変数から解決する。 */
+/** サイト全体で使うURL/メタ定数。 */
 export const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ??
-  (process.env.VERCEL_PROJECT_PRODUCTION_URL
-    ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
-    : "http://localhost:3000");
+  (process.env.NODE_ENV === "development"
+    ? "http://localhost:3000"
+    : "https://haruto-miyakawa.dev");
 
 export const SITE_NAME = "Haruto Miyakawa";
 export const SITE_TITLE = "Haruto Miyakawa — Web Engineer / AI Builder";
