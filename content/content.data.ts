@@ -83,7 +83,7 @@ export interface Work {
   gameStatus: "complete" | "in-progress";
 }
 
-/** Home の Featured Works（2枚）。works 本体と一致させる */
+/** Home の Featured Works（全作品）。works 本体と一致させる */
 export const featuredWorks: FeaturedWork[] = [
   {
     badge: "Web",
@@ -93,6 +93,15 @@ export const featuredWorks: FeaturedWork[] = [
     mock: "dash",
     thumb: "/projects/tsumugu/home.webp",
     gameStatus: "in-progress",
+  },
+  {
+    badge: "Tool",
+    title: "講義議事録ジェネレーター",
+    description: "音声をWhisperで文字起こしし、Geminiで議事録に整形するツール。聴くことに集中できる。",
+    tags: ["Python", "Whisper", "Gemini API"],
+    mock: "travel",
+    thumb: "/projects/lecture-minutes/editor.webp",
+    gameStatus: "complete",
   },
   {
     badge: "AI",
