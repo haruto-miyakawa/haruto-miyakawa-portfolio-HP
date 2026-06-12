@@ -5646,33 +5646,40 @@ body {
   background: linear-gradient(180deg, var(--bg-grad-top), var(--bg) 30%, var(--bg-grad-bot));
 }
 
-/* ── PRO/GAME mode toggle button (game mode exit — hidden in pro) ─── */
-.mode-toggle {
-  display: none; /* hidden in pro mode; visible only in [data-mode="game"] */
+/* ── PRO/GAME mode toggle button (legacy — hidden everywhere) ─── */
+.mode-toggle { display: none; }
+.mt-sep { color: var(--text-faint); }
+[data-mode="game"] .mt-game { color: var(--accent); font-weight: 700; }
+
+/* ── Return-to-pro button (game mode exit) ─────────────────────── */
+.return-to-pro-btn {
+  display: none; /* hidden in pro mode */
   align-items: center;
   gap: 6px;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid var(--border-2);
   border-radius: 8px;
   padding: 6px 10px;
-  font-family: var(--f-mono);
+  font-family: var(--f-head);
   font-size: 11px;
   font-weight: 600;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.04em;
   color: var(--text-2);
   cursor: pointer;
   transition: 0.18s ease;
   white-space: nowrap;
 }
-[data-mode="game"] .mode-toggle {
+[data-mode="game"] .return-to-pro-btn {
   display: inline-flex;
 }
-.mode-toggle:hover {
+.return-to-pro-btn:hover {
   border-color: var(--accent-line);
   color: var(--accent);
 }
-.mt-sep { color: var(--text-faint); }
-[data-mode="game"] .mt-game { color: var(--accent); font-weight: 700; }
+.topbar .return-to-pro-btn {
+  font-size: 10px;
+  padding: 4px 8px;
+}
 
 .sidebar-mode-toggle {
   margin-top: 8px;

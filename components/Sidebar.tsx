@@ -7,11 +7,10 @@ import { navItems, profile, type NavKey } from "@/content/content.data";
 import { navIcons, GithubIcon, XIcon, MailIcon } from "@/components/icons";
 import { Lines } from "@/components/Lines";
 import { DualLabel } from "@/components/DualLabel";
-import { ModeToggle } from "@/components/ModeToggle";
 import {
   LABEL_CONTACT,
   LABEL_GAME_WORKS, LABEL_GAME_ABOUT, LABEL_GAME_RESEARCH,
-  LABEL_GAME_CONTACT, LABEL_GAME_COMING_SOON,
+  LABEL_GAME_CONTACT, LABEL_GAME_COMING_SOON, LABEL_GAME_RETURN,
 } from "@/constants/labels";
 
 function activeKey(pathname: string): NavKey {
@@ -28,30 +27,42 @@ const gameLabels: Record<NavKey, string | null> = {
   about: LABEL_GAME_ABOUT,
 };
 
-function handleLanternClick() {
+function wipeAndApply(mode: "pro" | "game") {
   const wipe = document.getElementById("mode-wipe") as HTMLElement | null;
   const prefersReduced =
     typeof window !== "undefined" &&
     window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  const applyGame = () => {
-    document.documentElement.dataset.mode = "game";
-    try { localStorage.setItem("site-mode", "game"); } catch { /* private browsing */ }
+  const apply = () => {
+    document.documentElement.dataset.mode = mode;
+    try { localStorage.setItem("site-mode", mode); } catch { /* private browsing */ }
   };
 
   if (!wipe || prefersReduced) {
-    applyGame();
+    apply();
     return;
   }
 
   wipe.classList.add("wipe-in");
   setTimeout(() => {
-    applyGame();
+    apply();
     wipe.classList.remove("wipe-in");
     wipe.classList.add("wipe-out");
     setTimeout(() => { wipe.classList.remove("wipe-out"); }, 220);
   }, 220);
 }
+
+function handleLanternClick() { wipeAndApply("game"); }
+
+const ReturnButton = () => (
+  <button
+    type="button"
+    className="return-to-pro-btn"
+    onClick={() => wipeAndApply("pro")}
+  >
+    ◀ {LABEL_GAME_RETURN}
+  </button>
+);
 
 const LanternButton = () => (
   <button
@@ -147,7 +158,7 @@ export function Sidebar() {
         </div>
 
         <div className="sidebar-mode-toggle">
-          <ModeToggle />
+          <ReturnButton />
         </div>
 
         <nav className="nav">
@@ -189,7 +200,7 @@ export function Sidebar() {
           <img className="tb-av pixel-art" src="/assets/avatar.png" alt="" />
           <span className="tb-name">{profile.name}</span>
         </Link>
-        <ModeToggle />
+        <ReturnButton />
         <button
           ref={triggerRef}
           type="button"
@@ -260,7 +271,7 @@ export function Sidebar() {
         </div>
 
         <div className="drawer-mode-toggle">
-          <ModeToggle />
+          <ReturnButton />
         </div>
       </aside>
     </>
