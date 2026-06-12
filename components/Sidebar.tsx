@@ -174,7 +174,7 @@ export function Sidebar() {
         </div>
 
         {/* Game mode only: coming soon notice — not interactive */}
-        <span className="press-start-link">
+        <span className="press-start-link" aria-disabled="true">
           {LABEL_GAME_COMING_SOON}
         </span>
 
@@ -251,7 +251,7 @@ export function Sidebar() {
         </div>
 
         {/* Game mode only: coming soon notice — not interactive */}
-        <span className="press-start-link">
+        <span className="press-start-link" aria-disabled="true">
           {LABEL_GAME_COMING_SOON}
         </span>
 
