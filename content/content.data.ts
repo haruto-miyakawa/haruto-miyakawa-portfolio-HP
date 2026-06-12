@@ -61,6 +61,8 @@ export interface FeaturedWork {
   mock: WorkMock;
   /** 実スクショのサムネ（あれば mock タイルより優先） */
   thumb?: string;
+  /** Game mode quest badge — mirrors the corresponding Work entry */
+  gameStatus?: "complete" | "in-progress";
 }
 
 export interface Work {
@@ -77,9 +79,11 @@ export interface Work {
   footRight: "Case Study" | "GitHub";
   /** 詳細（ケーススタディ）ページを持つか */
   hasCaseStudy: boolean;
+  /** Game mode quest badge — derived from actual work status, no fabricated data */
+  gameStatus: "complete" | "in-progress";
 }
 
-/** Home の Featured Works（2枚）。works 本体と一致させる */
+/** Home の Featured Works（全作品）。works 本体と一致させる */
 export const featuredWorks: FeaturedWork[] = [
   {
     badge: "Web",
@@ -88,6 +92,16 @@ export const featuredWorks: FeaturedWork[] = [
     tags: ["Next.js", "TypeScript", "React", "Tiptap", "Claude API", "Tailwind CSS"],
     mock: "dash",
     thumb: "/projects/tsumugu/home.webp",
+    gameStatus: "in-progress",
+  },
+  {
+    badge: "Tool",
+    title: "講義議事録ジェネレーター",
+    description: "音声をWhisperで文字起こしし、Geminiで議事録に整形するツール。聴くことに集中できる。",
+    tags: ["Python", "Whisper", "Gemini API"],
+    mock: "travel",
+    thumb: "/projects/lecture-minutes/editor.webp",
+    gameStatus: "complete",
   },
   {
     badge: "AI",
@@ -95,6 +109,7 @@ export const featuredWorks: FeaturedWork[] = [
     description: "条件と好みから最適な家電を案内するPWA。制約付きAIで正確さを担保。",
     tags: ["Next.js", "TypeScript", "Supabase", "Gemini API", "PWA"],
     mock: "chat",
+    gameStatus: "complete",
   },
 ];
 
@@ -111,6 +126,7 @@ export const works: Work[] = [
     thumb: "/projects/tsumugu/home.webp",
     footRight: "Case Study",
     hasCaseStudy: true,
+    gameStatus: "in-progress",
   },
   {
     slug: "lecture-minutes",
@@ -123,6 +139,7 @@ export const works: Work[] = [
     thumb: "/projects/lecture-minutes/editor.webp",
     footRight: "Case Study",
     hasCaseStudy: true,
+    gameStatus: "complete",
   },
   {
     slug: "guide-manual",
@@ -134,6 +151,7 @@ export const works: Work[] = [
     mock: "chat",
     footRight: "Case Study",
     hasCaseStudy: true,
+    gameStatus: "complete",
   },
 ];
 

@@ -317,6 +317,24 @@ img.pixel-art {
   z-index: 1;
   filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.5));
 }
+/* lantern button — hidden entrance to game mode */
+.lantern-btn {
+  display: block;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: filter 0.22s ease;
+}
+.lantern-btn:hover,
+.lantern-btn:focus-visible {
+  filter: brightness(1.14);
+}
+.lantern-btn:focus-visible {
+  outline: 1px solid var(--accent);
+  outline-offset: 4px;
+  border-radius: 2px;
+}
 
 /* available */
 .available {
@@ -5552,4 +5570,425 @@ body {
   .route-spinner {
     animation-duration: 1.8s;
   }
+}
+
+/* ============================================================
+   GAME MODE
+   All rules scoped to [data-mode="game"] except:
+   - .dl-pro / .dl-game (dual-span defaults apply in both modes)
+   - #mode-wipe (always present, triggered by JS)
+   ============================================================ */
+
+/* ── Dual-span display toggle ──────────────────────────────── */
+.dl-game { display: none; }
+[data-mode="game"] .dl-game { display: inline; }
+[data-mode="game"] .dl-pro  { display: none; }
+
+/* ── Screen wipe overlay (~400 ms total) ───────────────────── */
+#mode-wipe {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: #110b09;
+  pointer-events: none;
+  opacity: 0;
+}
+#mode-wipe.wipe-in {
+  animation: wipeIn 0.22s ease forwards;
+}
+#mode-wipe.wipe-out {
+  animation: wipeOut 0.22s ease forwards;
+}
+@keyframes wipeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes wipeOut {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #mode-wipe.wipe-in,
+  #mode-wipe.wipe-out { animation: none; }
+}
+
+/* ── Game palette: dusk quantized token overrides ──────────── */
+/* Palette (9 colors only):
+   #110b09 #1a0f0c #1d120d #3a1d12 #8a5532 #c2601f #cfa97f #f2a65a #f7e7d3 */
+[data-mode="game"] {
+  --bg: #1a0f0c;
+  --bg-grad-top: #1d120d;
+  --bg-grad-bot: #110b09;
+  --sidebar: #110b09;
+  --sidebar-line: rgba(242, 165, 90, 0.18);
+  --surface: #1d120d;
+  --surface-2: #3a1d12;
+  --card: #1d120d;
+  --border: rgba(242, 165, 90, 0.15);
+  --border-2: rgba(242, 165, 90, 0.28);
+  --text: #f7e7d3;
+  --text-2: #cfa97f;
+  --text-3: #8a5532;
+  --text-faint: #8a5532;
+  --accent: #f2a65a;
+  --accent-2: #f2a65a;
+  --accent-soft: rgba(242, 165, 90, 0.15);
+  --accent-line: rgba(242, 165, 90, 0.35);
+  /* DotGothic16 for headings/UI labels only */
+  --f-head: var(--font-dot-gothic16), "DotGothic16", monospace;
+}
+
+/* ── hero-h1: switch to DotGothic16 in game mode ──────────────── */
+[data-mode="game"] .hero-h1 { font-family: var(--f-head); }
+
+/* ── Shell gradient overrides (uses :root vars, auto-updates) ─ */
+[data-mode="game"] .shell {
+  background: linear-gradient(180deg, var(--bg-grad-top), var(--bg) 30%, var(--bg-grad-bot));
+}
+
+/* ── PRO/GAME mode toggle button (legacy — hidden everywhere) ─── */
+.mode-toggle { display: none; }
+.mt-sep { color: var(--text-faint); }
+[data-mode="game"] .mt-game { color: var(--accent); font-weight: 700; }
+
+/* ── Return-to-pro button (game mode exit) ─────────────────────── */
+.return-to-pro-btn {
+  display: none; /* hidden in pro mode */
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-2);
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-family: var(--f-head);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--text-2);
+  cursor: pointer;
+  transition: 0.18s ease;
+  white-space: nowrap;
+}
+[data-mode="game"] .return-to-pro-btn {
+  display: inline-flex;
+}
+.return-to-pro-btn:hover {
+  border-color: var(--accent-line);
+  color: var(--accent);
+}
+.topbar .return-to-pro-btn {
+  font-size: 10px;
+  padding: 4px 8px;
+}
+
+.sidebar-mode-toggle {
+  margin-top: 8px;
+  display: flex;
+  justify-content: center;
+}
+.drawer-mode-toggle {
+  margin-top: 16px;
+  padding: 0 6px;
+}
+/* Topbar mode toggle */
+.topbar .mode-toggle {
+  font-size: 10px;
+  padding: 4px 8px;
+}
+
+/* ── Coming soon label (game mode only) — not a link, not interactive ─ */
+.press-start-link {
+  display: none; /* hidden in pro mode */
+  font-family: var(--f-head);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--text-faint);
+  border: 1px solid rgba(242, 165, 90, 0.14);
+  border-radius: 8px;
+  padding: 8px 14px;
+  text-align: center;
+  background: rgba(242, 165, 90, 0.05);
+  margin-top: 4px;
+  pointer-events: none;
+  cursor: default;
+  animation: pressStartBlink 1.4s step-end infinite;
+}
+[data-mode="game"] .press-start-link {
+  display: block;
+}
+@keyframes pressStartBlink {
+  0%, 60%, 100% { opacity: 1; }
+  30%            { opacity: 0.2; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .press-start-link { animation: none; }
+}
+
+/* ── RPG Message window ───────────────────────────────────── */
+.msg-window {
+  background: rgba(17, 11, 9, 0.94);
+  border: 2px solid var(--accent);
+  border-radius: 4px;
+  padding: 14px 18px;
+  font-family: var(--f-head);
+  position: relative;
+}
+.msg-body { display: flex; flex-direction: column; gap: 8px; position: relative; }
+.msg-line {
+  font-size: 14px;
+  color: var(--text);
+  line-height: 1.8;
+  letter-spacing: 0.04em;
+}
+.msg-cursor {
+  position: absolute;
+  right: 0;
+  bottom: -4px;
+  color: var(--accent);
+  font-size: 12px;
+  animation: msgBlink 0.8s step-end infinite;
+}
+@keyframes msgBlink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .msg-cursor { animation: none; }
+}
+
+/* ── RPG Quest card (Works page game mode) ────────────────── */
+.quest-card {
+  position: relative;
+}
+.qc-badge {
+  display: none; /* opt-in: shown only in [data-mode="game"] */
+  position: absolute;
+  top: -10px;
+  right: 12px;
+  z-index: 4;
+  font-family: var(--f-head);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: 1px solid;
+}
+[data-mode="game"] .quest-card .qc-badge { display: block; }
+.qc-clear {
+  color: #8fe3a6;
+  background: rgba(14, 26, 18, 0.9);
+  border-color: rgba(95, 208, 122, 0.5);
+}
+.qc-playing {
+  color: var(--accent-2);
+  background: rgba(28, 18, 12, 0.9);
+  border-color: var(--accent-line);
+}
+
+/* ── RPG Status window (About page game mode) ─────────────── */
+.status-window {
+  font-family: var(--f-head);
+  border: 1px solid var(--accent-line);
+  border-radius: 4px;
+  background: rgba(17, 11, 9, 0.6);
+  overflow: hidden;
+}
+.sw-titlebar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 12px;
+  background: rgba(232, 160, 64, 0.12);
+  border-bottom: 1px solid var(--accent-line);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+}
+.sw-corner { font-size: 10px; color: var(--accent-line); }
+.sw-title  { letter-spacing: 0.14em; }
+.sw-body   { padding: 12px; }
+.sw-footer {
+  padding: 4px 12px;
+  font-size: 9px;
+  color: var(--accent-line);
+  overflow: hidden;
+  text-overflow: clip;
+  white-space: nowrap;
+  border-top: 1px solid var(--border);
+}
+/* StatusWindow is invisible chrome in pro mode */
+:not([data-mode="game"]) .status-window {
+  background: none;
+  border: none;
+}
+:not([data-mode="game"]) .sw-titlebar,
+:not([data-mode="game"]) .sw-footer { display: none; }
+:not([data-mode="game"]) .sw-body { padding: 0; }
+
+/* ── /play fullscreen game layer ─────────────────────────── */
+.play-page { /* game-layer is position:fixed; this shell is invisible beneath */ }
+.play-loading {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--f-head);
+  font-size: 16px;
+  color: var(--accent);
+  background: #110b09;
+}
+.game-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+}
+.game-mode-toggle {
+  position: absolute;
+  top: max(12px, env(safe-area-inset-top));
+  left: max(12px, env(safe-area-inset-left));
+  z-index: 10;
+}
+.game-return-btn {
+  position: absolute;
+  top: max(12px, env(safe-area-inset-top));
+  right: max(12px, env(safe-area-inset-right));
+  z-index: 10;
+  width: 52px;
+  height: 52px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  font-family: var(--f-head);
+  background: rgba(58, 29, 18, 0.90);
+  border: 1px solid var(--accent-line);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.15s ease;
+}
+.game-return-btn:hover,
+.game-return-btn:active {
+  background: rgba(232, 160, 64, 0.18);
+  border-color: var(--accent-line);
+}
+.game-return-x {
+  font-size: 18px;
+  line-height: 1;
+  color: var(--text);
+}
+.game-return-label {
+  font-size: 9px;
+  line-height: 1;
+  color: var(--text-faint);
+}
+.game-canvas-area {
+  flex: 1 1 0;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.game-canvas-wrap {
+  position: relative;
+  display: inline-block; /* sized naturally by canvas child */
+}
+.game-canvas {
+  display: block;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  /* width/height set by JS resize handler */
+}
+.game-examine {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--f-head);
+  font-size: 16px;
+  color: var(--accent);
+  white-space: nowrap;
+  pointer-events: none;
+  text-shadow: 0 1px 5px rgba(0, 0, 0, 0.95);
+}
+.game-dialog {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(12, 8, 20, 0.95);
+  border-top: 1.5px solid var(--accent);
+  padding: 12px 14px 10px;
+  flex-direction: column;
+  gap: 6px;
+  cursor: pointer;
+}
+.game-dialog-text {
+  font-family: var(--f-head);
+  font-size: 16px;
+  color: var(--text);
+  line-height: 1.6;
+}
+.game-dialog-cursor {
+  font-family: var(--f-head);
+  font-size: 13px;
+  color: var(--accent);
+  text-align: right;
+}
+.game-zone-label {
+  position: absolute;
+  transform: translateX(-50%);
+  font-family: var(--f-head);
+  font-size: 11px;
+  color: var(--text);
+  pointer-events: none;
+  white-space: nowrap;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+}
+.game-controls {
+  flex-shrink: 0;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px max(8px, env(safe-area-inset-bottom));
+  background: rgba(12, 8, 20, 0.65);
+  border-top: 1px solid var(--border-1);
+}
+.game-hint {
+  display: flex;
+  gap: 16px;
+  font-family: var(--f-mono);
+  font-size: 10px;
+  color: var(--text-faint);
+  justify-content: center;
+  padding: 4px 16px max(6px, env(safe-area-inset-bottom));
+}
+@media (max-width: 480px) { .game-hint { display: none; } }
+.ex-btn {
+  font-family: var(--f-head);
+  font-size: 14px;
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-2);
+  border-radius: 6px;
+  color: var(--text);
+  cursor: pointer;
+  transition: 0.15s ease;
+  min-width: 48px;
+}
+.ex-btn:hover,
+.ex-btn:active { border-color: var(--accent-line); background: var(--accent-soft); }
+.ex-btn-examine {
+  padding: 8px 22px;
+  color: var(--accent);
+  border-color: var(--accent-line);
 }

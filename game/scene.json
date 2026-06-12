@@ -1,0 +1,55 @@
+{
+  "playerStartX": 160,
+  "worldWidth": 640,
+  "zones": [
+    {
+      "xMin": 16,
+      "xMax": 56,
+      "label": "ランタン",
+      "dialog": [
+        "あかりが　ゆれている…",
+        "げんじつへ　もどりますか？"
+      ],
+      "action": "__return_pro__"
+    },
+    {
+      "xMin": 100,
+      "xMax": 180,
+      "label": "QUEST BOARD",
+      "dialog": [
+        "ぼうけんのきろくが　みつかった。",
+        "みていきますか？"
+      ],
+      "action": "/works"
+    },
+    {
+      "xMin": 250,
+      "xMax": 340,
+      "label": "LAB",
+      "dialog": [
+        "けんきゅうしつのとびら。",
+        "なかに　はいりますか？"
+      ],
+      "action": "/research"
+    },
+    {
+      "xMin": 400,
+      "xMax": 480,
+      "label": "STATUS",
+      "dialog": [
+        "カレのこと、もっとくわしくカクニンする？"
+      ],
+      "action": "/about"
+    },
+    {
+      "xMin": 560,
+      "xMax": 620,
+      "label": "てがみ",
+      "dialog": [
+        "メッセージを　おくることができる。",
+        "てがみを　かきますか？"
+      ],
+      "action": "__mail__"
+    }
+  ]
+}

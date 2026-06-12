@@ -6,7 +6,12 @@ import { usePathname } from "next/navigation";
 import { navItems, profile, type NavKey } from "@/content/content.data";
 import { navIcons, GithubIcon, XIcon, MailIcon } from "@/components/icons";
 import { Lines } from "@/components/Lines";
-import { LABEL_CONTACT } from "@/constants/labels";
+import { DualLabel } from "@/components/DualLabel";
+import {
+  LABEL_CONTACT,
+  LABEL_GAME_WORKS, LABEL_GAME_ABOUT, LABEL_GAME_RESEARCH,
+  LABEL_GAME_CONTACT, LABEL_GAME_COMING_SOON, LABEL_GAME_RETURN,
+} from "@/constants/labels";
 
 function activeKey(pathname: string): NavKey {
   if (pathname.startsWith("/works")) return "works";
@@ -14,6 +19,61 @@ function activeKey(pathname: string): NavKey {
   if (pathname.startsWith("/about")) return "about";
   return "home";
 }
+
+const gameLabels: Record<NavKey, string | null> = {
+  home: null,
+  works: LABEL_GAME_WORKS,
+  research: LABEL_GAME_RESEARCH,
+  about: LABEL_GAME_ABOUT,
+};
+
+function wipeAndApply(mode: "pro" | "game") {
+  const wipe = document.getElementById("mode-wipe") as HTMLElement | null;
+  const prefersReduced =
+    typeof window !== "undefined" &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  const apply = () => {
+    document.documentElement.dataset.mode = mode;
+    try { localStorage.setItem("site-mode", mode); } catch { /* private browsing */ }
+  };
+
+  if (!wipe || prefersReduced) {
+    apply();
+    return;
+  }
+
+  wipe.classList.add("wipe-in");
+  setTimeout(() => {
+    apply();
+    wipe.classList.remove("wipe-in");
+    wipe.classList.add("wipe-out");
+    setTimeout(() => { wipe.classList.remove("wipe-out"); }, 220);
+  }, 220);
+}
+
+function handleLanternClick() { wipeAndApply("game"); }
+
+const ReturnButton = () => (
+  <button
+    type="button"
+    className="return-to-pro-btn"
+    onClick={() => wipeAndApply("pro")}
+  >
+    ◀ {LABEL_GAME_RETURN}
+  </button>
+);
+
+const LanternButton = () => (
+  <button
+    type="button"
+    className="lantern-btn"
+    aria-label="ゲームモードへ"
+    onClick={handleLanternClick}
+  >
+    <img src="/assets/lantern.webp" alt="" loading="lazy" decoding="async" />
+  </button>
+);
 
 export function Sidebar() {
   const pathname = usePathname();
@@ -97,22 +157,40 @@ export function Sidebar() {
           </div>
         </div>
 
+        <div className="sidebar-mode-toggle">
+          <ReturnButton />
+        </div>
+
         <nav className="nav">
-          {navItems.map((item) => (
-            <Link key={item.key} href={item.href} className={`nav-item${current === item.key ? " active" : ""}`}>
-              {navIcons[item.key]}
-              {item.label}
-            </Link>
-          ))}
+          {navItems.map((item) => {
+            const gameLabel = gameLabels[item.key];
+            return (
+              <Link key={item.key} href={item.href} className={`nav-item${current === item.key ? " active" : ""}`}>
+                {navIcons[item.key]}
+                {gameLabel ? (
+                  <DualLabel pro={item.label} game={gameLabel} />
+                ) : (
+                  item.label
+                )}
+              </Link>
+            );
+          })}
         </nav>
 
         <div>
-          <div className="side-label">{LABEL_CONTACT}</div>
+          <div className="side-label">
+            <DualLabel pro={LABEL_CONTACT} game={LABEL_GAME_CONTACT} />
+          </div>
           {contactLinks}
         </div>
 
+        {/* Game mode only: coming soon notice — not interactive */}
+        <span className="press-start-link" aria-disabled="true">
+          {LABEL_GAME_COMING_SOON}
+        </span>
+
         <div className="lantern-wrap">
-          <img src="/assets/lantern.webp" alt="" loading="lazy" decoding="async" />
+          <LanternButton />
         </div>
       </aside>
 
@@ -122,6 +200,7 @@ export function Sidebar() {
           <img className="tb-av pixel-art" src="/assets/avatar.png" alt="" />
           <span className="tb-name">{profile.name}</span>
         </Link>
+        <ReturnButton />
         <button
           ref={triggerRef}
           type="button"
@@ -155,22 +234,44 @@ export function Sidebar() {
         </div>
 
         <nav className="drawer-nav">
-          {navItems.map((item) => (
-            <Link
-              key={item.key}
-              href={item.href}
-              className={`drawer-item${current === item.key ? " active" : ""}`}
-              onClick={() => setOpen(false)}
-            >
-              {navIcons[item.key]}
-              {item.label}
-            </Link>
-          ))}
+          {navItems.map((item) => {
+            const gameLabel = gameLabels[item.key];
+            return (
+              <Link
+                key={item.key}
+                href={item.href}
+                className={`drawer-item${current === item.key ? " active" : ""}`}
+                onClick={() => setOpen(false)}
+              >
+                {navIcons[item.key]}
+                {gameLabel ? (
+                  <DualLabel pro={item.label} game={gameLabel} />
+                ) : (
+                  item.label
+                )}
+              </Link>
+            );
+          })}
         </nav>
 
         <div className="drawer-contact">
-          <div className="side-label">{LABEL_CONTACT}</div>
+          <div className="side-label">
+            <DualLabel pro={LABEL_CONTACT} game={LABEL_GAME_CONTACT} />
+          </div>
           {contactLinks}
+        </div>
+
+        {/* Game mode only: coming soon notice — not interactive */}
+        <span className="press-start-link" aria-disabled="true">
+          {LABEL_GAME_COMING_SOON}
+        </span>
+
+        <div className="lantern-wrap">
+          <LanternButton />
+        </div>
+
+        <div className="drawer-mode-toggle">
+          <ReturnButton />
         </div>
       </aside>
     </>

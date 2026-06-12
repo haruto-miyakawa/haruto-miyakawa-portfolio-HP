@@ -79,3 +79,23 @@ export const LABEL_CONTACT         = "Contact";
 // ── Footer ────────────────────────────────────────────────────────────────────
 export const LABEL_ROLE            = "Web Engineer / AI Builder";
 export const LABEL_BACK_TO_TOP     = "トップへ戻る ↑";
+
+// ── Mode toggle ───────────────────────────────────────────────────────────────
+export const LABEL_MODE_PRO        = "PRO";
+export const LABEL_MODE_GAME       = "GAME";
+
+// ── Game mode — nav vocabulary (game side of dual-span) ───────────────────────
+export const LABEL_GAME_WORKS      = "QUEST BOARD";
+export const LABEL_GAME_ABOUT      = "STATUS";
+export const LABEL_GAME_RESEARCH   = "LAB";
+export const LABEL_GAME_CONTACT    = "てがみをおくる";
+
+// ── Game mode — status badges ─────────────────────────────────────────────────
+export const LABEL_GAME_CLEAR      = "CLEAR!";
+export const LABEL_GAME_NOW_PLAYING = "NOW PLAYING";
+
+// ── Game mode — UI actions ────────────────────────────────────────────────────
+export const LABEL_GAME_RETURN       = "げんじつにもどる";
+export const LABEL_GAME_PRESS_START  = "PRESS START";
+export const LABEL_GAME_COMING_SOON  = "じゅんびちゅう…";
+export const LABEL_GAME_EXAMINE      = "▶しらべる";
