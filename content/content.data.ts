@@ -100,7 +100,7 @@ export const featuredWorks: FeaturedWork[] = [
     description: "条件と好みから最適な家電を案内するPWA。制約付きAIで正確さを担保。",
     tags: ["Next.js", "TypeScript", "Supabase", "Gemini API", "PWA"],
     mock: "chat",
-    gameStatus: "in-progress",
+    gameStatus: "complete",
   },
 ];
 
@@ -142,7 +142,7 @@ export const works: Work[] = [
     mock: "chat",
     footRight: "Case Study",
     hasCaseStudy: true,
-    gameStatus: "in-progress",
+    gameStatus: "complete",
   },
 ];
 

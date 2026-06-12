@@ -2,7 +2,6 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { LABEL_GAME_EXAMINE } from "@/constants/labels";
-import { ModeToggle } from "@/components/ModeToggle";
 import sceneData from "@/game/scene.json";
 import { profile } from "@/content/content.data";
 
@@ -314,7 +313,11 @@ export default function ExplorationScene() {
         wipeAlphaRef.current = Math.min(1, Math.max(0, wipeAlphaRef.current + dir * (FIXED_DT / 200)));
         if (wipeTargetRef.current === 1 && wipeAlphaRef.current >= 1) {
           const action = wipeActionRef.current;
-          if (action === "__return__") {
+          if (action === "__return_pro__") {
+            document.documentElement.dataset.mode = "pro";
+            try { localStorage.setItem("site-mode", "pro"); } catch { /* private browsing */ }
+            router.back();
+          } else if (action === "__return__") {
             router.back();
           } else if (action === "__mail__") {
             window.location.href = `mailto:${profile.email}`;
@@ -440,11 +443,6 @@ export default function ExplorationScene() {
 
   return (
     <div className="game-layer">
-      {/* PRO/GAME toggle — top-left, mirrors ✕ button position */}
-      <div className="game-mode-toggle">
-        <ModeToggle />
-      </div>
-
       {/* ✕ もどる — always visible, 44px+ tap target */}
       <button
         type="button"
