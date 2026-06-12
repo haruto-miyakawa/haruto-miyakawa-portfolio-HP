@@ -317,6 +317,24 @@ img.pixel-art {
   z-index: 1;
   filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.5));
 }
+/* lantern button — hidden entrance to game mode */
+.lantern-btn {
+  display: block;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: filter 0.22s ease;
+}
+.lantern-btn:hover,
+.lantern-btn:focus-visible {
+  filter: brightness(1.14);
+}
+.lantern-btn:focus-visible {
+  outline: 1px solid var(--accent);
+  outline-offset: 4px;
+  border-radius: 2px;
+}
 
 /* available */
 .available {
@@ -5628,9 +5646,9 @@ body {
   background: linear-gradient(180deg, var(--bg-grad-top), var(--bg) 30%, var(--bg-grad-bot));
 }
 
-/* ── PRO/GAME mode toggle button ───────────────────────────── */
+/* ── PRO/GAME mode toggle button (game mode exit — hidden in pro) ─── */
 .mode-toggle {
-  display: inline-flex;
+  display: none; /* hidden in pro mode; visible only in [data-mode="game"] */
   align-items: center;
   gap: 6px;
   background: rgba(255, 255, 255, 0.04);
@@ -5646,14 +5664,15 @@ body {
   transition: 0.18s ease;
   white-space: nowrap;
 }
+[data-mode="game"] .mode-toggle {
+  display: inline-flex;
+}
 .mode-toggle:hover {
   border-color: var(--accent-line);
   color: var(--accent);
 }
 .mt-sep { color: var(--text-faint); }
-/* Highlight active side */
 [data-mode="game"] .mt-game { color: var(--accent); font-weight: 700; }
-:not([data-mode="game"]) .mt-pro { color: var(--accent); font-weight: 700; }
 
 .sidebar-mode-toggle {
   margin-top: 8px;
@@ -5670,24 +5689,22 @@ body {
   padding: 4px 8px;
 }
 
-/* ── PRESS START link (game mode only) ────────────────────── */
+/* ── Coming soon label (game mode only) — not a link, not interactive ─ */
 .press-start-link {
   display: none; /* hidden in pro mode */
   font-family: var(--f-head);
   font-size: 12px;
   letter-spacing: 0.08em;
-  color: var(--accent);
-  border: 1px solid var(--accent-line);
+  color: var(--text-faint);
+  border: 1px solid rgba(242, 165, 90, 0.14);
   border-radius: 8px;
   padding: 8px 14px;
   text-align: center;
-  background: var(--accent-soft);
-  transition: 0.18s ease;
+  background: rgba(242, 165, 90, 0.05);
   margin-top: 4px;
+  pointer-events: none;
+  cursor: default;
   animation: pressStartBlink 1.4s step-end infinite;
-}
-.press-start-link:hover {
-  background: rgba(232, 160, 64, 0.24);
 }
 [data-mode="game"] .press-start-link {
   display: block;
@@ -5737,6 +5754,7 @@ body {
   position: relative;
 }
 .qc-badge {
+  display: none; /* opt-in: shown only in [data-mode="game"] */
   position: absolute;
   top: -10px;
   right: 12px;
@@ -5749,6 +5767,7 @@ body {
   border-radius: 4px;
   border: 1px solid;
 }
+[data-mode="game"] .quest-card .qc-badge { display: block; }
 .qc-clear {
   color: #8fe3a6;
   background: rgba(14, 26, 18, 0.9);
@@ -5759,8 +5778,6 @@ body {
   background: rgba(28, 18, 12, 0.9);
   border-color: var(--accent-line);
 }
-/* Hide quest badges in pro mode */
-:not([data-mode="game"]) .quest-card .qc-badge { display: none; }
 
 /* ── RPG Status window (About page game mode) ─────────────── */
 .status-window {

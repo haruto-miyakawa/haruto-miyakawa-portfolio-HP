@@ -11,7 +11,7 @@ import { ModeToggle } from "@/components/ModeToggle";
 import {
   LABEL_CONTACT,
   LABEL_GAME_WORKS, LABEL_GAME_ABOUT, LABEL_GAME_RESEARCH,
-  LABEL_GAME_CONTACT, LABEL_GAME_PRESS_START,
+  LABEL_GAME_CONTACT, LABEL_GAME_COMING_SOON,
 } from "@/constants/labels";
 
 function activeKey(pathname: string): NavKey {
@@ -27,6 +27,42 @@ const gameLabels: Record<NavKey, string | null> = {
   research: LABEL_GAME_RESEARCH,
   about: LABEL_GAME_ABOUT,
 };
+
+function handleLanternClick() {
+  const wipe = document.getElementById("mode-wipe") as HTMLElement | null;
+  const prefersReduced =
+    typeof window !== "undefined" &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  const applyGame = () => {
+    document.documentElement.dataset.mode = "game";
+    try { localStorage.setItem("site-mode", "game"); } catch { /* private browsing */ }
+  };
+
+  if (!wipe || prefersReduced) {
+    applyGame();
+    return;
+  }
+
+  wipe.classList.add("wipe-in");
+  setTimeout(() => {
+    applyGame();
+    wipe.classList.remove("wipe-in");
+    wipe.classList.add("wipe-out");
+    setTimeout(() => { wipe.classList.remove("wipe-out"); }, 220);
+  }, 220);
+}
+
+const LanternButton = () => (
+  <button
+    type="button"
+    className="lantern-btn"
+    aria-label="ゲームモードへ"
+    onClick={handleLanternClick}
+  >
+    <img src="/assets/lantern.webp" alt="" loading="lazy" decoding="async" />
+  </button>
+);
 
 export function Sidebar() {
   const pathname = usePathname();
@@ -137,13 +173,13 @@ export function Sidebar() {
           {contactLinks}
         </div>
 
-        {/* Game mode only: PRESS START → /play */}
-        <Link href="/play" className="press-start-link" aria-label="探索シーンへ">
-          {LABEL_GAME_PRESS_START}
-        </Link>
+        {/* Game mode only: coming soon notice — not interactive */}
+        <span className="press-start-link">
+          {LABEL_GAME_COMING_SOON}
+        </span>
 
         <div className="lantern-wrap">
-          <img src="/assets/lantern.webp" alt="" loading="lazy" decoding="async" />
+          <LanternButton />
         </div>
       </aside>
 
@@ -214,10 +250,14 @@ export function Sidebar() {
           {contactLinks}
         </div>
 
-        {/* Game mode only: PRESS START → /play */}
-        <Link href="/play" className="press-start-link" aria-label="探索シーンへ" onClick={() => setOpen(false)}>
-          {LABEL_GAME_PRESS_START}
-        </Link>
+        {/* Game mode only: coming soon notice — not interactive */}
+        <span className="press-start-link">
+          {LABEL_GAME_COMING_SOON}
+        </span>
+
+        <div className="lantern-wrap">
+          <LanternButton />
+        </div>
 
         <div className="drawer-mode-toggle">
           <ModeToggle />

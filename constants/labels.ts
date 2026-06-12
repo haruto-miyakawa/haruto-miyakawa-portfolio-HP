@@ -95,6 +95,7 @@ export const LABEL_GAME_CLEAR      = "CLEAR!";
 export const LABEL_GAME_NOW_PLAYING = "NOW PLAYING";
 
 // ── Game mode — UI actions ────────────────────────────────────────────────────
-export const LABEL_GAME_RETURN     = "げんじつにもどる";
-export const LABEL_GAME_PRESS_START = "PRESS START";
-export const LABEL_GAME_EXAMINE    = "▶しらべる";
+export const LABEL_GAME_RETURN       = "げんじつにもどる";
+export const LABEL_GAME_PRESS_START  = "PRESS START";
+export const LABEL_GAME_COMING_SOON  = "じゅんびちゅう…";
+export const LABEL_GAME_EXAMINE      = "▶しらべる";
