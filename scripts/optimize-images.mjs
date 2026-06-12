@@ -21,6 +21,10 @@ const jobs = [
   { in: "projects/lecture-minutes/editor.png", out: "projects/lecture-minutes/editor.webp", width: 1440, q: 80 },
   { in: "projects/lecture-minutes/settings.png", out: "projects/lecture-minutes/settings.webp", width: 1440, q: 80 },
   { in: "projects/lecture-minutes/result.png", out: "projects/lecture-minutes/result.webp", width: 1440, q: 80 },
+  { in: "projects/guide-manual/home.png", out: "projects/guide-manual/home.webp", width: 1440, q: 80 },
+  { in: "projects/guide-manual/list.png", out: "projects/guide-manual/list.webp", width: 1440, q: 80 },
+  { in: "projects/guide-manual/wizard.png", out: "projects/guide-manual/wizard.webp", width: 1440, q: 80 },
+  { in: "projects/guide-manual/compare.png", out: "projects/guide-manual/compare.webp", width: 1440, q: 80 },
 ];
 
 const kb = (b) => `${(b / 1024).toFixed(0)}KB`;

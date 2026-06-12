@@ -109,6 +109,7 @@ export const featuredWorks: FeaturedWork[] = [
     description: "条件と好みから最適な家電を案内するPWA。制約付きAIで正確さを担保。",
     tags: ["Next.js", "TypeScript", "Supabase", "Gemini API", "PWA"],
     mock: "chat",
+    thumb: "/projects/guide-manual/list.webp",
     gameStatus: "complete",
   },
 ];
@@ -149,6 +150,7 @@ export const works: Work[] = [
     description: "条件と好みから最適な家電を案内するPWA。制約付きAIで正確さを担保。",
     tags: ["Next.js", "TypeScript", "Supabase", "Gemini API", "PWA"],
     mock: "chat",
+    thumb: "/projects/guide-manual/list.webp",
     footRight: "Case Study",
     hasCaseStudy: true,
     gameStatus: "complete",
@@ -401,6 +403,12 @@ export const caseStudies: Record<string, CaseStudy> = {
       "PWAとしてモバイルでも使える形に",
     ],
     relatedLinks: [{ label: "GitHub リポジトリ", href: "https://github.com/haruto-miyakawa/Guide-manual" }],
+    heroImages: [
+      { src: "/projects/guide-manual/wizard.webp", caption: "ガイドウィザード — 質問に答えると、条件と好みからおすすめ候補と理由を提示" },
+      { src: "/projects/guide-manual/compare.webp", caption: "比較 — 選んだ製品のスペックを軸ごとに並べ、生活でのメリットまで整理" },
+      { src: "/projects/guide-manual/list.webp", caption: "商品一覧 — 型番・メーカーで絞り込み、最大5件選んで比較へ" },
+      { src: "/projects/guide-manual/home.webp", caption: "ホーム — 製品名・型番・メーカー検索とカテゴリから商品を探す" },
+    ],
     stack: [
       { mark: "N", name: "Next.js" },
       { mark: "TS", name: "TypeScript" },
