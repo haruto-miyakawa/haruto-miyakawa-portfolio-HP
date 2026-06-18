@@ -259,7 +259,7 @@ export const caseStudies: Record<string, CaseStudy> = {
       { label: "Role", value: "個人開発", icon: "user" },
       { label: "体制", value: "個人 (Solo)", icon: "people" },
       { label: "種類", value: "Webアプリ", icon: "monitor" },
-      { label: "ステータス", value: "v2.0 完成", sub: "クローズドβ準備中", icon: "checkCircle", status: true },
+      { label: "ステータス", value: "v2.0 完成", sub: "自分用に運用中", icon: "checkCircle", status: true },
       { label: "スタック", value: "Next.js, TypeScript,\nTiptap, Claude API 他", icon: "codeStack" },
     ],
     narrative: {
