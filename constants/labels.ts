@@ -44,6 +44,19 @@ export const LABEL_CS_FEATURES     = "主な機能";
 export const LABEL_VIEW_ON_GH      = "GitHub で見る";
 export const LABEL_SEND_MAIL       = "メールを送る";
 
+// ── Works detail — 濃いケーススタディの章見出し（PRO ⇄ GAME dual-span） ────────
+// GAME 側はクエスト風ラベル＋ピクセル記号（▶ ◆）。カラー絵文字は使わない。
+export const LABEL_CN_PROBLEM_PRO    = "なぜ作ったか";
+export const LABEL_CN_PROBLEM_GAME   = "▶ 受注のきっかけ";
+export const LABEL_CN_APPROACH_PRO   = "設計の中心に置いた思想";
+export const LABEL_CN_APPROACH_GAME  = "◆ 攻略方針";
+export const LABEL_CN_ROLE_PRO       = "役割分担";
+export const LABEL_CN_ROLE_GAME      = "◆ パーティ編成";
+export const LABEL_CN_DECISIONS_PRO  = "技術判断とトレードオフ";
+export const LABEL_CN_DECISIONS_GAME = "◆ 装備の選択";
+export const LABEL_CN_OUTCOME_PRO    = "現在地";
+export const LABEL_CN_OUTCOME_GAME   = "▶ 討伐報告";
+
 // ── Research detail — sections ────────────────────────────────────────────────
 export const LABEL_RD_TLDR         = "研究概要 (TL;DR)";
 export const LABEL_PROBLEM_EN      = "Problem";
