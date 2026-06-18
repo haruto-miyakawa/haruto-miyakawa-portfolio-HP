@@ -6056,3 +6056,218 @@ body {
   color: var(--accent);
   border-color: var(--accent-line);
 }
+
+/* =========================================================================
+   INTERACTION JUICE（追加: 2026-06-18）— 共通プリミティブの「押し心地」
+   ─────────────────────────────────────────────────────────────────────────
+   目的: ボタン/リンク/カードに hover/active のマイクロインタラクションを
+        共通層で一括付与し、PRO/GAME 両モード（data-mode 非依存）に効かせる。
+   方針: 既存の色・寸法・余白・フォント・レイアウトは不変。ここで触れるのは
+        transform / transition / cursor / -webkit-tap-highlight-color と
+        prefers-reduced-motion 分岐のみ。
+   仕様: transition は transform=120ms spring / その他は既存どおり ease。
+        hover=scale(1.03)（カードは既存の translateY lift を踏襲）、
+        active(押下)=scale(0.96)（大面積のカードのみ 0.985 に抑制）。
+   a11y: focus-visible のアウトラインは既存のグローバル定義（:focus-visible /
+        .nav-item・.drawer-item・.btn:focus-visible）をそのまま維持。transform は
+        outline を潰さない。reduced-motion 分岐は本セクション末尾。
+   scope外: /play（canvas ゲーム層）の .ex-btn / .game-* は対象外。
+            非クリックの装飾（.work[home] / .tag / .chip / .ri-tag / .ri-area /
+            .stack-item / 各 badge）にも付与しない。
+   ========================================================================= */
+:root {
+  /* 押下のオーバーシュート（spring）。既存トークンは変更していない（新規追加のみ）。 */
+  --mk-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* --- 1) タップ対象の共通設定（cursor / tap-highlight / spring トランジション） ---
+   transition は `all <既存相当> ease` で既存の色/境界アニメを保ったまま、
+   transform だけ 120ms spring・filter だけ 120ms ease に上書きする。
+   transform: scale は描画のみでレイアウトに影響しない（周囲を押し出さない）。 */
+.btn,
+.tab,
+.rtab,
+.tagchip,
+.gal-btn,
+.pd-pillbtn,
+.return-to-pro-btn,
+.lantern-btn,
+.menu-btn,
+.sf-social a,
+.hc-dot,
+.tag-clear,
+.sec-link,
+.about-more,
+.wfoot-a,
+.wfoot-b,
+.rc-link,
+.rel-link,
+.crumbs a,
+.cta-mail,
+.avail-mail,
+.sf-nav a,
+.sf-toplink,
+.contact a,
+.nav-item,
+.drawer-item,
+.tb-brand,
+.filter-row {
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: all 0.18s ease, transform 120ms var(--mk-spring), filter 120ms ease;
+  transform-origin: center;
+}
+/* カードは既存の影アニメ（0.22s）に合わせる。中央スケールで持ち上げ/押下が自然。 */
+.wcard,
+.rcard,
+.feat-paper {
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: all 0.22s ease, transform 120ms var(--mk-spring), filter 120ms ease;
+  transform-origin: center;
+}
+
+/* --- 2) hover: 離散ボタンを scale(1.03) で持ち上げ ---
+   リンク/カードは既存の hover（色変化・gap スライド・translateY lift）を踏襲するため
+   ここでは scale を足さない（手応えは active の press で付与）。 */
+.btn:hover,
+.tab:hover,
+.rtab:hover,
+.tagchip:hover,
+.gal-btn:hover,
+.pd-pillbtn:hover,
+.return-to-pro-btn:hover,
+.lantern-btn:hover,
+.menu-btn:hover,
+.sf-social a:hover {
+  transform: scale(1.03);
+}
+/* 既存で translateY lift を持つ btn 変種は lift を保ったまま scale を合成。 */
+.btn-primary:hover,
+.btn-pub:hover {
+  transform: translateY(-2px) scale(1.03);
+}
+
+/* --- 3) active(押下): 全タップ対象を scale(0.96) で凹ませる ---
+   :active は :hover/:focus-visible とは独立。後方に置くことで hover/lift を上書きし
+   「押し込み」を表現する。focus-visible のアウトラインは保持される。 */
+.btn:active,
+.tab:active,
+.rtab:active,
+.tagchip:active,
+.gal-btn:active,
+.pd-pillbtn:active,
+.return-to-pro-btn:active,
+.lantern-btn:active,
+.menu-btn:active,
+.sf-social a:active,
+.hc-dot:active,
+.tag-clear:active,
+.sec-link:active,
+.about-more:active,
+.wfoot-a:active,
+.wfoot-b:active,
+.rc-link:active,
+.rel-link:active,
+.crumbs a:active,
+.cta-mail:active,
+.avail-mail:active,
+.sf-nav a:active,
+.sf-toplink:active,
+.contact a:active,
+.nav-item:active,
+.drawer-item:active,
+.tb-brand:active,
+.filter-row:active {
+  transform: scale(0.96);
+}
+/* 大面積のカードは 0.96 が過剰なため 0.985 に抑制（押下感は十分・違和感なし）。 */
+.wcard:active,
+.rcard:active,
+.feat-paper:active {
+  transform: scale(0.985);
+}
+
+/* --- 4) reduced-motion: transform 系ジュースを無効化 ---
+   duration は 0 ではなく 0.01ms（transitionend を保持）。hover/active の scale を
+   打ち消す。cursor:pointer と focus-visible は本ブロックで触れないため維持される。 */
+@media (prefers-reduced-motion: reduce) {
+  .btn,
+  .tab,
+  .rtab,
+  .tagchip,
+  .gal-btn,
+  .pd-pillbtn,
+  .return-to-pro-btn,
+  .lantern-btn,
+  .menu-btn,
+  .sf-social a,
+  .hc-dot,
+  .tag-clear,
+  .sec-link,
+  .about-more,
+  .wfoot-a,
+  .wfoot-b,
+  .rc-link,
+  .rel-link,
+  .crumbs a,
+  .cta-mail,
+  .avail-mail,
+  .sf-nav a,
+  .sf-toplink,
+  .contact a,
+  .nav-item,
+  .drawer-item,
+  .tb-brand,
+  .filter-row,
+  .wcard,
+  .rcard,
+  .feat-paper {
+    transition-duration: 0.01ms;
+  }
+  .btn:hover,
+  .tab:hover,
+  .rtab:hover,
+  .tagchip:hover,
+  .gal-btn:hover,
+  .pd-pillbtn:hover,
+  .return-to-pro-btn:hover,
+  .lantern-btn:hover,
+  .menu-btn:hover,
+  .sf-social a:hover,
+  .btn-primary:hover,
+  .btn-pub:hover,
+  .btn:active,
+  .tab:active,
+  .rtab:active,
+  .tagchip:active,
+  .gal-btn:active,
+  .pd-pillbtn:active,
+  .return-to-pro-btn:active,
+  .lantern-btn:active,
+  .menu-btn:active,
+  .sf-social a:active,
+  .hc-dot:active,
+  .tag-clear:active,
+  .sec-link:active,
+  .about-more:active,
+  .wfoot-a:active,
+  .wfoot-b:active,
+  .rc-link:active,
+  .rel-link:active,
+  .crumbs a:active,
+  .cta-mail:active,
+  .avail-mail:active,
+  .sf-nav a:active,
+  .sf-toplink:active,
+  .contact a:active,
+  .nav-item:active,
+  .drawer-item:active,
+  .tb-brand:active,
+  .filter-row:active,
+  .wcard:active,
+  .rcard:active,
+  .feat-paper:active {
+    transform: none;
+  }
+}
