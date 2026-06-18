@@ -178,6 +178,24 @@ export interface CsoBlock {
   points?: string[];
   facts?: string[];
 }
+/** 濃いケーススタディの「技術判断」1件（取った選択＝見出し＋本文。両モード共通）。 */
+export interface CaseDecision {
+  /** 取った選択（見出し）。PRO/GAME 共通。 */
+  heading: string;
+  body: string;
+}
+/** 濃いケーススタディ（Problem→Approach→Role→Decisions→Outcome）。
+ *  章見出しは labels.ts ＋ dual-span で PRO/GAME 切替。本文（事実）は両モード共通。 */
+export interface CaseNarrative {
+  problem: string;
+  approach: string;
+  role: string;
+  /** Key Decisions（4判断）。各判断は「見出し＋本文」。 */
+  decisions: CaseDecision[];
+  /** 4判断の後に置く締めの一段落。 */
+  decisionsOutro: string;
+  outcome: string;
+}
 /** ヒーロー/連絡先で使う外部リンク */
 export interface CaseStudyLink {
   kind: "demo" | "github" | "zenn";
@@ -196,10 +214,13 @@ export interface CaseStudy {
   shotMock: ShotMock;
   /** メタ帯。icon は icons レジストリのキー */
   meta: { label: string; value: string; sub?: string; icon: string; status?: boolean }[];
-  tldr: string;
-  challenge: CsoBlock;
-  solution: CsoBlock;
-  outcome: CsoBlock;
+  /** TL;DR（CSO 構成の作品用。narrative を持つ作品では未指定） */
+  tldr?: string;
+  challenge?: CsoBlock;
+  solution?: CsoBlock;
+  outcome?: CsoBlock;
+  /** 濃いケーススタディ。あれば TL;DR + CSO の代わりにこの物語を描画する。 */
+  narrative?: CaseNarrative;
   /** 概要レール。icon は icons レジストリのキー */
   overview: { label: string; value: string; icon: string; link?: boolean; href?: string; status?: boolean }[];
   highlights: string[];
@@ -226,7 +247,7 @@ export const caseStudies: Record<string, CaseStudy> = {
     slug: "tsumugu",
     categoryLabel: "Webアプリ",
     title: "つむぐ",
-    lead: "note creators向けのAI共同執筆エディタ。書き手のリズムを崩さず、隣で支える。",
+    lead: "AIに書かせるのではなく、書き手の思考を止めない。自分の執筆の痛みから生まれた、AI共同執筆エディタ。",
     shotMock: "dashboard",
     meta: [
       { label: "Role", value: "個人開発", icon: "user" },
@@ -235,26 +256,35 @@ export const caseStudies: Record<string, CaseStudy> = {
       { label: "ステータス", value: "v2.0 完成", sub: "クローズドβ準備中", icon: "checkCircle", status: true },
       { label: "スタック", value: "Next.js, TypeScript,\nTiptap, Claude API 他", icon: "codeStack" },
     ],
-    tldr:
-      "Tsumugu（つむぐ）は、noteで発信するクリエイターのためのAI共同執筆エディタです。「AIに書かせる」のではなく「書き手の思考を止めない」ことを設計の中心に据えました。エディタ本体はTiptapで構築し、AIの提案は本文のブロック単位で差し替わる仕組み（ブロックリプレース）にすることで、執筆の流れを断たずに推敲を差し込めるようにしています。さらに、マスコットキャラクター『つむぎ』が5つの表情で寄り添い、AIを冷たい道具ではなく並走者として感じられる体験を目指しました。企画・設計・実装まで個人開発で一人で担当しています。",
-    challenge: {
-      heading: "AIが書く流れを奪う",
-      body: "既存のAI執筆ツールは生成が主役になりがちで、提案の量やタイミングが過剰だと、書き手のリズムや自分の言葉が削られてしまう——そう感じたのが出発点でした。",
-      points: ["提案が多すぎて思考と集中が途切れる", "操作のたびにエディタの外へ意識が逸れる", "文体が「AIっぽく」均質化してしまう"],
-    },
-    solution: {
-      heading: "呼んだときだけ並走するエディタ",
-      body: "AIを常時介入させず、書き手が求めた瞬間だけ応答する設計にしました。Tiptapのブロック構造を活かして、提案を本文へ自然に差し込むブロックリプレースを実装。生成はClaude APIを用い、ストリーミング表示で待ち時間を感じさせないようにしています。",
-      points: [
-        "選択範囲ベースの軽量な提案UI（ブロックリプレース）",
-        "Claude API＋ストリーミングで「待たせない」応答",
-        "マスコット『つむぎ』の5表情で、AIの介入を和らげる",
+    narrative: {
+      problem:
+        "知名度を広げるために note での発信を始めたものの、一本書くたびに数時間が溶けていくのが苦痛でした。特に二つの工程が重荷だった。ひとつは、リポジトリや手元の素材を「読みやすい記事の形」に整える整形作業。もうひとつは、書き上げた後に毎回 AI へ添削を投げ、表現を直していた往復です。これを毎回手作業でやる代わりに、整形と推敲を執筆フローへ最初から組み込んだツールが欲しい——つまり私自身が、つむぐの最初のユーザーでした。",
+      approach:
+        "既存の AI ライティングツールの多くは「テーマを渡すと丸ごと書いてくれる」方向に振れています。つむぐはその逆を狙いました。主導権は常に書き手に残す。AI は変えたい箇所だけを受け取って書き換え、構成については批評ではなく観察を返す。マスコット「つむぎ」は派手なエフェクトを持たず、AI の状態（待機・思考・執筆・完了）を mood として静かに可視化するだけの黒子に徹します。「AIを魔法のように振る舞わせると、ユーザーがツールに振り回される」——この一点を避けることが、設計全体の背骨になっています。",
+      role:
+        "個人開発です。企画と設計の草稿は自分、その草稿を読みやすい形に整えるのを Claude、実装を Claude Code、デザインモックを自分と ChatGPT で作り Claude Design で仕上げる、という分担で進めました。AI を道具として使い分けつつ、「何を作るか・どこで妥協しないか」の判断はすべて自分が下しています。",
+      decisions: [
+        {
+          heading: "エディタに Tiptap を選んだ — 実装の重さは AI に任せ、人間は「土台の正しさ」を選んだ",
+          body: "正直に言えば、着手時点で Tiptap の存在すら知りませんでした。自分で深く習熟したわけでもありません。それでも採用できたのは、実装が多少重くても Claude Code が書き切ってくれるという前提があったからです。だからこそ私は「自分が書きやすいか」ではなく、土台として正しいかだけで選べました。ProseMirror の構造化 DOM を保ちながら Headless で Tailwind と干渉しない——この性質は、将来 Phase 7 以降で画像挿入や続編生成を足すときに効きます。汎用性の低い土台を選んでいたら作り直しになる。実装の労力を AI が肩代わりしてくれる時代だからこそ、人間の判断は「目先の書きやすさ」から「長期の拡張耐性」へ寄せられる——その判断をした選定でした。",
+        },
+        {
+          heading: "AI に Claude API（Sonnet）を選んだ — 安い選択肢を知った上で、品質に投資した",
+          body: "Gemini API の方が安く、ローカルモデルを動かせば費用はゼロにできることは分かっていました。それでも Claude を選んだのは、つむぐの目玉が「文章作成」だからです。エッセイ調の日本語を生成させたとき、語の選び方が最も落ち着いていたのが Claude でした。コア機能の品質を価格で妥協したら、ツールそのものの存在意義が薄れる。加えて、tool_use でスタイル解析や記事生成のレスポンスを JSON Schema に縛れること、SSE ストリーミングが安定していることも、手作業のパースを消すうえで効きました。",
+        },
+        {
+          heading: "ブロックタイプを保持したまま置換する — 「当たり前」を担保するための実装",
+          body: "AI つむぎは、選択した段落だけを受け取って書き換えます。ここで素朴に実装すると、H2 見出しに相談したのに普通の段落になって返ってくる、といった崩れが起きる。これを防ぐため、ProseMirror の depth で doc 直下のブロックタイプを検出し、置換 HTML を組み立てる際に親要素（blockquote・list・heading）を壊さないよう分岐させました。「見出しに相談したら見出しのまま戻る」という、ユーザーから見れば当然の体験を、構造を理解した実装で裏から支えています。",
+        },
+        {
+          heading: "CSS Modules へ移行せず Tailwind v4 を続投した — 定石より、意図を取った",
+          body: "開発途中で CSS Modules への移行を検討しました。けれど Tailwind v4 の @theme 機能だけで「トークンの一元定義」と「型のように縛られたユーティリティ」の両方が成立すると判断し、移行を見送りました。色を #XXXXXX で直書きする逃げ道を塞ぐと、デザインの一貫性は自然に保たれる。「移行するのが定石だから」ではなく「この機能で意図が達成できるか」で決めた選択です。",
+        },
       ],
-    },
-    outcome: {
-      heading: "設計思想を、動くプロダクトに落とし込めた",
-      body: "現時点での成果は利用者数ではなく、『静かな並走者』という設計思想を実際に動くプロダクトとして形にできたことです。フルリニューアル版（v2.0）を完成させ、Tiptapのブロックリプレースとつむぎの5表情を実装。実装過程は技術記事（Zenn）にもまとめました。『呼んだときだけ支える体験が、書き手の文体を保ったまま下書きを速くできるか』を、これからのクローズドβで検証していきます。",
-      facts: ["v2.0 フルリニューアル達成", "マスコット『つむぎ』5表情", "Zenn 技術記事化"],
+      decisionsOutro:
+        "——これら四つの判断は、すべて同じ一本の軸で貫かれています。目先の楽・安・定石よりも、長期の正しさを取る。これは作品に掲げた「妥協なき創作のために、技術を磨く」というモットーを、実装の現場で守った結果です。",
+      outcome:
+        "v2.0 まで完成し、Phase 1 から 10 までのロードマップを構造化しています。デザインは v2.0 で全面刷新し、独自カラートークン・Noto Serif JP を基調にした組版・オリジナルマスコットを実装しました。現時点では商用化や一般公開は狙わず、ポートフォリオであり自分専用の執筆ツールとして設計しています。利用者数を競う作品ではなく、自分の課題を起点に、技術選定の判断を一つずつ言語化して積み上げた「設計の作品」です。",
     },
     overview: [
       { label: "役割", value: "個人開発", icon: "user" },
@@ -274,12 +304,13 @@ export const caseStudies: Record<string, CaseStudy> = {
       { src: "/projects/tsumugu/preview.webp", caption: "プレビュー — note公開前の仕上がり確認" },
     ],
     stack: [
-      { mark: "N", name: "Next.js" },
-      { mark: "TS", name: "TypeScript" },
-      { mark: "R", name: "React" },
-      { mark: "T", name: "Tiptap" },
-      { mark: "C", name: "Claude API" },
-      { mark: "~", name: "Tailwind CSS" },
+      { mark: "N", name: "Next.js 16 (App Router)" },
+      { mark: "R", name: "React 19" },
+      { mark: "TS", name: "TypeScript 5" },
+      { mark: "~", name: "Tailwind CSS v4" },
+      { mark: "T", name: "Tiptap 3" },
+      { mark: "C", name: "Claude API (Sonnet)" },
+      { mark: "V", name: "Vitest" },
     ],
     links: [{ kind: "github", label: "GitHub", href: "https://github.com/haruto-miyakawa/tsumugu" }],
     github: "https://github.com/haruto-miyakawa/tsumugu",

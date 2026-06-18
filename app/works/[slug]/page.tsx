@@ -7,6 +7,7 @@ import { Shot } from "@/components/mockups";
 import { Gallery } from "@/components/Gallery";
 import { HeroCarousel } from "@/components/HeroCarousel";
 import { SectionHead } from "@/components/SectionHead";
+import { DualLabel } from "@/components/DualLabel";
 import { ArrowUpRight, Check, icons } from "@/components/icons";
 import {
   LABEL_NAV_HOME, LABEL_NAV_WORKS,
@@ -15,6 +16,11 @@ import {
   LABEL_CS_FEATURES, LABEL_TECH_STACK,
   LABEL_RAIL_OVERVIEW, LABEL_RAIL_HIGHLIGHTS, LABEL_RAIL_RELATED,
   LABEL_VIEW_ON_GH, LABEL_SEND_MAIL,
+  LABEL_CN_PROBLEM_PRO, LABEL_CN_PROBLEM_GAME,
+  LABEL_CN_APPROACH_PRO, LABEL_CN_APPROACH_GAME,
+  LABEL_CN_ROLE_PRO, LABEL_CN_ROLE_GAME,
+  LABEL_CN_DECISIONS_PRO, LABEL_CN_DECISIONS_GAME,
+  LABEL_CN_OUTCOME_PRO, LABEL_CN_OUTCOME_GAME,
 } from "@/constants/labels";
 
 export function generateStaticParams() {
@@ -76,7 +82,10 @@ export default async function CaseStudyPage({ params }: { params: Promise<{ slug
         <div className="cs-hero-main">
           <span className="cat-badge">{cs.categoryLabel}</span>
           <h1 className="cs-title">{cs.title}</h1>
-          <p className="cs-lead">{cs.lead}</p>
+          <p className="cs-lead">
+            {/* リード文：PRO は記号なし、GAME は先頭に「▶ 」（同一テキスト・dual-span） */}
+            {cs.narrative ? <DualLabel pro={cs.lead} game={`▶ ${cs.lead}`} /> : cs.lead}
+          </p>
           {cs.body && <p className="cs-body">{cs.body}</p>}
           <div className="cs-cta">
             {cs.links.map((l, i) => (
@@ -118,16 +127,59 @@ export default async function CaseStudyPage({ params }: { params: Promise<{ slug
             </div>
           </section>
 
-          {/* TL;DR */}
-          <section className="cs-section">
-            <SectionHead title={LABEL_CS_TLDR} star />
-            <div className="tldr">
-              <div className="tldr-ic">{tldrIcon}</div>
-              <p>{cs.tldr}</p>
-            </div>
-          </section>
+          {/* TL;DR（CSO 構成の作品のみ。narrative を持つ作品では非表示） */}
+          {cs.tldr && (
+            <section className="cs-section">
+              <SectionHead title={LABEL_CS_TLDR} star />
+              <div className="tldr">
+                <div className="tldr-ic">{tldrIcon}</div>
+                <p>{cs.tldr}</p>
+              </div>
+            </section>
+          )}
 
-          {/* CHALLENGE / SOLUTION / OUTCOME */}
+          {/* 濃いケーススタディ（Problem → Approach → Role → Decisions → Outcome）
+              見出しは PRO/GAME で切替（dual-span）、本文は両モード共通。 */}
+          {cs.narrative && (
+            <section className="cs-section">
+              <div className="case-narrative">
+                <div className="cn-block">
+                  <SectionHead title={<DualLabel pro={LABEL_CN_PROBLEM_PRO} game={LABEL_CN_PROBLEM_GAME} />} />
+                  <p className="cn-body">{cs.narrative.problem}</p>
+                </div>
+                <div className="cn-block">
+                  <SectionHead title={<DualLabel pro={LABEL_CN_APPROACH_PRO} game={LABEL_CN_APPROACH_GAME} />} />
+                  <p className="cn-body">{cs.narrative.approach}</p>
+                </div>
+                <div className="cn-block">
+                  <SectionHead title={<DualLabel pro={LABEL_CN_ROLE_PRO} game={LABEL_CN_ROLE_GAME} />} />
+                  <p className="cn-body">{cs.narrative.role}</p>
+                </div>
+                <div className="cn-block">
+                  <SectionHead title={<DualLabel pro={LABEL_CN_DECISIONS_PRO} game={LABEL_CN_DECISIONS_GAME} />} />
+                  <div className="cn-decisions">
+                    {cs.narrative.decisions.map((d, i) => (
+                      <article key={d.heading} className="cn-decision">
+                        <h4 className="cn-dec-title">
+                          <span className="cn-dec-n">{String(i + 1).padStart(2, "0")}</span>
+                          <span>{d.heading}</span>
+                        </h4>
+                        <p className="cn-body">{d.body}</p>
+                      </article>
+                    ))}
+                    <p className="cn-outro">{cs.narrative.decisionsOutro}</p>
+                  </div>
+                </div>
+                <div className="cn-block">
+                  <SectionHead title={<DualLabel pro={LABEL_CN_OUTCOME_PRO} game={LABEL_CN_OUTCOME_GAME} />} />
+                  <p className="cn-body">{cs.narrative.outcome}</p>
+                </div>
+              </div>
+            </section>
+          )}
+
+          {/* CHALLENGE / SOLUTION / OUTCOME（narrative を持たない作品のみ） */}
+          {cs.challenge && cs.solution && cs.outcome && (
           <section className="cs-section">
             <div className="cso">
               <div className="cso-card">
@@ -212,6 +264,7 @@ export default async function CaseStudyPage({ params }: { params: Promise<{ slug
               </div>
             </div>
           </section>
+          )}
         </div>
 
         {/* RIGHT RAIL */}

@@ -3519,6 +3519,70 @@ img.pixel-art {
   height: 13px;
 }
 
+/* ── Case narrative（濃いケーススタディ: Problem→Approach→Role→Decisions→Outcome）──
+   既存トークンのみ使用（新しい色は導入しない）。data-mode 非依存で両モードに効く。 */
+.case-narrative {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+.cn-block {
+  min-width: 0;
+}
+.cn-block .sec-head {
+  margin-bottom: 16px;
+}
+.cn-body {
+  font-size: 14.5px;
+  color: var(--text-2);
+  line-height: 1.95;
+}
+.cn-body + .cn-body {
+  margin-top: 14px;
+}
+.cn-decisions {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.cn-decision {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-left: 2px solid var(--accent-line);
+  border-radius: var(--r-lg);
+  padding: 20px 22px;
+}
+.cn-dec-title {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  font-family: var(--f-jp);
+  font-weight: 700;
+  font-size: 15.5px;
+  line-height: 1.6;
+  color: var(--text);
+  margin-bottom: 11px;
+}
+.cn-dec-n {
+  flex: none;
+  font-family: var(--f-mono);
+  font-size: 13px;
+  color: var(--accent);
+}
+.cn-decision .cn-body {
+  font-size: 13.5px;
+  line-height: 1.85;
+}
+.cn-outro {
+  font-size: 13.5px;
+  color: var(--text-2);
+  line-height: 1.9;
+  padding: 16px 18px;
+  border-left: 2px solid var(--accent);
+  background: var(--accent-soft);
+  border-radius: var(--r-md);
+}
+
 /* right rail */
 .cs-rail {
   display: flex;
