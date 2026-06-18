@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import Image from "next/image";
 import { notFound } from "next/navigation";
 import { caseStudies, profile } from "@/content/content.data";
 import { Lines } from "@/components/Lines";
@@ -155,13 +154,15 @@ export default async function CaseStudyPage({ params }: { params: Promise<{ slug
                     <div className="cn-shots">
                       {cs.narrative.approachImages.map((img) => (
                         <figure key={img.src} className="cn-shot">
-                          <Image
+                          {/* サイト内の他画像（hero/gallery）と同じ plain <img>。元解像度(1440×708)を
+                              そのまま配信し、表示はCSSの width:100%/height:auto で本文幅に追従。 */}
+                          <img
                             className="cn-shot-img"
                             src={img.src}
                             alt={img.alt}
                             width={1440}
                             height={708}
-                            sizes="(max-width: 760px) 100vw, 680px"
+                            loading="lazy"
                           />
                           <figcaption className="cn-cap">{img.alt}</figcaption>
                         </figure>
