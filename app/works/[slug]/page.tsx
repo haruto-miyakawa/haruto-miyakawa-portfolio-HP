@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { caseStudies, profile } from "@/content/content.data";
 import { Lines } from "@/components/Lines";
@@ -148,11 +149,28 @@ export default async function CaseStudyPage({ params }: { params: Promise<{ slug
                   <p className="cn-body">{cs.narrative.problem}</p>
                 </div>
                 <div className="cn-block">
-                  <SectionHead title={<DualLabel pro={LABEL_CN_APPROACH_PRO} game={LABEL_CN_APPROACH_GAME} />} />
+                  <SectionHead title={<DualLabel pro={cs.narrative.approachLabelPro ?? LABEL_CN_APPROACH_PRO} game={LABEL_CN_APPROACH_GAME} />} />
                   <p className="cn-body">{cs.narrative.approach}</p>
+                  {cs.narrative.approachImages && cs.narrative.approachImages.length > 0 && (
+                    <div className="cn-shots">
+                      {cs.narrative.approachImages.map((img) => (
+                        <figure key={img.src} className="cn-shot">
+                          <Image
+                            className="cn-shot-img"
+                            src={img.src}
+                            alt={img.alt}
+                            width={1440}
+                            height={708}
+                            sizes="(max-width: 760px) 100vw, 680px"
+                          />
+                          <figcaption className="cn-cap">{img.alt}</figcaption>
+                        </figure>
+                      ))}
+                    </div>
+                  )}
                 </div>
                 <div className="cn-block">
-                  <SectionHead title={<DualLabel pro={LABEL_CN_ROLE_PRO} game={LABEL_CN_ROLE_GAME} />} />
+                  <SectionHead title={<DualLabel pro={cs.narrative.roleLabelPro ?? LABEL_CN_ROLE_PRO} game={LABEL_CN_ROLE_GAME} />} />
                   <p className="cn-body">{cs.narrative.role}</p>
                 </div>
                 <div className="cn-block">
@@ -167,7 +185,7 @@ export default async function CaseStudyPage({ params }: { params: Promise<{ slug
                         <p className="cn-body">{d.body}</p>
                       </article>
                     ))}
-                    <p className="cn-outro">{cs.narrative.decisionsOutro}</p>
+                    {cs.narrative.decisionsOutro && <p className="cn-outro">{cs.narrative.decisionsOutro}</p>}
                   </div>
                 </div>
                 <div className="cn-block">
