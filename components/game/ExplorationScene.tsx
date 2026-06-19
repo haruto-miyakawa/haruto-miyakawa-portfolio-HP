@@ -180,10 +180,9 @@ export default function ExplorationScene() {
   const [uiState, setUiState] = useState<"walk" | "dialog">("walk");
   const [muted, setMuted] = useState<boolean>(() => isSfxMuted());
 
-  const prevZoneLabelRef = useRef<string | null>(null);
   const keysRef = useRef<Set<string>>(new Set());
-  const touchRef = useRef<{ left: boolean; right: boolean; examine: boolean }>({
-    left: false, right: false, examine: false,
+  const touchRef = useRef<{ left: boolean; right: boolean }>({
+    left: false, right: false,
   });
 
   const stateRef = useRef<FSMState>("walk");
@@ -330,12 +329,6 @@ export default function ExplorationScene() {
         const movingRight = keys.has("ArrowRight") || keys.has("d") || touch.right;
         if (movingLeft) playerXRef.current = Math.max(8, playerXRef.current - PLAYER_SPEED);
         if (movingRight) playerXRef.current = Math.min(WORLD_W - 8, playerXRef.current + PLAYER_SPEED);
-        if (touch.examine) {
-          touch.examine = false;
-          const px = playerXRef.current;
-          const zone = zones.find((z) => px >= z.xMin && px <= z.xMax);
-          if (zone) examineZone(zone);
-        }
       }
 
       if (state === "wipe") {
@@ -406,11 +399,6 @@ export default function ExplorationScene() {
       // Examine prompt
       const currentZone = state === "walk" ? zones.find((z) => px >= z.xMin && px <= z.xMax) : null;
 
-      // (b) ゾーン接近: プロンプトが出た「立ち上がり」一度だけ通知音（連打しない）
-      const zoneLabel = currentZone ? currentZone.label : null;
-      if (zoneLabel && zoneLabel !== prevZoneLabelRef.current) playSfx("approach");
-      prevZoneLabelRef.current = zoneLabel;
-
       const ep = examinePromptRef.current;
       if (ep) {
         const text = currentZone ? `${LABEL_GAME_EXAMINE}　${currentZone.label}` : "";
@@ -472,7 +460,13 @@ export default function ExplorationScene() {
   // ── Touch handlers ────────────────────────────────────────────────────────
   const setLeft = (v: boolean) => { touchRef.current.left = v; };
   const setRight = (v: boolean) => { touchRef.current.right = v; };
-  const triggerExamine = () => { touchRef.current.examine = true; };
+  // タッチの「しらべる」も即時に examine（ゲームループの次tickを待たない＝音の立ち上がりを早める）。
+  const touchExamine = () => {
+    if (stateRef.current !== "walk") return;
+    const px = playerXRef.current;
+    const zone = zones.find((z) => px >= z.xMin && px <= z.xMax);
+    if (zone) examineZone(zone);
+  };
 
   // ── 効果音ミュートトグル（localStorage 永続・prefers-reduced-motion とは独立） ──
   const toggleMute = useCallback(() => {
@@ -571,7 +565,7 @@ export default function ExplorationScene() {
           type="button"
           className="ex-btn ex-btn-examine"
           aria-label={uiState === "dialog" ? "すすむ / 決定" : "しらべる"}
-          onClick={() => { if (uiState === "dialog") dialogAdvance(); else triggerExamine(); }}
+          onClick={() => { if (uiState === "dialog") dialogAdvance(); else touchExamine(); }}
         >
           {uiState === "dialog" ? "▶ すすむ" : (LABEL_GAME_EXAMINE.replace("▶", "").trim() || "しらべる")}
         </button>
