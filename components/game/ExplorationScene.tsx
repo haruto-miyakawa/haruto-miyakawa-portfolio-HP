@@ -4,6 +4,21 @@ import { useRouter } from "next/navigation";
 import { LABEL_GAME_EXAMINE } from "@/constants/labels";
 import sceneData from "@/game/scene.json";
 import { profile } from "@/content/content.data";
+import { playSfx, isSfxMuted, setSfxMuted } from "@/lib/sfx";
+
+// 効果音トグルのスピーカーアイコン（カラー絵文字不使用・currentColor のモノクロ SVG）。
+function SpeakerIcon({ muted }: { muted: boolean }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M4 9v6h3.5L13 19V5L7.5 9H4Z" fill="currentColor" stroke="none" />
+      {muted ? (
+        <path d="M17 9.5l4 5M21 9.5l-4 5" />
+      ) : (
+        <path d="M16.5 8.5a4 4 0 0 1 0 7M19 6a7.5 7.5 0 0 1 0 12" />
+      )}
+    </svg>
+  );
+}
 
 // ─── BackgroundLayer interface (future WFC tile generation hook) ──────────────
 // Replace `tileset` with a WFC-generated HTMLCanvasElement to swap map visuals
@@ -154,7 +169,9 @@ export default function ExplorationScene() {
   const router = useRouter();
 
   const [uiState, setUiState] = useState<"walk" | "dialog">("walk");
+  const [muted, setMuted] = useState<boolean>(() => isSfxMuted());
 
+  const prevZoneLabelRef = useRef<string | null>(null);
   const keysRef = useRef<Set<string>>(new Set());
   const touchRef = useRef<{ left: boolean; right: boolean; examine: boolean }>({
     left: false, right: false, examine: false,
@@ -196,6 +213,7 @@ export default function ExplorationScene() {
 
   // ── Examine zone ──────────────────────────────────────────────────────────
   const examineZone = useCallback((zone: Zone) => {
+    playSfx("examine"); // (a) しらべる（決定）— 明るい確定音
     dialogZoneRef.current = zone;
     dialogPageRef.current = 0;
     stateRef.current = "dialog";
@@ -210,6 +228,8 @@ export default function ExplorationScene() {
   const confirmDialog = useCallback(() => {
     const zone = dialogZoneRef.current;
     if (!zone) return;
+    // (d) PRO 復帰: ランタンゾーンの確定（げんじつにもどる）で戻る音
+    if (zone.action === "__return_pro__" || zone.action === "__return__") playSfx("return");
     stateRef.current = "wipe";
     wipeAlphaRef.current = 0;
     wipeTargetRef.current = 1;
@@ -220,6 +240,7 @@ export default function ExplorationScene() {
   // ── Return to previous page (✕ button / Esc in walk state) ───────────────
   const handleReturn = useCallback(() => {
     if (stateRef.current === "wipe") return;
+    playSfx("return"); // (d) PRO 復帰 — ✕ もどる / Esc
     stateRef.current = "wipe";
     wipeAlphaRef.current = 0;
     wipeTargetRef.current = 1;
@@ -375,6 +396,12 @@ export default function ExplorationScene() {
 
       // Examine prompt
       const currentZone = state === "walk" ? zones.find((z) => px >= z.xMin && px <= z.xMax) : null;
+
+      // (b) ゾーン接近: プロンプトが出た「立ち上がり」一度だけ通知音（連打しない）
+      const zoneLabel = currentZone ? currentZone.label : null;
+      if (zoneLabel && zoneLabel !== prevZoneLabelRef.current) playSfx("approach");
+      prevZoneLabelRef.current = zoneLabel;
+
       const ep = examinePromptRef.current;
       if (ep) {
         const text = currentZone ? `${LABEL_GAME_EXAMINE}　${currentZone.label}` : "";
@@ -438,11 +465,32 @@ export default function ExplorationScene() {
   const setRight = (v: boolean) => { touchRef.current.right = v; };
   const triggerExamine = () => { touchRef.current.examine = true; };
 
+  // ── 効果音ミュートトグル（localStorage 永続・prefers-reduced-motion とは独立） ──
+  const toggleMute = useCallback(() => {
+    setMuted((m) => {
+      const next = !m;
+      setSfxMuted(next);
+      return next;
+    });
+  }, []);
+
   // Building zones (excluding lantern) for DOM sign labels
   const buildingZones = zones.filter((z) => z.action !== "__return__");
 
   return (
     <div className="game-layer">
+      {/* 効果音トグル — 左上（右上の「✕ もどる」と左右対称）。キーボード操作可。 */}
+      <button
+        type="button"
+        className="game-sound-toggle"
+        aria-label="効果音のオン/オフ"
+        aria-pressed={!muted}
+        onClick={toggleMute}
+      >
+        <SpeakerIcon muted={muted} />
+        <span className="game-sound-label">{muted ? "OFF" : "ON"}</span>
+      </button>
+
       {/* ✕ もどる — always visible, 44px+ tap target */}
       <button
         type="button"
