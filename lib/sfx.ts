@@ -15,7 +15,7 @@
 //   オフは master.gain=0 で実装。prefers-reduced-motion とは独立（音はモーションではない）。
 // - 金属ランタン音(enter)は public/sfx のファイルがあれば優先、無ければ ZzFX シンセにフォールバック。
 
-export type SfxKey = "examine" | "approach" | "return" | "enter";
+export type SfxKey = "examine" | "return" | "enter";
 
 export const SFX_MUTE_KEY = "sfx-muted";
 export const SFX_NOTICE_KEY = "sfx-notice-seen";
@@ -30,12 +30,10 @@ const SAMPLE_RATE = 44100;
 // volume, randomness, frequency, attack, sustain, release, shape(0:sine),
 // shapeCurve, slide, deltaSlide, pitchJump, pitchJumpTime, repeatTime, noise,
 // modulation, bitCrush, delay, sustainVolume, decay, tremolo, filter
-// UI3音はサイン波(shape=0)で統一。attack>0・短release・高域控えめ＝温かく刺さらない音。
+// UI音はサイン波(shape=0)で統一。attack>0・短release・高域控えめ＝温かく刺さらない音。
 const PARAMS: Record<SfxKey, number[]> = {
   // (a) しらべる: 明るすぎない確定音。+pitchJump で「わずかに上昇する2音感」。
   examine: [1, 0.05, 480, 0.012, 0.05, 0.14, 0, 1, 0, 0, 150, 0.07],
-  // (b) ゾーン接近: (a)と同じサイン波で音程だけ低く・低音量・単発・<500ms。
-  approach: [0.45, 0.05, 320, 0.012, 0.03, 0.1, 0],
   // (d) PRO復帰: サインを下降させた離脱音（pitchJump マイナス）。
   return: [0.85, 0.05, 440, 0.012, 0.04, 0.18, 0, 1, 0, 0, -180, 0.06],
   // (c) GAME進入: 金属ランプを動かす音の暫定シンセ（saw＋少量noise＋modulation＋短い）。
@@ -59,7 +57,8 @@ function ensureCtx(): void {
     window.AudioContext ??
     (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
   if (!AC) return;
-  ctx = new AC();
+  // latencyHint: "interactive" で出力バッファを最小化し、start()〜可聴の遅延を抑える。
+  ctx = new AC({ latencyHint: "interactive" });
   master = ctx.createGain();
   master.gain.value = isSfxMuted() ? 0 : MASTER_GAIN;
   master.connect(ctx.destination);
