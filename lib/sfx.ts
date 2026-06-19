@@ -1,22 +1,20 @@
-// /play 用の効果音エンジン。ZzFX(MIT) で波形を生成し、自前の AudioContext で再生する。
+// /play 用の効果音エンジン。ZzFX(MIT) の buildSamples を自前にベンダリングし、
+// 自前の AudioContext で再生する。
 //
-// 設計方針:
+// 設計方針（画面遷移/bfcache をまたいでも一貫して鳴るように再設計）:
 // - クライアント専用。SSR では何もしない（window は遅延参照）。
-//   ※ ZzFX.js はモジュール評価時に new AudioContext するため、zzfx は必ず
-//      クライアントで「動的 import」する（SSR で評価するとクラッシュするため）。
-// - 【ラグ/取りこぼし対策（最重要）】波形サンプルを「ジェスチャより前」に事前生成して
-//   キャッシュ（ZZFX.buildSamples は AudioContext 不要の純関数）。AudioBuffer は再生時に
-//   キャッシュ済みサンプルから同期でオンデマンド生成（getBuffer）。これにより、ランタン進入や
-//   もどる等の「ワンショットが init と同時に発火」しても、動的 import の解決を待たずに即鳴る。
-//   旧実装は buildBuffers が動的 import の後（非同期）だったため、init 直後に撃つ enter/return は
-//   buffers[key]===undefined で無音 return されていた（examine は後から撃つので鳴っていた）。
-// - 単一 AudioContext ＋ マスター GainNode 1 つに全 SFX を通す（音量/ミュート一元）。
-//   latencyHint:"interactive" で出力遅延を最小化。
-// - autoplay 制約: 最初のユーザー操作（pointerdown/touchend/keydown）で resume＋iOS 無音再生。
-//   unlock 前 / ミュート時の playSfx は無音で握りつぶす。
+// - サンプル生成は完全同期（zzfxBuildSamples = AudioContext 不要の純関数）。動的 import を廃止。
+//   getBuffer が再生時に同期でサンプル生成＋AudioBuffer 化してキャッシュ→以後は使い回し。
+//   ＝どの realm（bfcache 復元・別ドキュメント）でも、初回再生から取りこぼさず鳴る。
+// - 【自己初期化】playSfx は必ずユーザー操作（クリック/キー）から呼ばれるので、その場で
+//   AudioContext を生成・resume する（init）。事前の unlock やページ読込時の初期化に依存しない。
+//   → /play で音ON → 現実に戻る（別 realm）→ ランタン押下、でも ctx を作り直して鳴る。
+// - 単一 AudioContext ＋ マスター GainNode 1 つ。latencyHint:"interactive" で出力遅延最小化。
 // - ミュートは localStorage("sfx-muted") に永続。【デフォルト OFF=ミュート】（"0" のときだけ ON）。
-//   オフは master.gain=0 で実装。prefers-reduced-motion とは独立。
-// - 金属ランタン音(enter)は public/sfx のファイルがあれば優先、無ければ ZzFX シンセにフォールバック。
+//   オフは playSfx 早期 return ＋ master.gain=0。prefers-reduced-motion とは独立。
+// - iOS: init はユーザー操作内で resume＋無音1サンプル再生。
+// - 金属ランタン音(enter)は public/sfx のファイルがあれば後追いで差し替え（無ければシンセ）。
+import { zzfxBuildSamples } from "@/lib/zzfxBuildSamples";
 
 export type SfxKey = "examine" | "return" | "enter";
 
@@ -29,7 +27,7 @@ const LANTERN_SFX_URL = "/sfx/lantern.mp3";
 const MASTER_GAIN = 0.5;
 const SAMPLE_RATE = 44100;
 
-// ── ZzFX パラメータ（buildSamples の 21 引数順）──────────────────────────────
+// ── ZzFX パラメータ（zzfxBuildSamples の 21 引数順）──────────────────────────
 // volume, randomness, frequency, attack, sustain, release, shape(0:sine),
 // shapeCurve, slide, deltaSlide, pitchJump, pitchJumpTime, repeatTime, noise,
 // modulation, bitCrush, delay, sustainVolume, decay, tremolo, filter
@@ -46,60 +44,28 @@ const PARAMS: Record<SfxKey, number[]> = {
 
 let ctx: AudioContext | null = null;
 let master: GainNode | null = null;
-let unlocked = false;
-let unlockBound = false;
-let prerenderStarted = false;
 let lanternUpgradeStarted = false;
 const sampleCache: Partial<Record<SfxKey, Float32Array>> = {};
 const buffers: Partial<Record<SfxKey, AudioBuffer>> = {};
 
 const isClient = (): boolean => typeof window !== "undefined";
 
-/** 波形サンプルを事前生成してキャッシュ（AudioContext 不要・dynamic import）。
- *  ジェスチャより前に済ませることで、再生時の非同期待ち＝取りこぼしを無くす。 */
-async function prerenderSamples(): Promise<void> {
-  if (prerenderStarted || !isClient()) return;
-  prerenderStarted = true;
-  let ZZFX: typeof import("zzfx").ZZFX;
-  try {
-    ({ ZZFX } = await import("zzfx"));
-  } catch {
-    prerenderStarted = false;
-    return;
-  }
-  // zzfx が内部で作る未使用の AudioContext は破棄（自前 ctx に一本化）。
-  try {
-    ZZFX.audioContext?.close?.();
-  } catch {
-    /* no-op */
-  }
-  (Object.keys(PARAMS) as SfxKey[]).forEach((k) => {
-    try {
-      const s = ZZFX.buildSamples(...PARAMS[k]);
-      if (s && s.length) sampleCache[k] = Float32Array.from(s);
-    } catch {
-      /* この音だけスキップ */
-    }
-  });
-  buildBuffersFromCache(); // ctx が既にあれば即バッファ化
-}
-
-/** キャッシュ済みサンプルから AudioBuffer を同期生成（必要時にオンデマンド）。 */
+/** キャッシュ済み（無ければ同期生成）の AudioBuffer を返す。 */
 function getBuffer(key: SfxKey): AudioBuffer | null {
   const existing = buffers[key];
   if (existing) return existing;
   if (!ctx) return null;
-  const s = sampleCache[key];
-  if (!s || s.length === 0) return null;
-  const b = ctx.createBuffer(1, s.length, SAMPLE_RATE);
-  b.getChannelData(0).set(s);
-  buffers[key] = b;
-  return b;
-}
-
-function buildBuffersFromCache(): void {
-  if (!ctx) return;
-  (Object.keys(sampleCache) as SfxKey[]).forEach((k) => getBuffer(k));
+  let s = sampleCache[key];
+  if (!s) {
+    const raw = zzfxBuildSamples(...PARAMS[key]); // 同期・AudioContext 不要
+    if (!raw.length) return null;
+    s = Float32Array.from(raw);
+    sampleCache[key] = s;
+  }
+  const buf = ctx.createBuffer(1, s.length, SAMPLE_RATE);
+  buf.getChannelData(0).set(s);
+  buffers[key] = buf;
+  return buf;
 }
 
 /** 金属ランタン音: ファイルがあれば decode して差し替え（無ければシンセのまま）。任意・後追い。 */
@@ -116,7 +82,7 @@ async function upgradeLanternFromFile(): Promise<void> {
   }
 }
 
-/** 自前 AudioContext とマスター Gain を同期生成（ジェスチャ内で呼ぶ）。 */
+/** AudioContext とマスター Gain を生成（無ければ）。必ずユーザー操作内で呼ぶ。 */
 function ensureCtx(): void {
   if (ctx || !isClient()) return;
   const AC =
@@ -128,13 +94,11 @@ function ensureCtx(): void {
   master = ctx.createGain();
   master.gain.value = isSfxMuted() ? 0 : MASTER_GAIN;
   master.connect(ctx.destination);
-  buildBuffersFromCache(); // 事前生成済みサンプルがあれば同期でバッファ化
-  void upgradeLanternFromFile();
 }
 
-/** AudioContext を作って解錠（必ずユーザー操作＝ジェスチャ内で呼ぶ）。冪等。 */
+/** ctx を作って解錠（必ずユーザー操作＝ジェスチャ内で呼ぶ）。冪等。
+ *  遷移後の別 realm でも、最初の playSfx/トグルでここが走り ctx を作り直す。 */
 function init(): void {
-  void prerenderSamples(); // まだなら事前生成を開始
   ensureCtx();
   if (!ctx) return;
   if (ctx.state === "suspended") void ctx.resume().catch(() => {});
@@ -147,24 +111,7 @@ function init(): void {
   } catch {
     /* no-op */
   }
-}
-
-/** 最初のユーザー操作で解錠。音オフ（デフォルト）の間は AudioContext を生成しない。 */
-function unlock(): void {
-  if (!isClient()) return;
-  unlocked = true;
-  if (!isSfxMuted()) init();
-  window.removeEventListener("pointerdown", unlock);
-  window.removeEventListener("touchend", unlock);
-  window.removeEventListener("keydown", unlock);
-}
-
-function bindUnlock(): void {
-  if (unlockBound || !isClient()) return;
-  unlockBound = true;
-  window.addEventListener("pointerdown", unlock, { passive: true });
-  window.addEventListener("touchend", unlock, { passive: true });
-  window.addEventListener("keydown", unlock);
+  void upgradeLanternFromFile();
 }
 
 // ── ミュート（デフォルト OFF=ミュート。"0" のときだけ ON）─────────────────────
@@ -184,12 +131,8 @@ export function setSfxMuted(muted: boolean): void {
   } catch {
     /* private browsing */
   }
-  // 音を ON にした瞬間に事前生成＋初期化（このコールはトグルのクリック＝ジェスチャ内）。
-  if (!muted) {
-    unlocked = true;
-    void prerenderSamples();
-    init();
-  }
+  // 音を ON にした瞬間に初期化（このコールはトグルのクリック＝ジェスチャ内）。
+  if (!muted) init();
   // マスター Gain で即時反映（軽いランプでプチノイズ回避）。
   if (ctx && master) {
     const now = ctx.currentTime;
@@ -218,12 +161,14 @@ export function markSfxNoticeSeen(): void {
   }
 }
 
-/** 効果音を鳴らす。unlock 前 / ミュート時は無音で握りつぶす（例外なし）。
- *  バッファは getBuffer で同期生成済み/オンデマンド取得＝再生時の非同期待ちなし。 */
+/** 効果音を鳴らす。呼び出しは必ずユーザー操作起点なので、その場で ctx を用意して鳴らす。
+ *  ミュート時は無音で握りつぶす（例外なし）。遷移後の別 realm でも ctx を作り直して鳴る。 */
 export function playSfx(key: SfxKey): void {
-  if (!isClient() || !unlocked || isSfxMuted() || !ctx || !master) return;
+  if (!isClient() || isSfxMuted()) return;
+  init(); // 必要なら ctx 生成＋resume（ジェスチャ内なので autoplay 制約OK）
+  if (!ctx || !master) return;
   if (ctx.state === "suspended") void ctx.resume().catch(() => {});
-  const buf = getBuffer(key);
+  const buf = getBuffer(key); // 未生成でも同期で作る＝取りこぼしなし
   if (!buf) return;
   const src = ctx.createBufferSource();
   src.buffer = buf;
@@ -234,10 +179,4 @@ export function playSfx(key: SfxKey): void {
   } catch {
     /* no-op */
   }
-}
-
-// クライアントで import された時点で: unlock リスナーを張る＋音 ON 設定なら事前生成を先行。
-if (isClient()) {
-  bindUnlock();
-  if (!isSfxMuted()) void prerenderSamples();
 }
