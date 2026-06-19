@@ -154,14 +154,14 @@ export default async function CaseStudyPage({ params }: { params: Promise<{ slug
                     <div className="cn-shots">
                       {cs.narrative.approachImages.map((img) => (
                         <figure key={img.src} className="cn-shot">
-                          {/* サイト内の他画像（hero/gallery）と同じ plain <img>。元解像度(1440×708)を
-                              そのまま配信し、表示はCSSの width:100%/height:auto で本文幅に追従。 */}
+                          {/* サイト内の他画像（hero/gallery）と同じ plain <img>。元解像度をそのまま配信し、
+                              表示は CSS の width:100%/height:auto で本文幅に追従。w/h は実寸（CLS 防止）。 */}
                           <img
                             className="cn-shot-img"
                             src={img.src}
                             alt={img.alt}
-                            width={1440}
-                            height={708}
+                            width={img.w}
+                            height={img.h}
                             loading="lazy"
                           />
                           <figcaption className="cn-cap">{img.alt}</figcaption>
