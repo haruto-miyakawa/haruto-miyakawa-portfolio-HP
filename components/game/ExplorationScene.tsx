@@ -71,6 +71,29 @@ const PAL = {
   wipeBg: "rgba(12,8,20,1)",
 };
 
+// ─── Juice（game feel）─────────────────────────────────────────────────────────
+// しらべる決定時の screen shake とパーティクル。reduced-motion 時は発火しない。
+const SHAKE_AMP = 3; // 初期振幅(px)。レンジ 2〜4 の中央
+const SHAKE_DECAY = 0.85; // 固定tick毎の減衰（≈18tick≒0.3sで収束）
+const SHAKE_MIN = 0.12; // これ未満で 0
+const PARTICLE_GRAVITY = 0.06; // px/tick^2
+const PARTICLE_COLORS = ["#f2a65a", "#f0b060", "#e8924f", "#f5cd8c"]; // warm sunset
+const PARTICLE_POOL_DESKTOP = 48;
+const PARTICLE_POOL_MOBILE = 24;
+const PARTICLE_BURST_DESKTOP = 12;
+const PARTICLE_BURST_MOBILE = 6;
+interface Particle {
+  active: boolean;
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  life: number;
+  maxLife: number;
+  size: number;
+  color: string;
+}
+
 function buildTileset(): BackgroundLayer {
   const tileW = 16;
   const tileH = 16;
@@ -197,7 +220,33 @@ export default function ExplorationScene() {
   const lastTimeRef = useRef<number>(0);
   const accumRef = useRef<number>(0);
 
+  // ── Juice refs（shake / particle pool / reduced-motion / 端末品質） ──────────
+  const shakeRef = useRef<number>(0);
+  const particlesRef = useRef<Particle[]>([]);
+  const reducedMotionRef = useRef<boolean>(false);
+  const burstCountRef = useRef<number>(PARTICLE_BURST_DESKTOP);
+
   const zones: Zone[] = (sceneData as { zones: Zone[] }).zones;
+
+  // ── Juice 初期化: reduced-motion 監視 ＋ 端末品質でプール/粒数を降格 ──────────
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const rm = window.matchMedia("(prefers-reduced-motion: reduce)");
+    reducedMotionRef.current = rm.matches;
+    const onRm = () => { reducedMotionRef.current = rm.matches; };
+    rm.addEventListener?.("change", onRm);
+
+    const coarse = window.matchMedia("(pointer: coarse)").matches;
+    burstCountRef.current = coarse ? PARTICLE_BURST_MOBILE : PARTICLE_BURST_DESKTOP;
+    const poolSize = coarse ? PARTICLE_POOL_MOBILE : PARTICLE_POOL_DESKTOP;
+    const pool: Particle[] = [];
+    for (let i = 0; i < poolSize; i++) {
+      pool.push({ active: false, x: 0, y: 0, vx: 0, vy: 0, life: 0, maxLife: 1, size: 1, color: PARTICLE_COLORS[0] });
+    }
+    particlesRef.current = pool;
+
+    return () => rm.removeEventListener?.("change", onRm);
+  }, []);
 
   // ── Body scroll lock ───────────────────────────────────────────────────────
   useEffect(() => {
@@ -219,9 +268,37 @@ export default function ExplorationScene() {
     };
   }, []);
 
+  // ── パーティクル放出（object pool 再利用。放出位置はワールド座標） ──────────
+  const spawnBurst = useCallback((wx: number, wy: number) => {
+    const pool = particlesRef.current;
+    const count = burstCountRef.current;
+    let spawned = 0;
+    for (let i = 0; i < pool.length && spawned < count; i++) {
+      const p = pool[i];
+      if (p.active) continue;
+      const angle = Math.random() * Math.PI * 2;
+      const speed = 0.6 + Math.random() * 1.0; // 0.6〜1.6 px/tick
+      p.active = true;
+      p.x = wx;
+      p.y = wy;
+      p.vx = Math.cos(angle) * speed;
+      p.vy = Math.sin(angle) * speed - 0.4; // 上向きバイアス
+      p.maxLife = 24 + Math.random() * 16; // 24〜40 tick
+      p.life = p.maxLife;
+      p.size = Math.random() < 0.5 ? 1 : 2;
+      p.color = PARTICLE_COLORS[(Math.random() * PARTICLE_COLORS.length) | 0];
+      spawned++;
+    }
+  }, []);
+
   // ── Examine zone ──────────────────────────────────────────────────────────
   const examineZone = useCallback((zone: Zone) => {
     playSfx("examine"); // (a) しらべる（決定）— 明るい確定音
+    // ジュース: 軽い screen shake ＋ プレイヤー胴付近からパーティクル（reduced-motion 時は無効）
+    if (!reducedMotionRef.current) {
+      shakeRef.current = SHAKE_AMP;
+      spawnBurst(playerXRef.current, INTERNAL_H - 28 - 9);
+    }
     dialogZoneRef.current = zone;
     dialogPageRef.current = 0;
     stateRef.current = "dialog";
@@ -230,7 +307,7 @@ export default function ExplorationScene() {
     if (dialogCursorRef.current) {
       dialogCursorRef.current.textContent = zone.dialog.length === 1 ? "▶ けってい" : "▼";
     }
-  }, []);
+  }, [spawnBurst]);
 
   // ── Confirm dialog (last page) ────────────────────────────────────────────
   const confirmDialog = useCallback(() => {
@@ -324,6 +401,22 @@ export default function ExplorationScene() {
       const keys = keysRef.current;
       const touch = touchRef.current;
 
+      // ジュース: screen shake 減衰
+      if (shakeRef.current > 0) {
+        shakeRef.current *= SHAKE_DECAY;
+        if (shakeRef.current < SHAKE_MIN) shakeRef.current = 0;
+      }
+      // ジュース: パーティクル物理（固定tick）
+      const pool = particlesRef.current;
+      for (let i = 0; i < pool.length; i++) {
+        const p = pool[i];
+        if (!p.active) continue;
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += PARTICLE_GRAVITY;
+        if (--p.life <= 0) p.active = false;
+      }
+
       if (state === "walk") {
         const movingLeft = keys.has("ArrowLeft") || keys.has("a") || touch.left;
         const movingRight = keys.has("ArrowRight") || keys.has("d") || touch.right;
@@ -355,6 +448,21 @@ export default function ExplorationScene() {
       }
     }
 
+    // ジュース: パーティクル描画（整数座標・pixelated・暖色・life でフェード/縮小）
+    function drawParticles(cameraX: number) {
+      const pool = particlesRef.current;
+      for (let i = 0; i < pool.length; i++) {
+        const p = pool[i];
+        if (!p.active) continue;
+        const k = p.life / p.maxLife;
+        ctx.globalAlpha = k < 0 ? 0 : k;
+        ctx.fillStyle = p.color;
+        const s = k > 0.5 ? p.size : 1; // 終盤は縮小
+        ctx.fillRect(Math.round(p.x - cameraX), Math.round(p.y), s, s);
+      }
+      ctx.globalAlpha = 1;
+    }
+
     function draw(now: number) {
       if (document.hidden) {
         lastTimeRef.current = now;
@@ -376,6 +484,16 @@ export default function ExplorationScene() {
       const state = stateRef.current;
 
       ctx.clearRect(0, 0, INTERNAL_W, INTERNAL_H);
+
+      // ジュース: screen shake（整数オフセット。シーンのみ平行移動し、端は sky で埋める）
+      const shake = shakeRef.current;
+      if (shake > 0) {
+        ctx.fillStyle = PAL.sky;
+        ctx.fillRect(0, 0, INTERNAL_W, INTERNAL_H);
+        ctx.save();
+        ctx.translate(Math.round((Math.random() * 2 - 1) * shake), Math.round((Math.random() * 2 - 1) * shake));
+      }
+
       drawBackground(ctx, bg, cameraX);
       drawBuildings(ctx, zones, cameraX);
       drawLantern(ctx, zones, cameraX);
@@ -388,7 +506,11 @@ export default function ExplorationScene() {
       ctx.stroke();
 
       drawPlayer(ctx, px, cameraX);
+      drawParticles(cameraX);
 
+      if (shake > 0) ctx.restore();
+
+      // wipe は shake の外（常に全面を覆う）
       if (state === "wipe" || wipeAlphaRef.current > 0) {
         drawWipe(ctx, wipeAlphaRef.current);
       }
