@@ -7,6 +7,7 @@ import { navItems, profile, type NavKey } from "@/content/content.data";
 import { navIcons, GithubIcon, XIcon, MailIcon } from "@/components/icons";
 import { Lines } from "@/components/Lines";
 import { DualLabel } from "@/components/DualLabel";
+import { playSfx } from "@/lib/sfx";
 import {
   LABEL_CONTACT,
   LABEL_GAME_WORKS, LABEL_GAME_ABOUT, LABEL_GAME_RESEARCH,
@@ -52,13 +53,16 @@ function wipeAndApply(mode: "pro" | "game") {
   }, 220);
 }
 
-function handleLanternClick() { wipeAndApply("game"); }
+function handleLanternClick() {
+  playSfx("enter"); // (c) ランタンで GAME に入る — 世界に入る音
+  wipeAndApply("game");
+}
 
 const ReturnButton = () => (
   <button
     type="button"
     className="return-to-pro-btn"
-    onClick={() => wipeAndApply("pro")}
+    onClick={() => { playSfx("return"); wipeAndApply("pro"); }} // (d) げんじつにもどる — 戻る音
   >
     ◀ {LABEL_GAME_RETURN}
   </button>
