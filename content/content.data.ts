@@ -191,8 +191,9 @@ export interface CaseNarrative {
   approach: string;
   /** Approach 章見出し PRO ラベルの上書き（既定: LABEL_CN_APPROACH_PRO）。作品ごとに章名が異なる場合に使用。 */
   approachLabelPro?: string;
-  /** Approach セクションに差し込む実スクショ（next/image で描画。alt は可視キャプションも兼ねる）。 */
-  approachImages?: { src: string; alt: string }[];
+  /** Approach セクションに差し込む実スクショ（plain <img> で描画。alt は可視キャプションも兼ねる）。
+   *  w/h は元画像の実寸（width/height 属性に出力し、アスペクト比確定で CLS を防ぐ）。 */
+  approachImages?: { src: string; alt: string; w: number; h: number }[];
   role: string;
   /** Role 章見出し PRO ラベルの上書き（既定: LABEL_CN_ROLE_PRO）。 */
   roleLabelPro?: string;
@@ -327,7 +328,7 @@ export const caseStudies: Record<string, CaseStudy> = {
     slug: "lecture-minutes",
     categoryLabel: "ツール・ライブラリ",
     title: "講義議事録ジェネレーター",
-    lead: "音声をWhisperで文字起こしし、Geminiで議事録に整形するツール。聴くことに集中できる。",
+    lead: "聞き逃した講義も、後から確実に拾い直す。AIの「もっともらしい嘘」を仕組みで捕まえる、ローカル完結の文字起こしツール。",
     shotMock: "chat",
     meta: [
       { label: "Role", value: "個人開発", icon: "user" },
@@ -336,28 +337,39 @@ export const caseStudies: Record<string, CaseStudy> = {
       { label: "ステータス", value: "公開（OSS）", icon: "checkCircle", status: true },
       { label: "スタック", value: "Python, Whisper, Gemini API", icon: "codeStack" },
     ],
-    tldr:
-      "講義中に板書・ノート・理解を同時にこなすのは難しい——という自分の課題から作った、講義音声の議事録ジェネレーターです。録音した音声をWhisperで文字起こしし、その結果をGeminiで見出し・要点・キーワードを備えた議事録へ自動整形します。聴くことに集中でき、後から読み返せる形に。実装の過程はZennに記事化しました。企画から実装まで個人で担当しています。",
-    challenge: {
-      heading: "聴く・書く・理解するを同時にできない",
-      body: "講義中はノートを取ることに気を取られ、肝心の内容理解がおろそかになりがち。後から見返しても、断片的なメモでは話の流れを追えない——という自分の困りごとが出発点でした。",
-      points: ["板書とノートに気を取られ、話そのものを聴けない", "手書きメモは断片的で、後から流れを再構成できない", "録音しても長すぎて、結局聴き直せない"],
-    },
-    solution: {
-      heading: "文字起こしから議事録まで自動で",
-      body: "音声をWhisperで文字起こしし、その結果をGeminiで議事録（見出し・要点・キーワード）に自動整形する流れを組みました。ノートを取る作業から解放し、講義そのものへ集中できる状態を目指しています。",
-      points: [
-        "Whisperによる音声の文字起こし（タイムスタンプ付き）",
-        "Geminiによる議事録への自動整形（見出し・まとめ・キーワード抽出）",
-        "出力に対応（コピー / .txt / .md / PDF ダウンロード）",
-        "ハルシネーション再解析（AIの誤りを再チェック）",
-        "Whisperモデル選択・話者分離などの設定",
+    narrative: {
+      problem:
+        "きっかけは二つありました。ひとつは、大学で共同研究が始まり、ミーティングの内容を後から確認できるようにしたかったこと。もうひとつは、講義中に聞き逃した——資料に載っていない口頭の補足を、後から確実に拾い直したかったことです。調べてみると、既存のクラウド型文字起こしツールには二つの根本的な問題がありました。コスト——API の従量課金では、長時間の講義を毎日処理していると費用がかさみ、学生が使い続けられない。そしてハルシネーション——専門用語や固有名詞の多い講義では、LLM がもっともらしい誤った内容を生成し、それをそのまま試験勉強に使うとむしろ逆効果になる。この二つを同時に解くツールが欲しくて、自分で作りました。",
+      approachLabelPro: "どう解いたか",
+      approach:
+        "音声ファイルをアップロードすると、ローカルの GPU で動く Whisper が文字起こしし、Gemini 2.5 Flash が議事録の形に整えます。文字起こしはローカル実行なのでクラウド従量課金が発生せず、長時間講義を何本処理してもゼロコスト。さらに講義資料（PDF）を AI に同時に渡して専門用語の精度を補正し、誤認識を自動で検知したら精度優先の設定で処理をやり直します。生成された議事録はアプリ内で直接編集でき、PDF や Markdown で書き出せます。",
+      approachImages: [
+        { src: "/projects/lecture-minutes/home.webp", alt: "ホーム画面。音声ファイル（mp3 / m4a）をドロップしてローカル処理を開始する", w: 1440, h: 774 },
+        { src: "/projects/lecture-minutes/transcribe.webp", alt: "文字起こし画面。ローカル GPU の Whisper がタイムスタンプ付きでテキスト化する", w: 1440, h: 774 },
+        { src: "/projects/lecture-minutes/editor.webp", alt: "議事録画面。Gemini が見出し・要点に整形した議事録をアプリ内で編集し、PDF / Markdown で書き出せる", w: 1440, h: 774 },
       ],
-    },
-    outcome: {
-      heading: "文字起こしの先の「議事録」まで自動化できた",
-      body: "ただ文字起こしするだけでなく、Geminiで議事録に整形して『あとで読み返せる』状態まで実現できたことが成果です。実装で得た知見はZennに記事化しました。",
-      facts: ["Whisper×Gemini", "議事録自動整形", "PDF / Markdown 出力"],
+      role:
+        "個人開発です。これまでの「つむぐ」「家電ガイド」と同じく、Claude Code との協働だけで開発しました。同じ開発スタイルで、執筆支援・接客支援・音声処理という異なる領域のアプリを作っています。",
+      decisions: [
+        {
+          heading: "ハルシネーションを仕組みで検知する — AI の誤りを鵜呑みにしない",
+          body: "このツールの一番の肝です。Whisper は無音区間や不明瞭な音声に対して、定型文を繰り返したり、ありもしない内容をもっともらしく出力することがあります。試験勉強に使う議事録でこれが起きると致命的です。そこで、三つの条件——定型文フレーズの一致、音声長に対して出力文字数が極端に少ない、無音確率（no_speech_prob）の平均が 0.7 を超える——のいずれかで誤認識を検知したら、精度優先の設定（condition_on_previous_text=False など）で自動的にやり直す仕組みを入れました。ポイントは、この精度優先設定を通常時には使わないことです。常に適用すると通常時の精度がかえって落ちるため、検知したときだけフォールバックとして発動させる。AI の出力を信頼しきらず、誤りを後段で捕まえて補正するという考え方を、文字起こしの品質保証として実装した部分です。",
+        },
+        {
+          heading: "ローカル Whisper — コストを設計の前提に置いた",
+          body: "文字起こしには、クラウドの Whisper API ではなくローカル実行の Whisper を選びました。API は 1 分あたり約 0.006 ドル。2 時間の講義を週 15 本も処理すれば、月に数千円かかります。学生が毎日使い続けるツールでこの金額は重い。手元に CUDA 対応の GPU があったので、ローカルで動かせばゼロコスト・無制限になる。「安く速く」より一段手前の、「そもそも継続して使えるか」を最優先した判断です。",
+        },
+        {
+          heading: "Gemini と RAG — 用途に合わせた使い分けと、幻覚の抑制",
+          body: "議事録の整形には Gemini 2.5 Flash を選びました。整形という用途では品質の差が小さく、コストは Claude のおよそ五分の一に収まり、100 万トークンの長いコンテキストが長時間講義の文字起こしを一度に扱えるからです。さらに、講義資料の PDF を整形時に同時に渡すことで、外部のベクトルデータベースを用意せずに専門用語の文脈を AI に与え、固有名詞の取り違えを抑えました。（文章エディタ「つむぐ」では日本語の質を最優先して Claude を選び、こちらでは用途とコストで Gemini を選ぶ——コア機能が何かによって最適な AI は変わる、という使い分けです。）",
+        },
+        {
+          heading: "SSE で進捗を可視化する — 長い処理を待てる UX に",
+          body: "Whisper は別の Python プロセスとして動くため、Node.js 側から処理の進捗を直接知ることができません。何分も無言で待たされるのは、長時間の文字起こしでは苦痛です。そこで Whisper の進捗表示（tqdm）に手を入れて、進捗を JSON として標準出力に流し、それを Node.js が SSE（Server-Sent Events）に変換してブラウザにリアルタイム表示する構成にしました。WebSocket より実装が軽量で、この一方向の進捗通知には十分です。",
+        },
+      ],
+      outcome:
+        "実際の大学講義で継続的に使い、当時は小テストで安定して点を取れていました。今は、ローカル Whisper が GPU を占有して研究作業と競合するため、毎回の講義ではなく期末前に講義内容をまとめ直す使い方へ切り替えています。ゼロコストと引き換えに GPU を使うという選択の帰結を、運用の側で調整した形です。開発の過程は記事として公開し、自分の学習効率のために作ったツールが、そのまま発信の題材にもなっています。",
     },
     overview: [
       { label: "役割", value: "個人開発", icon: "user" },
@@ -382,9 +394,14 @@ export const caseStudies: Record<string, CaseStudy> = {
       { src: "/projects/lecture-minutes/result.webp", caption: "処理キュー — アップロードした音声を順次処理（文字起こし → 議事録生成）" },
     ],
     stack: [
-      { mark: "Py", name: "Python" },
-      { mark: "W", name: "Whisper" },
-      { mark: "G", name: "Gemini API" },
+      { mark: "N", name: "Next.js 16 (App Router)" },
+      { mark: "TS", name: "TypeScript 5" },
+      { mark: "~", name: "Tailwind CSS v4" },
+      { mark: "Py", name: "Python 3" },
+      { mark: "W", name: "OpenAI Whisper (large-v3, local)" },
+      { mark: "G", name: "Google Gemini 2.5 Flash" },
+      { mark: "SD", name: "simple-diarizer" },
+      { mark: "S", name: "SSE" },
     ],
     links: [
       { kind: "github", label: "GitHub", href: "https://github.com/haruto-miyakawa/lecture-minutes" },
@@ -414,9 +431,9 @@ export const caseStudies: Record<string, CaseStudy> = {
       approach:
         "管理者が商品の型番や URL を入力するだけで、AI がメーカーページからスペック・接客トーク・売りポイントを自動抽出し、スタッフのタブレットにリアルタイムで反映されます。スタッフ側は、接客トークの例、専門用語のわかりやすい言い換え、複数機種の横並び比較、そしてお客様の条件を聞きながら最適な一台を絞り込む「おすすめウィザード」を、接客のその場で使えます。新人でも、ベテランの知識を借りながらお客様の前に立てる状態をつくることを狙いました。",
       approachImages: [
-        { src: "/projects/guide-manual/list.webp", alt: "スタッフアプリの商品一覧画面。型番・メーカーで絞り込み、複数機種を選んで比較に進める" },
-        { src: "/projects/guide-manual/compare.webp", alt: "比較画面。複数機種のスペックを軸ごとに横並びにして、違いを一目で確認できる" },
-        { src: "/projects/guide-manual/wizard.webp", alt: "おすすめウィザード。お客様の条件を聞きながら回答すると、最適な一台と理由を提示する" },
+        { src: "/projects/guide-manual/list.webp", alt: "スタッフアプリの商品一覧画面。型番・メーカーで絞り込み、複数機種を選んで比較に進める", w: 1440, h: 708 },
+        { src: "/projects/guide-manual/compare.webp", alt: "比較画面。複数機種のスペックを軸ごとに横並びにして、違いを一目で確認できる", w: 1440, h: 708 },
+        { src: "/projects/guide-manual/wizard.webp", alt: "おすすめウィザード。お客様の条件を聞きながら回答すると、最適な一台と理由を提示する", w: 1440, h: 708 },
       ],
       roleLabelPro: "役割分担と、これが「最初の一歩」だった意味",
       role:
