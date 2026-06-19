@@ -7,15 +7,24 @@ import { profile } from "@/content/content.data";
 import { playSfx, isSfxMuted, setSfxMuted } from "@/lib/sfx";
 
 // 効果音トグルのスピーカーアイコン（カラー絵文字不使用・currentColor のモノクロ SVG）。
-function SpeakerIcon({ muted }: { muted: boolean }) {
+// 効果音トグルのランタンアイコン（世界観のモチーフ）。lit=ON で炎が灯り、OFF で消える。
+// 炎の発光/ゆらぎは CSS（.flame）側で制御（prefers-reduced-motion で揺れは止める）。
+function LanternIcon({ lit }: { lit: boolean }) {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M4 9v6h3.5L13 19V5L7.5 9H4Z" fill="currentColor" stroke="none" />
-      {muted ? (
-        <path d="M17 9.5l4 5M21 9.5l-4 5" />
-      ) : (
-        <path d="M16.5 8.5a4 4 0 0 1 0 7M19 6a7.5 7.5 0 0 1 0 12" />
-      )}
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      {/* つり手と天面 */}
+      <path d="M10 3h4M12 3v2.5" />
+      <path d="M8.5 6.5h7l-.6 2h-5.8z" />
+      {/* ランタン本体 */}
+      <rect x="8" y="8.5" width="8" height="10.5" rx="1.6" />
+      <path d="M8 18.8h8" />
+      {/* 炎（lit のときだけ点灯。色/発光は CSS .flame） */}
+      <path
+        className="flame"
+        d="M12 10.4c1.7 1.2 2.4 2.5 2.4 3.8a2.4 2.4 0 1 1-4.8 0c0-.9.4-1.7 1.1-2.4.3.7.9 1 1.3 1.1.2-.9-.4-1.8 0-2.5z"
+        fill={lit ? "currentColor" : "none"}
+        stroke="none"
+      />
     </svg>
   );
 }
@@ -479,15 +488,16 @@ export default function ExplorationScene() {
 
   return (
     <div className="game-layer">
-      {/* 効果音トグル — 左上（右上の「✕ もどる」と左右対称）。キーボード操作可。 */}
+      {/* 効果音トグル — 左上（右上の「✕ もどる」と左右対称）。ランタンの炎で ON/OFF を表す。 */}
       <button
         type="button"
-        className="game-sound-toggle"
+        role="switch"
+        aria-checked={!muted}
+        className={`game-sound-toggle${muted ? " is-off" : " is-on"}`}
         aria-label="効果音のオン/オフ"
-        aria-pressed={!muted}
         onClick={toggleMute}
       >
-        <SpeakerIcon muted={muted} />
+        <LanternIcon lit={!muted} />
         <span className="game-sound-label">{muted ? "OFF" : "ON"}</span>
       </button>
 

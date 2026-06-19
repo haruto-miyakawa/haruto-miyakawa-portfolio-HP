@@ -5980,7 +5980,7 @@ body {
   line-height: 1;
   color: var(--text-faint);
 }
-/* 効果音トグル — 左上（✕もどる と左右対称）。スタイルは return ボタンに合わせる。 */
+/* 効果音トグル — 左上（✕もどる と左右対称）。ランタンの炎で ON/OFF を表現。 */
 .game-sound-toggle {
   position: absolute;
   top: max(12px, env(safe-area-inset-top));
@@ -5994,26 +5994,101 @@ body {
   justify-content: center;
   gap: 2px;
   font-family: var(--f-head);
-  background: rgba(58, 29, 18, 0.90);
+  background: rgba(58, 29, 18, 0.9);
   border: 1px solid var(--accent-line);
   border-radius: 8px;
-  color: var(--text);
   cursor: pointer;
-  transition: 0.15s ease;
+  transition: background 0.15s ease, border-color 0.15s ease;
 }
 .game-sound-toggle:hover,
 .game-sound-toggle:active {
   background: rgba(232, 160, 64, 0.18);
-  border-color: var(--accent-line);
 }
 .game-sound-toggle svg {
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
 }
 .game-sound-label {
   font-size: 9px;
   line-height: 1;
+  letter-spacing: 0.06em;
+}
+/* ON: ランタン本体は明るく、炎は accent で点灯＋ほのかな発光（ゆらぎ） */
+.game-sound-toggle.is-on {
+  color: var(--accent-2);
+}
+.game-sound-toggle.is-on .game-sound-label {
+  color: var(--accent-2);
+}
+.game-sound-toggle.is-on .flame {
+  color: #ffcf8a;
+  filter: drop-shadow(0 0 3px rgba(255, 180, 90, 0.9));
+  animation: sfxFlame 1.6s ease-in-out infinite;
+  transform-origin: center 70%;
+}
+/* OFF: 炎は消え、全体がくすむ */
+.game-sound-toggle.is-off {
+  color: var(--text-3);
+}
+.game-sound-toggle.is-off .game-sound-label {
   color: var(--text-faint);
+}
+@keyframes sfxFlame {
+  0%, 100% { opacity: 1; transform: scaleY(1); }
+  50% { opacity: 0.82; transform: scaleY(0.9); }
+}
+/* 効果音お知らせトースト（初回のみ・下中央・控えめ） */
+.sfx-notice {
+  position: fixed;
+  left: 50%;
+  bottom: max(18px, env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  z-index: 120;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  max-width: min(92vw, 460px);
+  padding: 12px 14px;
+  background: linear-gradient(180deg, rgba(36, 22, 14, 0.96), rgba(26, 16, 11, 0.96));
+  border: 1px solid var(--accent-line);
+  border-radius: var(--r-md);
+  box-shadow: var(--sh-2);
+  animation: sfxNoticeIn 0.4s ease both;
+}
+.sfx-notice-text {
+  font-family: var(--f-jp);
+  font-size: 12.5px;
+  line-height: 1.7;
+  color: var(--text-2);
+}
+[data-mode="game"] .sfx-notice-text {
+  font-family: var(--f-head);
+  letter-spacing: 0.03em;
+}
+.sfx-notice-close {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  color: var(--text-3);
+  background: none;
+  border: none;
+  cursor: pointer;
+  border-radius: var(--r-sm);
+}
+.sfx-notice-close:hover {
+  color: var(--accent);
+}
+@keyframes sfxNoticeIn {
+  from { opacity: 0; transform: translate(-50%, 8px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .game-sound-toggle.is-on .flame { animation: none; }
+  .sfx-notice { animation: none; }
 }
 .game-canvas-area {
   flex: 1 1 0;
