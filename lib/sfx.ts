@@ -1,55 +1,58 @@
-// /play 用の効果音エンジン。jsfxr で 4 音を生成し、自前の AudioContext で再生する。
+// /play 用の効果音エンジン。ZzFX(MIT) で波形を生成し、自前の AudioContext で再生する。
 //
 // 設計方針:
-// - クライアント専用。SSR では何もしない（window は遅延参照）。jsfxr の toBuffer は
-//   純粋計算なので import 自体は SSR でも安全。
-// - autoplay 制約対応: 最初のユーザー操作（pointerdown / touchend / keydown）で
-//   AudioContext を resume してから鳴らす。unlock 前の playSfx() は無音で握りつぶす。
-// - jsfxr は内部 AudioContext を外部公開しないため、jsfxr は「サンプル生成器」としてのみ使い
-//   （toBuffer = 8bit unsigned PCM）、再生は自前 AudioContext で行う（unlock/mute を完全制御）。
-// - generate(preset) は毎回ランダムなので、各音は一度生成した固定パラメータを埋め込む（決定的）。
-// - ミュートは localStorage("sfx-muted") に永続（デフォルト OFF = 音 ON）。
-//   prefers-reduced-motion とは独立（音はモーションではないため別管理）。
-import { sfxr, type SfxrParams } from "jsfxr";
+// - クライアント専用。SSR では何もしない（window は遅延参照）。
+//   ※ ZzFX.js はモジュール評価時に new AudioContext するため、zzfx は必ず
+//      クライアントで「動的 import」する（SSR で評価するとクラッシュするため）。
+// - ラグ解消: 初回 unlock 時に全 SFX を一度だけ AudioBuffer 化してキャッシュ。
+//   再生はキャッシュ済みバッファを使い捨て BufferSource で鳴らすだけ（波形生成しない）。
+//   playbackRate を ±5% ランダム化して機械的反復を防ぐ。
+// - 単一 AudioContext ＋ マスター GainNode 1 つに全 SFX を通す（音量/ミュート一元）。
+// - autoplay 制約: 最初のユーザー操作（pointerdown / touchend / keydown）で
+//   AudioContext を resume＋iOS 用に無音 1 サンプル再生。これは「ジェスチャ内で同期」実行する
+//   （zzfx の動的 import 解決を待たない）。unlock 前 / ミュート時の playSfx は無音で握りつぶす。
+// - ミュートは localStorage("sfx-muted") に永続。【デフォルト OFF=ミュート】（"0" のときだけ ON）。
+//   オフは master.gain=0 で実装。prefers-reduced-motion とは独立（音はモーションではない）。
+// - 金属ランタン音(enter)は public/sfx のファイルがあれば優先、無ければ ZzFX シンセにフォールバック。
 
-export type SfxKey = "examine" | "approach" | "enter" | "return";
-
-// jsfxr の generate(preset) を一度生成して固定した決定的パラメータ（外部音声ファイル不使用）。
-//   examine  = pickupCoin（しらべる/決定の明るい確定音）
-//   approach = blipSelect（ゾーン接近の控えめな通知音）
-//   enter    = powerUp（GAME に入る・上昇する音）
-//   return   = blipSelect を低く下降（-freq_ramp）させた「戻る」音
-const PARAMS: Record<SfxKey, SfxrParams> = {
-  examine: { oldParams: true, wave_type: 1, p_env_attack: 0, p_env_sustain: 0.02332800323418706, p_env_punch: 0.3571783175471856, p_env_decay: 0.36350760063043996, p_base_freq: 0.6376455890863646, p_freq_limit: 0, p_freq_ramp: 0, p_freq_dramp: 0, p_vib_strength: 0, p_vib_speed: 0, p_arp_mod: 0.5752059662194866, p_arp_speed: 0.5625077884949244, p_duty: 0, p_duty_ramp: 0, p_repeat_speed: 0, p_pha_offset: 0, p_pha_ramp: 0, p_lpf_freq: 1, p_lpf_ramp: 0, p_lpf_resonance: 0, p_hpf_freq: 0, p_hpf_ramp: 0, sound_vol: 0.25, sample_rate: 44100, sample_size: 8 },
-  approach: { oldParams: true, wave_type: 1, p_env_attack: 0, p_env_sustain: 0.16310954956032567, p_env_punch: 0, p_env_decay: 0.08793531612334947, p_base_freq: 0.4660746491100795, p_freq_limit: 0, p_freq_ramp: 0, p_freq_dramp: 0, p_vib_strength: 0, p_vib_speed: 0, p_arp_mod: 0, p_arp_speed: 0, p_duty: 1, p_duty_ramp: 0, p_repeat_speed: 0, p_pha_offset: 0, p_pha_ramp: 0, p_lpf_freq: 1, p_lpf_ramp: 0, p_lpf_resonance: 0, p_hpf_freq: 0.1, p_hpf_ramp: 0, sound_vol: 0.25, sample_rate: 44100, sample_size: 8 },
-  enter: { oldParams: true, wave_type: 1, p_env_attack: 0, p_env_sustain: 0.16259696182501512, p_env_punch: 0, p_env_decay: 0.37707149068175694, p_base_freq: 0.41326352595142635, p_freq_limit: 0, p_freq_ramp: 0.17844247953342368, p_freq_dramp: 0, p_vib_strength: 0.3949122102346469, p_vib_speed: 0.35557935164767557, p_arp_mod: 0, p_arp_speed: 0, p_duty: 1, p_duty_ramp: 0, p_repeat_speed: 0, p_pha_offset: 0, p_pha_ramp: 0, p_lpf_freq: 1, p_lpf_ramp: 0, p_lpf_resonance: 0, p_hpf_freq: 0, p_hpf_ramp: 0, sound_vol: 0.25, sample_rate: 44100, sample_size: 8 },
-  return: { oldParams: true, wave_type: 0, p_env_attack: 0, p_env_sustain: 0.05, p_env_punch: 0, p_env_decay: 0.22, p_base_freq: 0.35, p_freq_limit: 0, p_freq_ramp: -0.3, p_freq_dramp: 0, p_vib_strength: 0, p_vib_speed: 0, p_arp_mod: 0, p_arp_speed: 0, p_duty: 0.11898789509073199, p_duty_ramp: 0, p_repeat_speed: 0, p_pha_offset: 0, p_pha_ramp: 0, p_lpf_freq: 1, p_lpf_ramp: 0, p_lpf_resonance: 0, p_hpf_freq: 0.1, p_hpf_ramp: 0, sound_vol: 0.25, sample_rate: 44100, sample_size: 8 },
-};
+export type SfxKey = "examine" | "approach" | "return" | "enter";
 
 export const SFX_MUTE_KEY = "sfx-muted";
-const MASTER_GAIN = 0.45;
+export const SFX_NOTICE_KEY = "sfx-notice-seen";
+
+// 金属ランタン音の差し替え用パス。ここに CC0 の音源(mp3 など)を置くと自動で優先使用される。
+const LANTERN_SFX_URL = "/sfx/lantern.mp3";
+
+const MASTER_GAIN = 0.5;
+const SAMPLE_RATE = 44100;
+
+// ── ZzFX パラメータ（buildSamples の 21 引数順）──────────────────────────────
+// volume, randomness, frequency, attack, sustain, release, shape(0:sine),
+// shapeCurve, slide, deltaSlide, pitchJump, pitchJumpTime, repeatTime, noise,
+// modulation, bitCrush, delay, sustainVolume, decay, tremolo, filter
+// UI3音はサイン波(shape=0)で統一。attack>0・短release・高域控えめ＝温かく刺さらない音。
+const PARAMS: Record<SfxKey, number[]> = {
+  // (a) しらべる: 明るすぎない確定音。+pitchJump で「わずかに上昇する2音感」。
+  examine: [1, 0.05, 480, 0.012, 0.05, 0.14, 0, 1, 0, 0, 150, 0.07],
+  // (b) ゾーン接近: (a)と同じサイン波で音程だけ低く・低音量・単発・<500ms。
+  approach: [0.45, 0.05, 320, 0.012, 0.03, 0.1, 0],
+  // (d) PRO復帰: サインを下降させた離脱音（pitchJump マイナス）。
+  return: [0.85, 0.05, 440, 0.012, 0.04, 0.18, 0, 1, 0, 0, -180, 0.06],
+  // (c) GAME進入: 金属ランプを動かす音の暫定シンセ（saw＋少量noise＋modulation＋短い）。
+  //     public/sfx/lantern.mp3 を置けば自動で実録音に差し替わる。
+  enter: [1, 0.05, 720, 0, 0.01, 0.16, 2, 1, 0, 0, 0, 0, 0.03, 0.05, 9, 0, 0, 0.4, 0.09],
+};
 
 let ctx: AudioContext | null = null;
 let master: GainNode | null = null;
 let unlocked = false;
 let unlockBound = false;
-const samples: Partial<Record<SfxKey, Float32Array>> = {};
+let buffersBuilt = false;
 const buffers: Partial<Record<SfxKey, AudioBuffer>> = {};
 
 const isClient = (): boolean => typeof window !== "undefined";
 
-/** jsfxr で 4 音のサンプルを一度だけレンダリング（8bit unsigned → float[-1,1]）。AudioContext 不要。 */
-function renderSamples(): void {
-  if (samples.examine) return;
-  (Object.keys(PARAMS) as SfxKey[]).forEach((k) => {
-    const raw = sfxr.toBuffer(PARAMS[k]); // 8bit unsigned PCM (0..255, center 128)
-    const f = new Float32Array(raw.length);
-    for (let i = 0; i < raw.length; i++) f[i] = (raw[i] - 128) / 128;
-    samples[k] = f;
-  });
-}
-
-/** AudioContext と AudioBuffer を遅延生成（最初の unlock 時に同期で構築）。 */
+/** 自前 AudioContext とマスター Gain を同期生成（ジェスチャ内で呼ぶ）。 */
 function ensureCtx(): void {
   if (ctx || !isClient()) return;
   const AC =
@@ -58,35 +61,74 @@ function ensureCtx(): void {
   if (!AC) return;
   ctx = new AC();
   master = ctx.createGain();
-  master.gain.value = MASTER_GAIN;
+  master.gain.value = isSfxMuted() ? 0 : MASTER_GAIN;
   master.connect(ctx.destination);
-  renderSamples();
-  (Object.keys(PARAMS) as SfxKey[]).forEach((k) => {
-    const f = samples[k]!;
-    const sr = (PARAMS[k].sample_rate as number) || 44100;
-    const ab = ctx!.createBuffer(1, f.length, sr);
-    ab.getChannelData(0).set(f);
-    buffers[k] = ab;
-  });
 }
 
-/** 最初のユーザー操作で AudioContext を resume。以降は通常再生可能に。 */
+function bufferFromSamples(samples: number[]): AudioBuffer | null {
+  if (!ctx || samples.length === 0) return null;
+  const b = ctx.createBuffer(1, samples.length, SAMPLE_RATE);
+  b.getChannelData(0).set(samples);
+  return b;
+}
+
+/** zzfx を動的 import して全 SFX バッファを一度だけ構築（非同期）。 */
+async function buildBuffers(): Promise<void> {
+  if (buffersBuilt || !ctx) return;
+  buffersBuilt = true;
+  let ZZFX: typeof import("zzfx").ZZFX;
+  try {
+    ({ ZZFX } = await import("zzfx"));
+  } catch {
+    buffersBuilt = false;
+    return;
+  }
+  // zzfx が内部で作る未使用の AudioContext は破棄（自前 ctx に一本化）。
+  try {
+    ZZFX.audioContext?.close?.();
+  } catch {
+    /* no-op */
+  }
+  (Object.keys(PARAMS) as SfxKey[]).forEach((k) => {
+    const buf = bufferFromSamples(ZZFX.buildSamples(...PARAMS[k]));
+    if (buf) buffers[k] = buf;
+  });
+  // 金属ランタン音: ファイルがあれば decode して差し替え（無ければシンセのまま）。
+  try {
+    const res = await fetch(LANTERN_SFX_URL);
+    if (res.ok && ctx) {
+      const decoded = await ctx.decodeAudioData(await res.arrayBuffer());
+      buffers.enter = decoded;
+    }
+  } catch {
+    /* ファイル無し: シンセのフォールバックを使う */
+  }
+}
+
+/** AudioContext を作って解錠（必ずユーザー操作＝ジェスチャ内で呼ぶ）。冪等。 */
+function init(): void {
+  ensureCtx();
+  if (!ctx) return;
+  if (ctx.state === "suspended") void ctx.resume().catch(() => {});
+  // iOS Safari: ジェスチャ内で無音 1 サンプルを鳴らして出力を確実に解錠。
+  try {
+    const warm = ctx.createBufferSource();
+    warm.buffer = ctx.createBuffer(1, 1, 22050);
+    warm.connect(ctx.destination);
+    warm.start(0);
+  } catch {
+    /* no-op */
+  }
+  void buildBuffers();
+}
+
+/** 最初のユーザー操作で解錠。ただし音オフ（デフォルト）の間は AudioContext も
+ *  zzfx も生成しない（音を使わない来訪者に無駄な初期化をしないため）。
+ *  音を ON にした瞬間（setSfxMuted(false)）に init() する。 */
 function unlock(): void {
   if (!isClient()) return;
-  ensureCtx();
-  if (ctx && ctx.state === "suspended") void ctx.resume().catch(() => {});
-  // iOS Safari: ジェスチャ内で無音バッファを一度鳴らして出力を確実に解錠する。
-  if (ctx) {
-    try {
-      const warm = ctx.createBufferSource();
-      warm.buffer = ctx.createBuffer(1, 1, 22050);
-      warm.connect(ctx.destination);
-      warm.start(0);
-    } catch {
-      /* no-op */
-    }
-  }
   unlocked = true;
+  if (!isSfxMuted()) init();
   window.removeEventListener("pointerdown", unlock);
   window.removeEventListener("touchend", unlock);
   window.removeEventListener("keydown", unlock);
@@ -95,18 +137,18 @@ function unlock(): void {
 function bindUnlock(): void {
   if (unlockBound || !isClient()) return;
   unlockBound = true;
-  // pointerdown / touchend / keydown のいずれか最初の操作で解錠（iOS Safari の touchend も含む）。
   window.addEventListener("pointerdown", unlock, { passive: true });
   window.addEventListener("touchend", unlock, { passive: true });
   window.addEventListener("keydown", unlock);
 }
 
+// ── ミュート（デフォルト OFF=ミュート。"0" のときだけ ON）─────────────────────
 export function isSfxMuted(): boolean {
-  if (!isClient()) return false;
+  if (!isClient()) return true;
   try {
-    return localStorage.getItem(SFX_MUTE_KEY) === "1";
+    return localStorage.getItem(SFX_MUTE_KEY) !== "0";
   } catch {
-    return false;
+    return true;
   }
 }
 
@@ -117,9 +159,40 @@ export function setSfxMuted(muted: boolean): void {
   } catch {
     /* private browsing */
   }
+  // 音を ON にした瞬間に初期化（このコールはトグルのクリック＝ジェスチャ内で起きる）。
+  if (!muted) {
+    unlocked = true;
+    init();
+  }
+  // マスター Gain で即時反映（軽いランプでプチノイズ回避）。
+  if (ctx && master) {
+    const now = ctx.currentTime;
+    master.gain.cancelScheduledValues(now);
+    master.gain.setValueAtTime(master.gain.value, now);
+    master.gain.linearRampToValueAtTime(muted ? 0 : MASTER_GAIN, now + 0.03);
+  }
 }
 
-/** 効果音を鳴らす。unlock 前 / ミュート時は無音で握りつぶす（エラーを投げない）。 */
+// ── 告知UI（初回のみ表示）─────────────────────────────────────────────────────
+export function hasSeenSfxNotice(): boolean {
+  if (!isClient()) return true;
+  try {
+    return localStorage.getItem(SFX_NOTICE_KEY) === "1";
+  } catch {
+    return true;
+  }
+}
+
+export function markSfxNoticeSeen(): void {
+  if (!isClient()) return;
+  try {
+    localStorage.setItem(SFX_NOTICE_KEY, "1");
+  } catch {
+    /* private browsing */
+  }
+}
+
+/** 効果音を鳴らす。unlock 前 / ミュート時は無音で握りつぶす（例外なし）。 */
 export function playSfx(key: SfxKey): void {
   if (!isClient() || !unlocked || isSfxMuted() || !ctx || !master) return;
   if (ctx.state === "suspended") void ctx.resume().catch(() => {});
@@ -127,6 +200,7 @@ export function playSfx(key: SfxKey): void {
   if (!buf) return;
   const src = ctx.createBufferSource();
   src.buffer = buf;
+  src.playbackRate.value = 1 + (Math.random() * 2 - 1) * 0.05; // ±5% で反復感を消す
   src.connect(master);
   try {
     src.start();

@@ -4,6 +4,7 @@ import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Sidebar } from "@/components/Sidebar";
 import { SiteFooter } from "@/components/SiteFooter";
+import { SfxNotice } from "@/components/SfxNotice";
 import { profile } from "@/content/content.data";
 import { SITE_URL, SITE_NAME, SITE_TITLE, SITE_DESCRIPTION } from "@/lib/site";
 import { VIEWPORT_THEME_COLOR } from "@/constants/theme-values";
@@ -119,6 +120,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <SiteFooter />
           </main>
         </div>
+        <SfxNotice />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }} />
         <Analytics />
         <SpeedInsights />
